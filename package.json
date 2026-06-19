@@ -1,0 +1,46 @@
+{
+  "name": "eyelang",
+  "version": "0.1.0",
+  "description": "A small logic programming language for rules, goals, answers, and proofs.",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "bin": {
+    "eyelang": "./bin/eyelang.js"
+  },
+  "keywords": [
+    "logic",
+    "rules",
+    "prolog",
+    "reasoner",
+    "proofs"
+  ],
+  "license": "MIT",
+  "author": "Jos De Roo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eyereasoner/eyelang.git"
+  },
+  "homepage": "https://github.com/eyereasoner/eyelang#readme",
+  "files": [
+    "LICENSE.md",
+    "README.md",
+    "index.js",
+    "index.d.ts",
+    "bin",
+    "src",
+    "docs",
+    "examples",
+    "test"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test/run-all.mjs",
+    "test:eyelang": "node test/run-all.mjs",
+    "test:conformance": "node test/run-conformance.mjs",
+    "test:examples": "node test/run-examples.mjs",
+    "test:regression": "node test/run-regression.mjs"
+  }
+}
