@@ -41,6 +41,8 @@
     "test:eyelang": "node test/run-all.mjs",
     "test:conformance": "node test/run-conformance.mjs",
     "test:examples": "node test/run-examples.mjs",
-    "test:regression": "node test/run-regression.mjs"
+    "test:regression": "node test/run-regression.mjs",
+    "preversion": "npm test",
+    "postversion": "git push origin HEAD --follow-tags"
   }
 }
