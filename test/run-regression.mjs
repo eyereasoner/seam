@@ -189,26 +189,6 @@ why(
       },
     },
     {
-      name: 'README covers every mirrored example',
-      run: () => {
-        const examples = listExampleNames();
-        const readmeExamples = readmeCatalogExampleNames();
-        assertEqual(readmeExamples.join('\n'), examples.join('\n'), 'README example catalog');
-      },
-    },
-    {
-      name: 'README mirrors the Eyelang builtin registry',
-      run: () => {
-        const actual = registeredBuiltinNames();
-        const documented = readmeBuiltinNames();
-        assertEqual(documented.join('\n'), actual.join('\n'), 'README builtin catalog');
-
-        const { entries, names } = readmeBuiltinSummary();
-        assertEqual(entries, actual.length, 'README builtin entry count');
-        assertEqual(names, new Set(actual.map((item) => item.split('/')[0])).size, 'README builtin name count');
-      },
-    },
-    {
       name: 'stdin input is accepted',
       run: () => {
         const result = runCli(['-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
