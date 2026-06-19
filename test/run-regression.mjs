@@ -393,6 +393,23 @@ function whiteBoxCases() {
         assertEqual(termIsGround(resolved), true, 'ground after copy');
       },
     },
+
+    {
+      name: 'parser rejects non-Prolog unquoted atom spelling',
+      run: () => {
+        let threw = false;
+        try { parseProgramText('value(a-b, ok).\n'); } catch (_) { threw = true; }
+        assertEqual(threw, true, 'a-b must be quoted');
+      },
+    },
+    {
+      name: 'parser rejects zero-arity compound syntax',
+      run: () => {
+        let threw = false;
+        try { parseProgramText('value(nil(), ok).\n'); } catch (_) { threw = true; }
+        assertEqual(threw, true, 'zero-arity compound rejection');
+      },
+    },
     {
       name: 'parser preserves list syntax readback',
       run: () => {

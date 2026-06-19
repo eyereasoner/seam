@@ -192,6 +192,7 @@ export function termToString(term, env = new Env(), quoteStrings = true) {
   if (resolved.type === STRING) return writeString(resolved.name, quoteStrings);
   if (resolved.type === ATOM) return writeAtom(resolved.name);
   if (resolved.type === NUMBER) return resolved.name;
+  if (resolved.type === COMPOUND && resolved.arity === 0) return writeAtom(resolved.name);
   if (isConjunction(resolved)) {
     const parts = [];
     let cursor = resolved;

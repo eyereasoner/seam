@@ -56,7 +56,8 @@ function* compoundNameArguments({ goal, env }) {
   const args = properListItems(goal.args[2], env);
   if (name == null || !args) return;
   const next = env.clone();
-  if (unify(goal.args[0], compound(name, args), next)) yield next;
+  const built = args.length === 0 ? atom(name) : compound(name, args);
+  if (unify(goal.args[0], built, next)) yield next;
 }
 
 function scalarNameTerm(term) {

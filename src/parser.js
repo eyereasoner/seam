@@ -15,18 +15,27 @@ function isDigitCode(code) {
   return code >= 48 && code <= 57;
 }
 
+function isAsciiLetterCode(code) {
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+function isNameContinueCode(code) {
+  return code === 95 || isAsciiLetterCode(code) || isDigitCode(code);
+}
+
 function isVariableStart(text) {
   const code = text.charCodeAt(0);
   return code === 95 || (code >= 65 && code <= 90);
 }
 
-function isAtomCharCode(code) {
-  // Stop at whitespace and the punctuation tokens that have syntactic meaning.
-  return code > 0 &&
-    !isWhitespaceCode(code) &&
-    code !== 40 && code !== 41 && code !== 91 && code !== 93 &&
-    code !== 44 && code !== 124 && code !== 46 &&
-    code !== 39 && code !== 34 && code !== 58;
+function isPlainAtomStartCode(code) {
+  return code >= 97 && code <= 122;
+}
+
+const graphicAtomChars = '#$&*+-/<=>?@^~\\';
+
+function isGraphicAtomCode(code) {
+  return graphicAtomChars.includes(String.fromCharCode(code));
 }
 
 class Parser {
@@ -130,13 +139,30 @@ class Parser {
       return { type: TOK.NUMBER, text: this.source.slice(start, this.pos), line };
     }
 
-    const start = this.pos;
-    while (this.pos < this.source.length && isAtomCharCode(this.source.charCodeAt(this.pos))) this.pos++;
-    if (this.pos === start) throw new Error(`parse line ${line}: bad character ${JSON.stringify(ch)}`);
-    let text = this.source.slice(start, this.pos);
-    let type = isVariableStart(text) ? TOK.VAR : TOK.ATOM;
-    if (type === TOK.VAR && text === '_') text = `__anon${this.anonymous++}`;
-    return { type, text, line };
+    if (isVariableStart(ch)) {
+      const start = this.pos;
+      this.take();
+      while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
+      let text = this.source.slice(start, this.pos);
+      if (text === '_') text = `__anon${this.anonymous++}`;
+      return { type: TOK.VAR, text, line };
+    }
+
+    if (isPlainAtomStartCode(ch.charCodeAt(0))) {
+      const start = this.pos;
+      this.take();
+      while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
+      return { type: TOK.ATOM, text: this.source.slice(start, this.pos), line };
+    }
+
+    if (isGraphicAtomCode(ch.charCodeAt(0))) {
+      const start = this.pos;
+      this.take();
+      while (isGraphicAtomCode(this.peek().charCodeAt(0))) this.take();
+      return { type: TOK.ATOM, text: this.source.slice(start, this.pos), line };
+    }
+
+    throw new Error(`parse line ${line}: bad character ${JSON.stringify(ch)}`);
   }
   advance() {
     this.token = this.nextToken();
@@ -220,15 +246,16 @@ class Parser {
       if (this.token.type === TOK.LPAREN) {
         this.advance();
         const args = [];
-        if (this.token.type !== TOK.RPAREN) {
-          while (true) {
-            args.push(this.parseTerm());
-            if (this.token.type === TOK.COMMA) {
-              this.advance();
-              continue;
-            }
-            break;
+        if (this.token.type === TOK.RPAREN) {
+          throw new Error(`parse line ${this.token.line}: zero-arity compound syntax is not supported; use atom ${JSON.stringify(name)} for arity zero data`);
+        }
+        while (true) {
+          args.push(this.parseTerm());
+          if (this.token.type === TOK.COMMA) {
+            this.advance();
+            continue;
           }
+          break;
         }
         this.expect(TOK.RPAREN, ')');
         this.advance();
@@ -286,9 +313,11 @@ function isSimpleName(text) {
 }
 
 const SIMPLE_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
-const SIMPLE_ARG_FORBIDDEN = /[\s()[\]|"']/;
 const FAST_BINARY_FACT = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const FAST_BINARY_RULE = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\s*:-\s*([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
+const SIMPLE_VARIABLE = /^[_A-Z][A-Za-z0-9_]*$/;
+const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*$/;
+const GRAPHIC_ATOM = /^[#$&*+\-\/<=>?@^~\\]+$/;
 
 function parseClausesFastNoSource(source) {
   source = String(source ?? '');
@@ -306,11 +335,12 @@ function parseClausesFastNoSource(source) {
     cache.set(key, value);
     return value;
   };
+  const isFastScalarToken = (text) => SIMPLE_VARIABLE.test(text) || SIMPLE_ATOM.test(text) || GRAPHIC_ATOM.test(text) || SIMPLE_NUMBER.test(text);
   const scalarOrVariableFast = (text) => {
-    if (!text) throw new Error('empty simple term');
+    if (!text || !isFastScalarToken(text)) throw new Error('bad simple term');
     const first = text.charCodeAt(0);
     if (text === '_') return variable(`__anon${anonymous++}`);
-    if (first === 95 || (first >= 65 && first <= 90)) {
+    if (SIMPLE_VARIABLE.test(text)) {
       const existing = variableCache.get(text);
       if (existing) return existing;
       const value = variable(text);
@@ -318,7 +348,6 @@ function parseClausesFastNoSource(source) {
       return value;
     }
     if ((first === 45 || isDigitCode(first)) && SIMPLE_NUMBER.test(text)) return cached(numberCache, text, numberTerm);
-    if (first === 34 && text.endsWith('"')) return cached(stringCache, text.slice(1, -1), stringTerm);
     return atom(text);
   };
   const scalarOrVariable = (text) => scalarOrVariableFast(text.trim());
@@ -334,13 +363,15 @@ function parseClausesFastNoSource(source) {
     if (comma < 0 || inner.indexOf(',', comma + 1) >= 0) return null;
     const left = inner.slice(0, comma).trim();
     const right = inner.slice(comma + 1).trim();
-    if (!left || !right || SIMPLE_ARG_FORBIDDEN.test(left) || SIMPLE_ARG_FORBIDDEN.test(right)) return null;
+    if (!isFastScalarToken(left) || !isFastScalarToken(right)) return null;
     return compound(name, [scalarOrVariable(left), scalarOrVariable(right)]);
   };
   const parseFastBinaryMatch = (match) => {
+    if (!isFastScalarToken(match[2]) || !isFastScalarToken(match[3])) return null;
     return compound(match[1], [scalarOrVariableFast(match[2]), scalarOrVariableFast(match[3])]);
   };
   const parseFastBinaryRuleMatch = (match) => {
+    if (!isFastScalarToken(match[2]) || !isFastScalarToken(match[3]) || !isFastScalarToken(match[5]) || !isFastScalarToken(match[6])) return null;
     return {
       head: compound(match[1], [scalarOrVariableFast(match[2]), scalarOrVariableFast(match[3])]),
       body: [compound(match[4], [scalarOrVariableFast(match[5]), scalarOrVariableFast(match[6])])],
@@ -349,9 +380,15 @@ function parseClausesFastNoSource(source) {
   const parseFastLine = (text) => {
     if (!text.endsWith('.')) return null;
     const ruleMatch = FAST_BINARY_RULE.exec(text);
-    if (ruleMatch) return parseFastBinaryRuleMatch(ruleMatch);
+    if (ruleMatch) {
+      const parsed = parseFastBinaryRuleMatch(ruleMatch);
+      if (parsed) return parsed;
+    }
     const factMatch = FAST_BINARY_FACT.exec(text);
-    if (factMatch) return { head: parseFastBinaryMatch(factMatch), body: [] };
+    if (factMatch) {
+      const head = parseFastBinaryMatch(factMatch);
+      if (head) return { head, body: [] };
+    }
     return null;
   };
   const parseSimple = (text) => {

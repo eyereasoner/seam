@@ -1,6 +1,6 @@
 # Eyelang Guide
 
-This guide introduces Eyelang, a small Prolog-style Horn-clause language and engine for rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node src/bin.js` when working directly from a source checkout.
+This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is a deliberate subset of ordinary Prolog syntax for rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node src/bin.js` when working directly from a source checkout.
 
 Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize(Name, Arity).` declarations to focus output on selected predicates.
 
@@ -522,4 +522,4 @@ For large programs, keep helper predicates selective, bind arguments early, and 
 
 ## Implementation limits
 
-Eyelang is intentionally smaller than ISO Prolog. It has no operators, cut, modules, dynamic database updates, DCGs, or complete ISO library. Negation is negation-as-failure through `not/1`. Search is goal-directed and expected to be finite for the selected output goals. Output explanations are non-normative proof printouts and do not change answer semantics. 
+Eyelang is intentionally smaller than ISO Prolog. It has no operators, zero-arity compound syntax, cut, modules, dynamic database updates, DCGs, or complete ISO library. Negation is negation-as-failure through `not/1`. Search is goal-directed and expected to be finite for the selected output goals. Output explanations are non-normative proof printouts and do not change answer semantics. 

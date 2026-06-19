@@ -62,9 +62,9 @@
 
 ## Abstract
 
-Eyelang is a compact Prolog-like definite-clause language for rule-based programs over ordinary terms, lists, arithmetic, strings, and finite search. A Eyelang program is a finite sequence of facts and Horn clauses. The underlying declarative semantics of the pure language is **Herbrand semantics**: constants, compound terms, and lists denote themselves, and predicates denote sets of ground atomic formulas over those terms. Evaluation is goal-directed: goals are solved by unification against facts, rules, and a fixed set of built-in predicates.
+Eyelang is a compact definite-clause language whose surface syntax is a deliberately small subset of ordinary Prolog term and clause syntax for rule-based programs over ordinary terms, lists, arithmetic, strings, and finite search. A Eyelang program is a finite sequence of facts and Horn clauses. The underlying declarative semantics of the pure language is **Herbrand semantics**: constants, compound terms, and lists denote themselves, and predicates denote sets of ground atomic formulas over those terms. Evaluation is goal-directed: goals are solved by unification against facts, rules, and a fixed set of built-in predicates.
 
-Eyelang is intentionally smaller than ISO Prolog. It supports enough Prolog syntax to express Horn-clause reasoning, list processing, arithmetic examples, finite search, and context data, without operators, cut, modules, dynamic predicates, DCGs, or a complete ISO standard library.
+Eyelang is intentionally smaller than ISO Prolog. It supports a Prolog-syntax subset sufficient to express Horn-clause reasoning, list processing, arithmetic examples, finite search, and context data, without operators, cut, modules, dynamic predicates, DCGs, zero-arity compound syntax, or a complete ISO standard library.
 
 ## 1. Terminology and normative language
 
@@ -138,12 +138,14 @@ Each `_` anonymous variable occurrence is fresh.
 
 ### 3.5 Atom constants
 
-A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores:
+A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. This follows the usual Prolog unquoted-atom shape; names such as `a-b` or `http://example` MUST be quoted if they are meant as one atom constant:
 
 ```prolog
 pat
 type
 case_123
+'a-b'
+'http://example'
 ```
 
 A quoted atom constant is enclosed in single quotes. A single quote inside a quoted atom constant is represented by doubling it:
@@ -190,22 +192,23 @@ term         ::= variable
               | atom_constant
               | string
               | number
-              | atom_constant "(" [term ("," term)*] ")"
+              | atom_constant "(" term ("," term)* ")"
               | "[" [list_items] "]"
               | "(" term ("," term)+ ")"
 list_items   ::= term ("," term)* ["|" term]
 ```
 
-Here `atom_constant` is a lexical class for symbolic scalar terms, not an atomic formula. Atomic formulas are represented by the grammar alternative `atom_constant "(" ... ")"` when such a compound appears in a clause head, rule body, or selected goal.
+Here `atom_constant` is a lexical class for symbolic scalar terms, not an atomic formula. Atomic formulas are represented by the grammar alternative `atom_constant "(" ... ")"` when such a compound appears in a clause head, rule body, or selected goal. Compound syntax always has at least one argument.
 
 A clause head SHOULD be a compound term. Non-compound heads are parsed but are not useful in the current predicate index.
 
-Zero-arity compounds are written with parentheses:
+Arity-zero data is written as an atom constant, not as a zero-arity compound:
 
 ```prolog
-nil().
-value(example, nil()).
+value(example, nil).
 ```
+
+The syntax `nil()` is intentionally rejected so eyelang source and read-back output remain inside the Prolog syntax subset used by this language.
 
 ## 5. Terms
 
@@ -642,9 +645,10 @@ Conformance cases live in the repository under `test/conformance/`. They are run
 
 ## 15. Relationship to ISO Prolog
 
-eyelang borrows familiar Prolog syntax and Horn-clause execution but is not ISO Prolog. Notable differences include:
+eyelang source is intended to be a subset of familiar Prolog term and Horn-clause syntax, but eyelang is not ISO Prolog. Notable differences include:
 
 - no operators or operator declarations;
+- no zero-arity compound syntax such as `nil()`;
 - no cut;
 - no modules;
 - no dynamic database update;
@@ -653,7 +657,7 @@ eyelang borrows familiar Prolog syntax and Horn-clause execution but is not ISO 
 - no variables in functor or predicate position;
 - no occurs check in unification.
 
-Programs intended to be portable to eyelang SHOULD avoid ISO-specific syntax and keep terms explicit.
+Programs intended to be portable to eyelang SHOULD avoid ISO-specific syntax and keep terms explicit. Atom names that are not plain lowercase-starting names or graphic atom tokens SHOULD be written as quoted atoms, for example `'a-b'`.
 
 ## 16. Examples
 
