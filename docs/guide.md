@@ -238,9 +238,19 @@ The playground has matching `--stats` and `--proof` checkboxes, so browser runs 
 
 ### Builtins
 
-Eyelang builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Builtins are enabled by normal predicate calls.
+Eyelang builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Built-ins are called as ordinary Eyelang predicates. See the [Eyelang language reference](docs/language-reference.md#9-standard-built-in-predicates) for the portable profile. The bundled implementation currently registers 80 name/arity entries across 78 predicate names:
 
-The builtin families cover unification, arithmetic, comparison, dates, strings, lists, aggregation, context terms, term inspection, and search control. Domain-specific number-theory and matrix helper modules were removed from the default registry because those predicates were examples/accelerators rather than a reusable portable surface. New reusable helpers cover common numeric functions, list slicing and summaries, string normalization/conversion, term inspection/construction, and `forall/2`. The complete bundled implementation list is kept in the top-level [README built-ins section](../README.md#built-ins-1), and the regression suite checks that table against the actual runtime registry.
+| Family | Count | Built-ins |
+|---|---:|---|
+| Core and host | 4 | `eq/2`, `neq/2`, `local_time/1`, `difference/3` |
+| Arithmetic, comparison, and generators | 29 | `neg/2`, `abs/2`, `sin/2`, `cos/2`, `tan/2`, `asin/2`, `acos/2`, `sqrt/2`, `floor/2`, `ceiling/2`, `trunc/2`, `rounded/2`, `exp/2`, `log/2`, `add/3`, `sub/3`, `mul/3`, `div/3`, `mod/3`, `min/3`, `max/3`, `pow/3`, `atan2/3`, `lt/2`, `gt/2`, `le/2`, `ge/2`, `between/3`, `smallest_divisor_from/3` |
+| Strings and conversions | 15 | `str_concat/3`, `contains/2`, `matches/2`, `matches/3`, `not_matches/2`, `split/3`, `join/3`, `substring/4`, `replace/4`, `lowercase/2`, `uppercase/2`, `trim/2`, `number_string/2`, `atom_string/2`, `term_string/2` |
+| Lists | 19 | `append/3`, `nth0/3`, `set_nth0/4`, `head/2`, `rest/2`, `last/2`, `take/3`, `drop/3`, `slice/4`, `member/2`, `select/3`, `not_member/2`, `reverse/2`, `length/2`, `sum_list/2`, `min_list/2`, `max_list/2`, `list_to_set/2`, `sort/2` |
+| Aggregation | 5 | `findall/3`, `countall/2`, `sumall/3`, `aggregate_min/5`, `aggregate_max/5` |
+| Control | 3 | `not/1`, `once/1`, `forall/2` |
+| Context and terms | 5 | `holds/2`, `holds/3`, `functor/3`, `arg/3`, `compound_name_arguments/3` |
+| **Total** | **80** |  |
+
 
 To add a builtin, create or extend a module with `register(registry)` and call `registry.add(name, arity, handler, options)`. The default registry is assembled in [`src/builtins/registry.js`](../src/builtins/registry.js). Builtins that are only safe for specific argument modes should provide a `ready` predicate and `fallbackWhenNotReady: true`, so user-defined clauses remain visible until the builtin is applicable.
 
