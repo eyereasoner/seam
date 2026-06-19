@@ -191,6 +191,19 @@ why(
       },
     },
     {
+      name: 'npm exec can run package CLI bin from checkout',
+      run: () => {
+        const result = spawnSync('npm', ['exec', '--', 'eyelang', '--version'], {
+          cwd: packageRoot,
+          encoding: 'utf8',
+          env: { ...process.env, npm_config_update_notifier: 'false' },
+        });
+        assertEqual(result.status, 0, 'exit status');
+        assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
+        assertEqual(result.stderr, '', 'stderr');
+      },
+    },
+    {
       name: 'stdin input is accepted',
       run: () => {
         const result = runCli(['-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
@@ -284,6 +297,16 @@ function documentationSyncCases() {
     {
       name: 'documented npm scripts exist in package.json',
       run: () => assertArrayEqual(missingDocumentedPackageScripts(), [], 'missing documented npm scripts'),
+    },
+    {
+      name: 'source-checkout setup docs match package bin',
+      run: () => {
+        assertEqual(pkg.bin?.eyelang, './bin/eyelang.js', 'package eyelang bin');
+        const binPath = path.join(packageRoot, pkg.bin.eyelang);
+        const binText = fs.readFileSync(binPath, 'utf8');
+        assertEqual(binText.startsWith('#!/usr/bin/env node\n'), true, 'bin shebang');
+        assertArrayEqual(misleadingDependencyInstallDocs(), [], 'misleading dependency install docs');
+      },
     },
   ];
 }
@@ -483,6 +506,17 @@ function whiteBoxCases() {
         assertEqual(termToString(candidates.primary[0].head, new Env(), true), 'edge(a, b)', 'primary head');
       },
     },
+    {
+      name: 'collatz example keeps recursive trajectory predicate memoized',
+      run: () => {
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'collatz-1000.pl'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'collatz-1000.pl' }]);
+        const group = program.findGroup('collatz', 2);
+        assertEqual(Boolean(group), true, 'collatz/2 group exists');
+        assertEqual(group.memoized, true, 'collatz/2 memoized');
+        assertEqual(group.recursive, true, 'collatz/2 recursive');
+      },
+    },
   ];
 }
 
@@ -607,20 +641,37 @@ function declaredValueExportNames() {
 function missingDocumentedPackageScripts() {
   const docs = documentationFiles();
   const missing = [];
+  const nativeCommands = new Set(['exec', 'install', 'link']);
   for (const file of docs) {
     const text = fs.readFileSync(file, 'utf8');
     for (const line of text.split('\n')) {
       const trimmed = line.trim();
-      if (!trimmed.startsWith('npm ') && !line.includes('`npm ')) continue;
-      for (const match of line.matchAll(/\bnpm\s+(?:run\s+)?([A-Za-z0-9:_-]+)/g)) {
+      const commandTexts = [];
+      if (trimmed.startsWith('npm ')) commandTexts.push(trimmed);
+      for (const match of line.matchAll(/`([^`]*\bnpm\s+[^`]*)`/g)) commandTexts.push(match[1].trim());
+      for (const commandText of commandTexts) {
+        const match = commandText.match(/^npm\s+(?:run\s+)?([A-Za-z0-9:_-]+)/);
+        if (match == null) continue;
         const command = match[1];
-        if (command === 'install') continue;
+        if (nativeCommands.has(command)) continue;
         const script = command === 'test' ? 'test' : command;
         if (!pkg.scripts?.[script]) missing.push(`${path.relative(packageRoot, file)}: npm ${command === 'test' ? 'test' : `run ${script}`}`);
       }
     }
   }
   return [...new Set(missing)].sort();
+}
+
+function misleadingDependencyInstallDocs() {
+  const misleading = [];
+  for (const file of documentationFiles()) {
+    const text = fs.readFileSync(file, 'utf8');
+    if (text.includes('Install dependencies')) misleading.push(`${path.relative(packageRoot, file)}: Install dependencies`);
+    if (text.includes('npm install\n```') || text.includes('npm install\r\n```')) {
+      misleading.push(`${path.relative(packageRoot, file)}: bare npm install setup block`);
+    }
+  }
+  return [...new Set(misleading)].sort();
 }
 
 function findBrokenDocLinks() {

@@ -1,6 +1,6 @@
 # Eyelang Guide
 
-This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is a deliberate subset of ordinary Prolog syntax for rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node src/bin.js` when working directly from a source checkout.
+This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is a deliberate subset of ordinary Prolog syntax for rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node bin/eyelang.js` when working directly from a source checkout.
 
 Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize(Name, Arity).` declarations to focus output on selected predicates.
 
@@ -24,24 +24,34 @@ For the normative language definition, including lexical syntax, terms, clauses,
 
 ## Quick start
 
-Install dependencies, then run the Eyelang CLI:
+Eyelang has no runtime npm dependencies and no build step. From a source checkout, run the CLI entry point directly with Node.js 18 or newer:
 
 ```sh
-npm install
+node bin/eyelang.js --version
+node bin/eyelang.js examples/ancestor.pl
+node bin/eyelang.js facts.pl rules.pl
+printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
 ```
 
-There is no build step for the source-checkout CLI path. Run examples, multiple inputs, stdin, or a URL:
+You can also use npm's local package-bin runner from the checkout:
 
 ```sh
+npm exec -- eyelang --version
+npm exec -- eyelang examples/ancestor.pl
+```
+
+To make the `eyelang` command available on your `PATH` while developing this checkout, prefer npm's package link instead of a manual symlink:
+
+```sh
+npm link
 eyelang --version
-eyelang examples/ancestor.pl
-eyelang facts.pl rules.pl
-printf 'works(stdin, true) :- eq(ok, ok).\n' | eyelang -
 ```
 
-The CLI runs directly on Node.js 18 or newer. From a source checkout, `node src/bin.js` exposes the same options.
+`npm install -g .` is another local-checkout option if you want npm to install the package globally instead of linking it. Avoid hand-written `/usr/local/bin` symlinks unless you really need one; npm already reads the `bin` entry in `package.json` and creates the correct executable shim.
 
 ## Running eyelang
+
+The commands in this section use `eyelang` for readability. In a source checkout where you have not run `npm link` or `npm install -g .`, replace `eyelang` with `node bin/eyelang.js`, or run the command through `npm exec -- eyelang`.
 
 Show the package version:
 
@@ -319,6 +329,7 @@ The repository includes examples for recursion, graph reachability, finite searc
 | [`canary-release.pl`](../examples/canary-release.pl) | Decides canary rollout or rollback. | [`output/canary-release.pl`](../examples/output/canary-release.pl) |
 | [`cat-koko.pl`](../examples/cat-koko.pl) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.pl`](../examples/output/cat-koko.pl) |
 | [`clinical-trial-screening.pl`](../examples/clinical-trial-screening.pl) | Screens candidates for a trial. | [`output/clinical-trial-screening.pl`](../examples/output/clinical-trial-screening.pl) |
+| [`collatz-1000.pl`](../examples/collatz-1000.pl) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.pl`](../examples/output/collatz-1000.pl) |
 | [`combinatorics-findall-sort.pl`](../examples/combinatorics-findall-sort.pl) | Collects and sorts finite combinations. | [`output/combinatorics-findall-sort.pl`](../examples/output/combinatorics-findall-sort.pl) |
 | [`competitive-enzyme-kinetics.pl`](../examples/competitive-enzyme-kinetics.pl) | Computes inhibited enzyme reaction rates. | [`output/competitive-enzyme-kinetics.pl`](../examples/output/competitive-enzyme-kinetics.pl) |
 | [`complex.pl`](../examples/complex.pl) | Performs arithmetic on complex pairs. | [`output/complex.pl`](../examples/output/complex.pl) |

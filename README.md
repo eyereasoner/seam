@@ -9,12 +9,26 @@ It grew out of logic-language experiments in the EYE/N3 reasoning tradition, but
 
 ## Install and run
 
+Eyelang has no runtime npm dependencies and no build step. From a source checkout, run the CLI directly with Node.js 18 or newer:
+
 ```bash
-npm install
-eyelang examples/ancestor.pl
-eyelang --proof examples/socrates.pl
-printf 'works(stdin, true) :- eq(ok, ok).
-' | eyelang -
+node bin/eyelang.js examples/ancestor.pl
+node bin/eyelang.js --proof examples/socrates.pl
+printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
+```
+
+For one-off local CLI use from the checkout, npm can run the package bin without a manual symlink:
+
+```bash
+npm exec -- eyelang --version
+npm exec -- eyelang examples/ancestor.pl
+```
+
+To install the checkout's `eyelang` command on your `PATH`, use npm's package link:
+
+```bash
+npm link
+eyelang --version
 ```
 
 ## JavaScript API
