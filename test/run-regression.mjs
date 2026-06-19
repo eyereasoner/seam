@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import * as publicApi from '../src/index.js';
 import {
   run,
   Program,
@@ -50,6 +51,7 @@ export function runRegression(reporter = new TestReporter()) {
 
   try {
     runSection(reporter, 'Regression', regressionCases());
+    runSection(reporter, 'Documentation sync', documentationSyncCases());
     runSection(reporter, 'API', apiCases());
     runSection(reporter, 'White-box', whiteBoxCases());
   } finally {
@@ -254,8 +256,44 @@ why(
   ];
 }
 
+
+function documentationSyncCases() {
+  return [
+    {
+      name: 'language reference builtins match runtime registry',
+      run: () => assertArrayEqual(languageReferenceBuiltinNames(), registeredBuiltinNames(), 'builtins'),
+    },
+    {
+      name: 'guide builtin catalog matches runtime registry',
+      run: () => {
+        assertArrayEqual(guideBuiltinNames(), registeredBuiltinNames(), 'builtins');
+        const summary = guideBuiltinSummary();
+        const actual = registeredBuiltinSummary();
+        assertEqual(summary.entries, actual.entries, 'builtin entry count');
+        assertEqual(summary.names, actual.names, 'builtin predicate name count');
+      },
+    },
+    {
+      name: 'guide example catalog matches examples directory',
+      run: () => assertArrayEqual(guideCatalogExampleNames(), listExampleNames(), 'example catalog'),
+    },
+    {
+      name: 'documentation local links and anchors resolve',
+      run: () => assertArrayEqual(findBrokenDocLinks(), [], 'broken documentation links'),
+    },
+    {
+      name: 'documented npm scripts exist in package.json',
+      run: () => assertArrayEqual(missingDocumentedPackageScripts(), [], 'missing documented npm scripts'),
+    },
+  ];
+}
+
 function apiCases() {
   return [
+    {
+      name: 'public type declarations match runtime exports',
+      run: () => assertArrayEqual(declaredValueExportNames(), runtimeExportNames(), 'public value exports'),
+    },
     {
       name: 'run materialization through public API without proof by default',
       run: () => {
@@ -455,6 +493,7 @@ function runSection(reporter, name, cases) {
 }
 
 function sectionLabel(name) {
+  if (name === 'Documentation sync') return 'documentation sync';
   if (name === 'API') return 'API';
   if (name === 'White-box') return 'white-box';
   return name.toLowerCase();
@@ -499,9 +538,9 @@ function listExampleNames() {
     .sort();
 }
 
-function readmeCatalogExampleNames() {
-  const readme = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
-  const section = between(readme, '## Example catalog', '## Golden outputs, tests, and conformance');
+function guideCatalogExampleNames() {
+  const guide = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
+  const section = between(guide, '## Example catalog', '## Golden outputs, tests, and conformance');
   return [...section.matchAll(/examples\/([A-Za-z0-9_-]+)\.pl/g)]
     .map((match) => match[1])
     .filter((name, index, names) => names.indexOf(name) === index)
@@ -512,56 +551,137 @@ function registeredBuiltinNames() {
   return [...createDefaultRegistry().defs.keys()].sort();
 }
 
-function readmeBuiltinNames() {
-  const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
-  const section = between(readme, '### Eyelang built-ins', '## Custom built-ins');
-  return [...section.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)\/(\d+)`/g)]
-    .map((match) => `${match[1]}/${match[2]}`)
+function registeredBuiltinSummary() {
+  const names = registeredBuiltinNames();
+  return {
+    entries: names.length,
+    names: new Set(names.map((name) => name.split('/')[0])).size,
+  };
+}
+
+function guideBuiltinNames() {
+  const guide = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
+  return documentedBuiltinNames(between(guide, '### Builtins', '## Aggregation helpers'));
+}
+
+function guideBuiltinSummary() {
+  const guide = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
+  const section = between(guide, '### Builtins', '## Aggregation helpers');
+  const match = section.match(/currently registers (\d+) name\/arity entries across (\d+) predicate names/);
+  if (match == null) throw new Error('guide builtin summary not found');
+  return { entries: Number(match[1]), names: Number(match[2]) };
+}
+
+function languageReferenceBuiltinNames() {
+  const reference = fs.readFileSync(path.join(packageRoot, 'docs', 'language-reference.md'), 'utf8');
+  return documentedBuiltinNames(between(reference, '## 9. Standard built-in predicates', '## 10. Implementation-specific built-ins'));
+}
+
+function documentedBuiltinNames(section) {
+  const names = [];
+  for (const line of section.split('\n')) {
+    if (!line.trim().startsWith('|') || !line.includes('`')) continue;
+    for (const match of line.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)\(([^`)]*)\)`/g)) {
+      const arity = match[2].trim() === '' ? 0 : match[2].split(',').length;
+      names.push(`${match[1]}/${arity}`);
+    }
+    for (const match of line.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)\/(\d+)`/g)) {
+      names.push(`${match[1]}/${match[2]}`);
+    }
+  }
+  return [...new Set(names)].sort();
+}
+
+function runtimeExportNames() {
+  return Object.keys(publicApi).sort();
+}
+
+function declaredValueExportNames() {
+  const dts = fs.readFileSync(path.join(packageRoot, 'index.d.ts'), 'utf8');
+  return [...dts.matchAll(/^export\s+(?:declare\s+)?(?:class|function|const)\s+([A-Za-z_][A-Za-z0-9_]*)/gm)]
+    .map((match) => match[1])
     .filter((name, index, names) => names.indexOf(name) === index)
     .sort();
 }
 
-function readmeBuiltinSummary() {
-  const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
-  const section = between(readme, '### Eyelang built-ins', '## Custom built-ins');
-  const match = section.match(/currently registers (\d+) name\/arity entries across (\d+) predicate names/);
-  if (match == null) throw new Error('README builtin summary not found');
-  return { entries: Number(match[1]), names: Number(match[2]) };
-}
-
-function playgroundExampleNames() {
-  const html = fs.readFileSync(path.join(root, 'playground.html'), 'utf8');
-  const match = html.match(/const EXAMPLES = \[(.*?)\];/s);
-  if (match == null) throw new Error('playground EXAMPLES array not found');
-  return [...match[1].matchAll(/"([^"]+)"/g)]
-    .map((match) => match[1])
-    .sort();
-}
-
-function playgroundImportGraph() {
-  const entry = path.join(root, 'playground-worker.mjs');
-  const seen = new Set();
-  const stack = [entry];
-  while (stack.length > 0) {
-    const file = stack.pop();
-    if (seen.has(file)) continue;
-    seen.add(file);
+function missingDocumentedPackageScripts() {
+  const docs = documentationFiles();
+  const missing = [];
+  for (const file of docs) {
     const text = fs.readFileSync(file, 'utf8');
-    for (const spec of moduleSpecifiers(text)) {
-      if (spec.startsWith('node:')) throw new Error(`${path.relative(testRoot, file)} imports ${spec}`);
-      if (!spec.startsWith('.')) continue;
-      const next = path.resolve(path.dirname(file), spec);
-      if (next.startsWith(root) && fs.existsSync(next)) stack.push(next);
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('npm ') && !line.includes('`npm ')) continue;
+      for (const match of line.matchAll(/\bnpm\s+(?:run\s+)?([A-Za-z0-9:_-]+)/g)) {
+        const command = match[1];
+        if (command === 'install') continue;
+        const script = command === 'test' ? 'test' : command;
+        if (!pkg.scripts?.[script]) missing.push(`${path.relative(packageRoot, file)}: npm ${command === 'test' ? 'test' : `run ${script}`}`);
+      }
     }
   }
-  return [...seen].sort();
+  return [...new Set(missing)].sort();
 }
 
-function moduleSpecifiers(text) {
-  const specs = [];
-  for (const match of text.matchAll(/(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]/g)) specs.push(match[1]);
-  for (const match of text.matchAll(/import\(\s*['"]([^'"]+)['"]\s*\)/g)) specs.push(match[1]);
-  return specs;
+function findBrokenDocLinks() {
+  const broken = [];
+  const anchorsByFile = new Map();
+  for (const file of documentationFiles()) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const target of markdownLinkTargets(text)) {
+      if (/^(?:https?:|mailto:)/i.test(target)) continue;
+      const [targetPathRaw, fragmentRaw] = target.split('#');
+      const targetPath = targetPathRaw === '' ? file : path.resolve(path.dirname(file), decodeURI(targetPathRaw));
+      const display = `${path.relative(packageRoot, file)} -> ${target}`;
+      if (!fs.existsSync(targetPath)) {
+        broken.push(`${display} (missing target)`);
+        continue;
+      }
+      if (fragmentRaw != null && fragmentRaw !== '') {
+        const anchors = anchorsByFile.get(targetPath) ?? markdownAnchors(targetPath);
+        anchorsByFile.set(targetPath, anchors);
+        if (!anchors.has(fragmentRaw)) broken.push(`${display} (missing heading #${fragmentRaw})`);
+      }
+    }
+  }
+  return broken.sort();
+}
+
+function documentationFiles() {
+  return [
+    path.join(packageRoot, 'README.md'),
+    path.join(packageRoot, 'docs', 'guide.md'),
+    path.join(packageRoot, 'docs', 'language-reference.md'),
+  ];
+}
+
+function markdownLinkTargets(text) {
+  return [...text.matchAll(/!?\[[^\]\n]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)].map((match) => match[1]);
+}
+
+function markdownAnchors(file) {
+  if (!file.endsWith('.md')) return new Set();
+  const text = fs.readFileSync(file, 'utf8');
+  const anchors = new Set();
+  const counts = new Map();
+  for (const match of text.matchAll(/^#{1,6}\s+(.+)$/gm)) {
+    const base = githubSlug(match[1]);
+    const count = counts.get(base) ?? 0;
+    counts.set(base, count + 1);
+    anchors.add(count === 0 ? base : `${base}-${count}`);
+  }
+  return anchors;
+}
+
+function githubSlug(heading) {
+  return heading
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{Letter}\p{Number}\s-]/gu, '')
+    .trim()
+    .replace(/\s+/g, '-');
 }
 
 function between(text, startMarker, endMarker) {
@@ -592,6 +712,16 @@ function assertIncludes(actual, expected, label) {
 
 function assertNotIncludes(actual, expected, label) {
   if (String(actual).includes(expected)) throw new Error(`${label} unexpectedly included ${format(expected)}\nactual: ${format(actual)}`);
+}
+
+function assertArrayEqual(actual, expected, label) {
+  const actualText = actual.join('\n');
+  const expectedText = expected.join('\n');
+  if (actualText !== expectedText) {
+    const onlyActual = actual.filter((item) => !expected.includes(item));
+    const onlyExpected = expected.filter((item) => !actual.includes(item));
+    throw new Error(`${label} mismatch\nonly actual: ${format(onlyActual)}\nonly expected: ${format(onlyExpected)}`);
+  }
 }
 
 function format(value) {

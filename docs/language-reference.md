@@ -39,7 +39,7 @@
   - [9.6 Strings and atom constants](#96-strings-and-atom-constants)
   - [9.7 Lists](#97-lists)
   - [9.8 Aggregation and ordering](#98-aggregation-and-ordering)
-  - [9.9 Context terms](#99-context-terms)
+  - [9.9 Context and term inspection](#99-context-and-term-inspection)
   - [9.10 Search control](#910-search-control)
 - [10. Implementation-specific built-ins](#10-implementation-specific-built-ins)
 - [11. Declarations](#11-declarations)
@@ -474,8 +474,6 @@ compound_name_arguments(Term, route, [alice, bob, 7]).
 The first goal can yield `holds((name(alice, "Alice"), knows(alice, bob)), name(alice, "Alice")).` The second can yield `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ready, []).`, `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), name, [alice, "Alice"]).`, and `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), route, [alice, bob, 7]).`
 
 `holds/3` is the appropriate form for schema-style introspection because it exposes the predicate name and all arguments without assuming a fixed arity. For example, a single rule can inspect `heartbeat`, `source(sensor17)`, `temperature(sensor17, 38)`, and `signature(sensor17, sha256, Hash, Time)` as `heartbeat/0`, `source/1`, `temperature/2`, and `signature/4`; see [`context-schema-audit.pl`](../examples/context-schema-audit.pl).
-
-The N3 example [`context-schema-audit.n3`](../examples/context-schema-audit.n3) shows the same idea in quoted graph form: members are encoded as predicates with RDF-list argument objects, then `log:includes` and `list:length` expose `Name + Arity` for schema checking.
 
 ### 9.10 Search control
 

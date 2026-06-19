@@ -238,7 +238,7 @@ The playground has matching `--stats` and `--proof` checkboxes, so browser runs 
 
 ### Builtins
 
-Eyelang builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Built-ins are called as ordinary Eyelang predicates. See the [Eyelang language reference](docs/language-reference.md#9-standard-built-in-predicates) for the portable profile. The bundled implementation currently registers 80 name/arity entries across 78 predicate names:
+Eyelang builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Built-ins are called as ordinary Eyelang predicates. See the [Eyelang language reference](language-reference.md#9-standard-built-in-predicates) for the portable profile. The bundled implementation currently registers 80 name/arity entries across 78 predicate names:
 
 | Family | Count | Built-ins |
 |---|---:|---|
@@ -288,8 +288,6 @@ holds((ready, name(alice, "Alice"), route(alice, bob, 7)), Name, Args).
 Use `holds/2` when you want to match the member term directly, for example `name(S, O)`, `route(A, B, Cost)`, or `edge(A, arc(B, Cost))`. Use `holds/3` when you need the predicate name and argument list as data: it exposes any-arity member as atom constant `Name` plus a proper list `Args`, so zero-, binary-, and ternary members appear as `ready/0`, `name/2`, and `route/3` shapes without a special binary predicate. These utilities are useful for quoted context data, but they do not make those context members true in the ambient program. The [`context-schema-audit.pl`](../examples/context-schema-audit.pl) example shows a case that really needs `holds/3`: it audits heterogeneous message contexts by extracting every member as `Name + Args`, computing each arity, and checking the resulting shape against a schema without knowing the predicate names in advance.
 
 `matches/3` can create context data from named regular-expression captures, which is useful when text logs or messages need to become facts before later rules inspect them with `holds/2` or `holds/3`. See [`observability-log-correlation.pl`](../examples/observability-log-correlation.pl) for a complete log-correlation example.
-
-The N3 counterpart of the context schema audit lives at [`examples/context-schema-audit.n3`](../examples/context-schema-audit.n3) with golden output in [`examples/output/context-schema-audit.md`](../examples/output/context-schema-audit.md).
 
 
 ## Example catalog
@@ -467,8 +465,8 @@ The conformance suite lives in [`test/conformance/`](../test/conformance/) as on
 Common commands:
 
 ```sh
-npm run test:eyelang        # integration check plus eyelang corpus
-npm run test:eyelang:corpus # conformance, regression/API/white-box, examples, and proof examples
+npm run test:eyelang        # alias for npm test
+npm test                    # full conformance, regression/API/white-box, examples, and proof examples
 node test/run-conformance.mjs
 node test/run-regression.mjs
 node test/run-examples.mjs
