@@ -515,7 +515,17 @@ A useful rule of thumb:
 | Human-auditable derivations | Either | Both can emit proof explanations when requested. |
 | Large generated Horn-clause workloads | eyelang | The engine specializes in predicate/arity indexing, scalar argument indexes, fast fact paths, and materialized output goals. |
 
-For the deep taxonomy benchmark, Eyelang is substantially faster in current local checks. On one sandbox run, `eyelang examples/deep-taxonomy-100000.pl > /dev/null` took about `1.60 sec`, while `eyeling` package version `1.28.7` on `examples/deep-taxonomy-100000.n3` took about `4.56 sec` without proof and about `5.04 sec` with proof. Treat those numbers as a smoke comparison rather than a formal benchmark: hardware, Node.js version, package version, and CLI startup all matter.
+On local smoke benchmarks, eyelang is substantially faster on large generated Horn-clause and recursion-heavy workloads. These numbers are 5-run medians with stdout redirected to `/dev/null`, using Node.js `v22.16.0`, eyelang from this checkout, and Eyeling package version `1.34.6` with its default output mode. The ratio is `Eyeling median / eyelang median`, so larger numbers mean eyelang was faster.
+
+| Example | eyelang median | Eyeling median | Ratio |
+| --- | ---: | ---: | ---: |
+| `fundamental-theorem-arithmetic` | `0.16 sec` | `2.00 sec` | `12.66x` |
+| `deep-taxonomy-100000` | `1.69 sec` | `4.72 sec` | `2.79x` |
+| `path-discovery` | `0.53 sec` | `1.62 sec` | `3.07x` |
+| `fibonacci` | `0.15 sec` | `5.76 sec` | `38.40x` |
+| `collatz-1000` | `0.71 sec` | `6.99 sec` | `9.85x` |
+
+Treat these as smoke comparisons rather than a formal benchmark: hardware, Node.js version, package version, CLI startup, and output mode all matter.
 
 The projects are therefore complementary rather than replacements for each other: Eyeling optimizes for Semantic Web interoperability and N3 expressiveness; eyelang optimizes for a small standard-looking relational rule language and fast finite goal-directed execution.
 
