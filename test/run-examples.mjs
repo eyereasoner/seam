@@ -16,26 +16,36 @@ const expectedProofDir = path.join(examplesDir, 'proof');
 const fixedExampleDate = '2026-05-30';
 
 const proofExamples = [
+  'access-control-policy.pl',
   'age.pl',
   'aliases-and-namespaces.pl',
   'ancestor.pl',
   'animal.pl',
   'annotation.pl',
   'backward.pl',
+  'bayes-diagnosis.pl',
   'cat-koko.pl',
+  'context-association.pl',
   'data-negotiation.pl',
+  'deontic-logic.pl',
+  'derived-backward-rule.pl',
   'derived-rule.pl',
   'dog.pl',
   'electrical-rc-filter.pl',
   'existential-rule.pl',
   'floating-point.pl',
   'good-cobbler.pl',
+  'graph-reachability.pl',
+  'greatest-lower-bound-uniqueness.pl',
   'group-inverse-uniqueness.pl',
   'list-collection.pl',
   'proof-contrapositive.pl',
+  'reusable-builtins.pl',
   'socket-age.pl',
   'socket-family.pl',
   'socrates.pl',
+  'term-tools.pl',
+  'witch.pl',
 ];
 
 export function runExamples(reporter = new TestReporter()) {
