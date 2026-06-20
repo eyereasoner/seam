@@ -408,6 +408,7 @@
         <button id="copy-source" type="button">Copy source</button>
         <button id="copy-output" type="button">Copy output</button>
         <button id="share" type="button">Copy share link</button>
+        <button id="create-gist" type="button">Create Gist share</button>
       </div>
     </section>
 
@@ -566,6 +567,8 @@
 answer(ok) :- eq(ok, ok).
 `;
     const HIGHLIGHT_LIMIT = 200000;
+    const MAX_SHARE_URL_LENGTH = 1900;
+    const GIST_STATE_FILENAME = 'eyelang-playground-state.json';
     const KEYWORDS = new Set(['materialize', 'memoize']);
     const BUILTINS = new Set([
             "abs",
@@ -671,12 +674,17 @@ answer(ok) :- eq(ok, ok).
     let activeWorkerUrl = null;
     let renderToken = 0;
     let syntaxErrorLine = null;
+    let sourceReference = { kind: 'custom' };
+    let sourceDirty = false;
+    let backgroundReference = null;
 
     populateExamples(EXAMPLES);
-    restoreFromHash() || loadExample('ancestor');
+    await restoreFromHashOrLoadDefault();
     loadVersion();
 
     source.addEventListener('input', () => {
+      sourceDirty = true;
+      sourceReference = { kind: 'custom' };
       clearSyntaxError();
       render();
     });
@@ -690,6 +698,7 @@ answer(ok) :- eq(ok, ok).
     document.querySelector('#copy-source').addEventListener('click', () => copyText(source.value, 'Source copied.'));
     document.querySelector('#copy-output').addEventListener('click', () => copyText(output.textContent, 'Output copied.'));
     document.querySelector('#share').addEventListener('click', copyShareLink);
+    document.querySelector('#create-gist').addEventListener('click', createGistShare);
 
     function populateExamples(names) {
       const current = exampleSelect.value;
@@ -716,7 +725,7 @@ answer(ok) :- eq(ok, ok).
         const exampleUrl = new URL(`./examples/${name}.pl`, location.href);
         const response = await fetch(exampleUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-        setSource(await response.text(), `examples/${name}.pl`);
+        setSource(await response.text(), `examples/${name}.pl`, { kind: 'example', name });
         setStatus(`Loaded examples/${name}.pl.`);
       } catch (error) {
         setSource(FALLBACK_SOURCE, 'fallback program');
@@ -735,10 +744,11 @@ answer(ok) :- eq(ok, ok).
         if (loadBackground.checked) {
           backgroundSource = text;
           backgroundName = url;
+          backgroundReference = { kind: 'url', url };
           updateBackgroundStatus();
           setStatus(`Loaded background knowledge from ${url}.`);
         } else {
-          setSource(text, url);
+          setSource(text, url, { kind: 'url', url });
           setStatus(`Loaded ${url}.`);
         }
       } catch (error) {
@@ -749,6 +759,7 @@ answer(ok) :- eq(ok, ok).
     function clearBackground() {
       backgroundSource = '';
       backgroundName = '';
+      backgroundReference = null;
       updateBackgroundStatus();
       setStatus('Background knowledge cleared.');
     }
@@ -759,9 +770,11 @@ answer(ok) :- eq(ok, ok).
         : 'No background knowledge loaded.';
     }
 
-    function setSource(text, name) {
+    function setSource(text, name, reference = { kind: 'custom' }) {
       source.value = text;
       sourceName.textContent = name;
+      sourceReference = reference;
+      sourceDirty = false;
       clearSyntaxError();
       render();
     }
@@ -1001,39 +1014,176 @@ answer(ok) :- eq(ok, ok).
     }
 
     async function copyShareLink() {
-      const payload = JSON.stringify({
+      const link = buildShareLink();
+      if (link == null) {
+        setStatus('This program is too large for a reliable URL. Use “Create Gist share” instead.', true);
+        return;
+      }
+      await copyText(link, 'Share link copied.');
+    }
+
+    function buildShareLink() {
+      const referenced = buildReferenceShareLink();
+      if (referenced && referenced.length <= MAX_SHARE_URL_LENGTH) return referenced;
+      const embedded = `${basePlaygroundUrl()}#state=${encodeState(currentShareState())}`;
+      return embedded.length <= MAX_SHARE_URL_LENGTH ? embedded : null;
+    }
+
+    function buildReferenceShareLink() {
+      const params = new URLSearchParams();
+      if (proof.checked) params.set('proof', '1');
+      if (stats.checked) params.set('stats', '1');
+      if (backgroundSource.trim()) {
+        if (backgroundReference?.kind !== 'url') return null;
+        params.set('background-url', backgroundReference.url);
+      }
+      if (!sourceDirty && sourceReference.kind === 'example') params.set('example', sourceReference.name);
+      else if (!sourceDirty && sourceReference.kind === 'url') params.set('url', sourceReference.url);
+      else return null;
+      return `${basePlaygroundUrl()}#${params.toString()}`;
+    }
+
+    async function createGistShare() {
+      const stateText = JSON.stringify(currentShareState(), null, 2);
+      const token = prompt('Optional GitHub token with gist scope. It is only sent to api.github.com and is not stored. Leave blank to copy Gist-ready state instead.');
+      if (token === null) return;
+      if (!token.trim()) {
+        await copyText(stateText, `Gist-ready state copied. Create a Gist file named ${GIST_STATE_FILENAME}, paste it, then share its raw URL with #state-url=...`);
+        window.open('https://gist.github.com/', '_blank', 'noopener');
+        return;
+      }
+
+      try {
+        setStatus('Creating GitHub Gist…');
+        const files = {
+          [GIST_STATE_FILENAME]: { content: stateText },
+          'program.pl': { content: source.value },
+        };
+        if (backgroundSource.trim()) files['background.pl'] = { content: backgroundSource };
+        const response = await fetch('https://api.github.com/gists', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/vnd.github+json',
+            Authorization: `Bearer ${token.trim()}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            description: 'Eyelang playground share',
+            public: false,
+            files,
+          }),
+        });
+        const gist = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(gist.message || `${response.status} ${response.statusText}`);
+        const rawUrl = gist.files?.[GIST_STATE_FILENAME]?.raw_url;
+        if (!rawUrl) throw new Error('Gist response did not include a raw state URL.');
+        await copyText(`${basePlaygroundUrl()}#state-url=${encodeURIComponent(rawUrl)}`, 'Gist share link copied.');
+      } catch (error) {
+        await copyText(stateText, `Could not create Gist: ${formatError(error)}. Gist-ready state copied instead.`);
+      }
+    }
+
+    function currentShareState() {
+      return {
         source: source.value,
         proof: proof.checked,
         stats: stats.checked,
         backgroundSource,
         backgroundName,
-      });
-      const data = new TextEncoder().encode(payload);
-      let binary = '';
-      for (const byte of data) binary += String.fromCharCode(byte);
-      const encoded = btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
-      await copyText(`${location.href.split('#')[0]}#state=${encoded}`, 'Share link copied.');
+      };
     }
 
-    function restoreFromHash() {
-      if (!location.hash.startsWith('#state=')) return false;
+    function encodeState(payload) {
+      const data = new TextEncoder().encode(JSON.stringify(payload));
+      let binary = '';
+      for (const byte of data) binary += String.fromCharCode(byte);
+      return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    }
+
+    function decodeState(encoded) {
+      const base64 = encoded.replaceAll('-', '+').replaceAll('_', '/');
+      const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+      const bytes = Uint8Array.from(atob(padded), (ch) => ch.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+
+    function basePlaygroundUrl() {
+      return location.href.split('#')[0];
+    }
+
+    async function restoreFromHashOrLoadDefault() {
+      if (!(await restoreFromHash())) await loadExample('ancestor');
+    }
+
+    async function restoreFromHash() {
+      if (!location.hash || location.hash === '#') return false;
+      const params = new URLSearchParams(location.hash.slice(1));
       try {
-        const encoded = location.hash.slice(7).replaceAll('-', '+').replaceAll('_', '/');
-        const padded = encoded + '='.repeat((4 - encoded.length % 4) % 4);
-        const bytes = Uint8Array.from(atob(padded), (ch) => ch.charCodeAt(0));
-        const payload = JSON.parse(new TextDecoder().decode(bytes));
-        setSource(String(payload.source || ''), 'shared program');
-        proof.checked = Boolean(payload.proof);
-        stats.checked = Boolean(payload.stats);
-        backgroundSource = String(payload.backgroundSource || '');
-        backgroundName = String(payload.backgroundName || 'shared background');
-        updateBackgroundStatus();
-        setStatus('Loaded shared program.');
-        return true;
+        if (params.has('state')) {
+          applySharedState(decodeState(params.get('state')), 'shared program');
+          setStatus('Loaded shared program.');
+          return true;
+        }
+        if (params.has('state-url')) {
+          const stateUrl = params.get('state-url');
+          const response = await fetch(stateUrl);
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+          applySharedState(await response.json(), `shared state from ${stateUrl}`);
+          setStatus('Loaded shared Gist state.');
+          return true;
+        }
+        await restoreBackgroundUrl(params);
+        applyOptionParams(params);
+        if (params.has('example')) {
+          await loadExample(params.get('example'));
+          applyOptionParams(params);
+          return true;
+        }
+        if (params.has('url')) {
+          await loadSourceFromUrl(params.get('url'), false);
+          applyOptionParams(params);
+          return true;
+        }
       } catch (error) {
         setStatus(`Could not read shared state: ${formatError(error)}`, true);
         return false;
       }
+      return false;
+    }
+
+    async function restoreBackgroundUrl(params) {
+      const url = params.get('background-url');
+      if (!url) return;
+      await loadSourceFromUrl(url, true);
+    }
+
+    async function loadSourceFromUrl(url, asBackground) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      const text = await response.text();
+      if (asBackground) {
+        backgroundSource = text;
+        backgroundName = url;
+        backgroundReference = { kind: 'url', url };
+        updateBackgroundStatus();
+      } else {
+        setSource(text, url, { kind: 'url', url });
+      }
+    }
+
+    function applySharedState(payload, label) {
+      setSource(String(payload.source || ''), label, { kind: 'custom' });
+      proof.checked = Boolean(payload.proof);
+      stats.checked = Boolean(payload.stats);
+      backgroundSource = String(payload.backgroundSource || '');
+      backgroundName = String(payload.backgroundName || 'shared background');
+      backgroundReference = null;
+      updateBackgroundStatus();
+    }
+
+    function applyOptionParams(params) {
+      proof.checked = params.get('proof') === '1' || params.get('proof') === 'true';
+      stats.checked = params.get('stats') === '1' || params.get('stats') === 'true';
     }
 
     async function loadVersion() {

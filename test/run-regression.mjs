@@ -678,6 +678,15 @@ function playgroundStaticIssues() {
   if (!html.includes('id="line-numbers"') || !html.includes('updateLineNumbers') || !html.includes('lineNumbersInner.style.transform') || !html.includes('--line-number-bg')) {
     issues.push('playground editor must include synced line numbers');
   }
+  if (!html.includes('MAX_SHARE_URL_LENGTH') || !html.includes('buildReferenceShareLink') || !html.includes("params.set('example'") || !html.includes("params.set('url'")) {
+    issues.push('playground share links must avoid embedding large example or URL-loaded sources');
+  }
+  if (!html.includes('id="create-gist"') || !html.includes('createGistShare') || !html.includes('GIST_STATE_FILENAME') || !html.includes("fetch('https://api.github.com/gists'")) {
+    issues.push('playground must support Gist-backed sharing for large programs');
+  }
+  if (!html.includes("params.has('state-url')") || !html.includes('#state-url=')) {
+    issues.push('playground must restore state from raw Gist state URLs');
+  }
   if (!html.includes('id="example-search"') || !html.includes('id="examples"')) issues.push('playground must include searchable examples');
   const scriptMatch = html.match(new RegExp('<script type="module">\\n([\\s\\S]*?)\\n  <\\/script>'));
   if (scriptMatch == null) {
