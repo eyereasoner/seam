@@ -1,6 +1,6 @@
 {
   "name": "eyelang",
-  "version": "0.1.11",
+  "version": "1.1.12",
   "description": "A small Prolog-syntax-subset logic programming language for rules, goals, answers, and proofs.",
   "type": "module",
   "main": "./index.js",
