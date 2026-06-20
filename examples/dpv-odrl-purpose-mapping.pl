@@ -1,4 +1,6 @@
-% DPV process to ODRL policy view in eyelang.
+% Translate a DPV-style personal-data processing description into an ODRL-style policy view.
+% The source facts describe one care/research process: controller, recipient, data, action, purpose, and legal basis.
+% The derived predicates materialize the corresponding ODRL policy, permission, target, party, action, and constraints.
 
 materialize(type, 2).
 materialize(odrl_permission, 2).

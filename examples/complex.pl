@@ -4,6 +4,10 @@
 % the pair-shaped pair lists used by the Eyeling source.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The example derives arithmetic identities, polar conversions, powers, roots,
+% exponential/trigonometric functions, and distance/normalization results from
+% a small complex-number toolkit.
 materialize(is, 2).
 
 % Program structure: facts set up the scenario, and rules derive the materialized conclusions.
@@ -11,6 +15,7 @@ pi(3.141592653589793).
 e(2.718281828459045).
 
 % Derivation rules: each rule below contributes one logical step toward the displayed results.
+% z^w is evaluated through polar/log form, exposing useful intermediate proof steps.
 complex_exponentiation([A, B], [C, D], [E, F]) :-
   complex_polar([A, B], [R, T]),
   pow(R, C, Z1),

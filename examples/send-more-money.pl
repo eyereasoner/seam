@@ -1,5 +1,6 @@
 % Cryptarithm search for SEND + MORE = MONEY.
-% Column constraints prune the digit assignment search.
+% The solver assigns distinct decimal digits to letters while enforcing the usual column-by-column carries.
+% Early constraints for M=1, O=0, and each column sum prune most of the search before full numbers are built.
 materialize(cryptarithm_answer, 2).
 
 all_digits([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).

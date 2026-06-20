@@ -1,6 +1,11 @@
 % Memoize shared inference layers: the score vector, disease likelihood tails,
 % and expected therapy success are reused by several report relations.
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Read this as two stacked inference problems: first infer disease posterior
+% probabilities from symptoms, then score each therapy by averaging outcomes
+% over that posterior distribution. The memoized predicates are exactly the
+% shared layers used by several materialized reports.
 materialize(diseases, 2).
 materialize(therapies, 2).
 materialize(evidence, 2).
@@ -95,6 +100,7 @@ likelihood(Disease, [Evidence|Rest], Likelihood) :-
   likelihood(Disease, Rest, TailLikelihood),
   mul(Factor, TailLikelihood, Likelihood).
 
+% score/2 combines prior probability with the likelihood of the observed evidence.
 score(Disease, Score) :-
   prior(Disease, Prior),
   evidence(case, Evidence),
@@ -131,6 +137,7 @@ expected_success(Therapy, ExpectedSuccess) :-
   success_by_disease(Therapy, SuccessByDisease),
   dot_product(Posteriors, SuccessByDisease, ExpectedSuccess).
 
+% utility/2 turns expected success and adverse effects into a ranking score.
 utility(Therapy, Utility) :-
   expected_success(Therapy, ExpectedSuccess),
   adverse(Therapy, Adverse),

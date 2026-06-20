@@ -4,6 +4,9 @@
 % grid import, and a concise feasibility report for a campus microgrid interval.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The dispatch policy is greedy but auditable: use renewables first, discharge
+% the battery only down to reserve, then import the remaining deficit from grid.
 materialize(renewablePower_kW, 2).
 materialize(batteryDispatch_kW, 2).
 materialize(gridImport_kW, 2).
@@ -62,6 +65,7 @@ reserve_ok(Site) :-
   required_battery_reserve_kW(Site, Required),
   ge(ReserveLeft, Required).
 
+% stable_dispatch/1 passes only when contract and reserve constraints remain satisfied.
 stable_dispatch(Site) :-
   contract_ok(Site),
   reserve_ok(Site).

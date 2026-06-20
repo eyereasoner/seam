@@ -2,6 +2,10 @@
 % Four simple worlds estimate whether trips fit the available battery.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Each world changes consumption with temperature, speed, payload, or safety
+% buffer assumptions. The reported status shows which worlds keep the route
+% inside the usable battery envelope.
 materialize(safeInWorld, 2).
 materialize(riskyInWorld, 2).
 materialize(reason, 2).
@@ -55,6 +59,7 @@ required_energy(T, w3, E) :-
   required_energy(T, w0, W0),
   mul(W0, 1.30, E).
 
+% safe_in_world/2 compares required trip energy with usable battery capacity.
 safe_in_world(T, W) :-
   trip_data(T, _, _, _, _, Battery, _),
   required_energy(T, W, Required),

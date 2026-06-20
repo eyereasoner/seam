@@ -5,6 +5,10 @@
 % a rule-level validation layer that rejects equal colours across borders.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The countries form a small planar-style adjacency graph. The example is a
+% constraint problem: assign colours, reject border conflicts, then materialize
+% the canonical colour vector and validation status.
 materialize(color, 2).
 materialize(status, 2).
 materialize(reason, 2).
@@ -72,11 +76,13 @@ assigned(bulgaria, green).
 assigned(romania, red).
 assigned(croatia, red).
 
+% valid_assignment/1 checks that one country has an assigned colour from the palette.
 valid_assignment(Country) :-
   country(Country),
   assigned(Country, Colour),
   color(Colour).
 
+% bad_border/3 is the only forbidden pattern: adjacent countries sharing a colour.
 bad_border(A, B, Colour) :-
   border(A, B),
   assigned(A, Colour),

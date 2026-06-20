@@ -1,5 +1,6 @@
-% Pell equation x^2 - 2 y^2 = 1 by memoized recurrence.
-% The fundamental solution (3,2) generates all positive solutions.
+% Pell equation x^2 - 2y^2 = 1 by memoized recurrence.
+% Starting from the fundamental solution (3, 2), pell/3 generates successive positive solutions.
+% pell_holds/2 recomputes the Diophantine identity as a check on the generated pair.
 materialize(pell_answer, 2).
 
 memoize(pell, 3).

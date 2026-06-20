@@ -1,6 +1,10 @@
 % Memoize interval computations reused across width, midpoint, gradient, step,
 % objective, and contraction report relations.
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% This is a proof-friendly optimization trace: every numeric fact needed to
+% justify the step is materialized, so proof output can certify why the update
+% is accepted.
 materialize(eta, 2).
 materialize(etaLeHalf, 2).
 materialize(xBounds, 2).

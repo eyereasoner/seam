@@ -1,6 +1,9 @@
 % Memoize route costs: selected paths, route relations, and trust checks reuse
 % the same path-list reductions.
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% path/5 carries a visited list to avoid cycles. The materialized answer reports
+% both the winning route and its accumulated risk score.
 materialize(route, 2).
 materialize(rawCost, 2).
 materialize(riskSum, 2).

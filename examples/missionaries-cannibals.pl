@@ -1,4 +1,6 @@
-% Missionaries-and-cannibals river crossing as a guarded state-space search.
+% Missionaries-and-cannibals river crossing as guarded state-space search.
+% A state records missionaries and cannibals on the left bank plus the boat side.
+% crossing/3 generates only legal boat moves, and journey/4 avoids revisiting states while finding a safe path.
 materialize(missionaries_cannibals_answer, 2).
 
 move(1, 0).

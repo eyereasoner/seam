@@ -1,11 +1,11 @@
-% Peasant multiplication and exponentiation cases, adapted from Eyelet
-% input/peasant.pl.  The selected answers match Eyelet output-swipl/peasant.pl.
+% Peasant multiplication and exponentiation cases, adapted from Eyelet.
+% The selected inputs include very large integers to exercise native numeric
+% built-ins through ordinary relations.  The want_* facts keep the example from
+% enumerating an unbounded arithmetic domain.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(prod, 2).
 materialize(pow, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Inputs are explicit so the example does not enumerate an unbounded domain.
 want_prod([3, 0]).
 want_prod([5, 6]).
@@ -20,7 +20,6 @@ want_pow([238, 13]).
 want_pow([8367238, 2713]).
 
 % The arithmetic itself is delegated to the native numeric built-ins.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 prod([A, B], C) :-
   want_prod([A, B]),
   mul(A, B, C).

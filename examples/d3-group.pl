@@ -1,12 +1,12 @@
 % Eyelet-inspired D3 group example using findall/3 and sort/2.
-% It enumerates subgroups of the dihedral group of order 6.
+% The six facts are the symmetries of an equilateral triangle, with compose/3 as
+% the Cayley table and inverse/2 as the inverse relation.  Candidate subsets are
+% generated as subsequences, then filtered for subgroup closure.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(subgroups, 2).
 materialize(subgroupCount, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Six symmetries of an equilateral triangle: identity, rotations, reflections.
 symmetry(identity).
 symmetry(rotation_120).
@@ -62,7 +62,6 @@ inverse(reflection_c, reflection_c).
 
 % Candidate subsets are generated as subsequences of the sorted symmetry list.
 subsequence([], []).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 subsequence([Head | Tail], [Head | Rest]) :-
   subsequence(Tail, Rest).
 subsequence([_Head | Tail], Rest) :-

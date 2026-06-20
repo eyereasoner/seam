@@ -2,6 +2,9 @@
 % The graph is undirected; edges are represented by identifiers so each edge is used once.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The remaining-edge list is the state of the search. Selecting and deleting an
+% outgoing edge models classical trail construction directly in Horn clauses.
 materialize(oddVertices, 2).
 materialize(path, 2).
 materialize(edgeCount, 2).

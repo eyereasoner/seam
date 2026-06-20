@@ -1,11 +1,12 @@
 % Deontic logic: obligations, prohibitions, compensations, and violations.
+% The example separates normative facts from observed actions.  Missing an
+% obligation and performing a prohibited action are violations, but a prohibited
+% action can be marked compensated when the configured repair action occurred.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(violation, 2).
 materialize(compensation, 2).
 materialize(status, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Facts state what the actor was obliged/prohibited to do and what happened.
 actor(alice).
 action(share_record).
@@ -21,7 +22,6 @@ not_performed(alice, obtain_consent).
 not_performed(alice, delete_unneeded_copy).
 
 % Missing an obligation and performing a prohibited action are both violations.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 violation(Actor, missed_obligation(Action)) :-
   obliged(Actor, Action),
   not_performed(Actor, Action).

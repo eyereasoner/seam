@@ -1,10 +1,10 @@
-% Gray-code counter adapted from Eyeling gray-code-counter.n3 and the
-% Clause and Effect example referenced there.
+% Gray-code counter adapted from Eyeling gray-code-counter.n3.
+% Boolean gates are represented as truth-table facts.  The circuit rules compose
+% those gates into next-state logic for three flip-flops, and testgcc/3 runs the
+% counter over a finite clock sequence.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(isgcc, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Boolean gates are truth tables; the circuit rules compose them.
 and(0, 0, 0). and(0, 1, 0). and(1, 0, 0). and(1, 1, 1).
 or(0, 0, 0).  or(0, 1, 1).  or(1, 0, 1).  or(1, 1, 1).
@@ -13,7 +13,6 @@ inv(0, 1). inv(1, 0).
 dff(D, 0, Q, Q).
 dff(D, 1, _Q, D).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 neta(A, B, Q) :-
   and(A, B, T1),
   inv(A, NA),

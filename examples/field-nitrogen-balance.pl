@@ -3,6 +3,9 @@
 
 % field(Field, SoilN, FertilizerN, LossFraction, CropDemandN).
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The balance is a simple agronomic accounting model. Status and reason facts
+% separate nutrient sufficiency from environmental surplus warnings.
 materialize(availableN_kg_ha, 2).
 materialize(deficitN_kg_ha, 2).
 materialize(surplusN_kg_ha, 2).
@@ -28,6 +31,7 @@ available_n(F, Avail) :-
   sub(1.0, Loss, Retained),
   mul(Total, Retained, Avail).
 
+% surplus_n/2 and deficit_n/2 split the signed balance into reportable quantities.
 surplus_n(F, Surplus) :-
   available_n(F, Avail),
   field(F, _, _, _, Demand),

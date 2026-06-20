@@ -1,4 +1,6 @@
-% 0/1 knapsack search with an aggregate maximum over all feasible packs.
+% 0/1 knapsack optimization with aggregate_max/5.
+% subset/2 enumerates each possible expedition pack; total_weight/2 and total_value/2 score it.
+% feasible_pack/3 enforces the capacity limit, and best_pack/3 keeps the highest-value feasible choice.
 materialize(knapsack_answer, 2).
 
 capacity(15).

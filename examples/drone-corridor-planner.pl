@@ -1,13 +1,11 @@
-% Memoize bounded paths because surviving-plan metrics reuse route prefixes.
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% Bounded drone corridor planner adapted from Eyeling drone-corridor-planner.n3.
+% States track city, battery level, and corridor permit.  A finite fuel list
+% bounds recursion; path/9 sums duration and cost while multiplying belief and
+% comfort.  Memoization helps because many surviving-plan checks reuse prefixes.
+
 materialize(gps_plan, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 memoize(path, 9).
-
-% Bounded drone corridor planner adapted from Eyeling drone-corridor-planner.n3.
-% A fuel list bounds recursion; duration and cost are summed, belief and comfort
-% are multiplied along the action sequence.
 
 fuel(fuel7, [t, t, t, t, t, t, t]).
 
@@ -26,7 +24,6 @@ step(state(brugge, mid, P), state(oostende, low, P), public_coastline_brugge_oos
 step(state(brugge, full, P), state(oostende, mid, P), public_coastline_brugge_oostende, 1200.0, 0.006, 0.975, 0.96).
 step(state(kortrijk, full, yes), state(oostende, mid, yes), direct_corridor_kortrijk_oostende, 1100.0, 0.009, 0.955, 0.92).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 path(From, To, [Act], Duration, Cost, Belief, Comfort, FuelIn, FuelOut) :-
   step(From, To, Act, Duration, Cost, Belief, Comfort),
   rest(FuelIn, FuelOut).

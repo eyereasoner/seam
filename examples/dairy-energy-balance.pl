@@ -3,6 +3,10 @@
 
 % cow(Cow, BodyWeightKg, MilkKgPerDay, RationEnergyMcalPerKgDM, IntakeKgDM).
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% This is a small domain-calculation example: facts are measurements, helper
+% predicates compute metabolizable energy and demand, and status/reason facts
+% summarize the herd-management conclusion.
 materialize(energyBalance_Mcal, 2).
 materialize(rationSupportedMilk_kg, 2).
 materialize(status, 2).
@@ -33,6 +37,7 @@ total_requirement(C, R) :-
   milk_requirement(C, MilkR),
   add(M, MilkR, R).
 
+% energy_balance/2 is intake minus maintenance and milk-production demand.
 energy_balance(C, B) :-
   ration_supply(C, S),
   total_requirement(C, R),

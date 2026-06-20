@@ -3,6 +3,10 @@
 % then check product reconstruction and primality of the distinct factors.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The goal is not to be a production factorizer; it is a readable encoding of
+% divisibility, primality, two factorization strategies, and agreement between
+% normalized factor lists.
 materialize(n, 2).
 materialize(factorsSmallest, 2).
 materialize(factorsLargest, 2).
@@ -40,6 +44,7 @@ smallest_divisor_from(N, D, S) :-
 
 trial_prime(2).
 trial_prime(3).
+% trial_prime/1 is the bounded primality test used by the factorization rules.
 trial_prime(P) :-
   gt(P, 3),
   smallest_divisor_from(P, 2, P).
@@ -51,6 +56,7 @@ factor_smallest(N, [N]) :-
   ge(N, 2),
   smallest_divisor_from(N, 2, N).
 
+% factor_smallest/2 repeatedly removes the least divisor, producing ascending factors.
 factor_smallest(N, Factors) :-
   ge(N, 2),
   smallest_divisor_from(N, 2, D),

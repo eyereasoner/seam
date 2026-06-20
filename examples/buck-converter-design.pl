@@ -4,6 +4,10 @@
 % inductor ripple current, capacitor ripple voltage, and checks design limits.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The constants describe one regulator design. The rules intentionally keep
+% each engineering equation separate so proof output can point to the exact
+% calculation that made the design pass or fail.
 materialize(dutyCycle, 2).
 materialize(inductorRipple_A, 2).
 materialize(rippleRatio, 2).
@@ -51,6 +55,7 @@ capacitor_ripple_voltage(Converter, RippleVoltage) :-
   mul(EightF, Capacitance, Denominator),
   div(RippleCurrent, Denominator, RippleVoltage).
 
+% within_ripple_limits/1 is the design gate for ripple current and output voltage.
 within_ripple_limits(Converter) :-
   ripple_ratio(Converter, Ratio),
   limit(Converter, maxRippleRatio, MaxRatio),

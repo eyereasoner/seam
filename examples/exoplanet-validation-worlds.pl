@@ -4,6 +4,9 @@
 % sensitivity-only reasoning, a heuristic threshold, or a stricter Bayesian rule.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The example is intentionally qualitative: several independent signals must
+% align before a candidate is promoted from plausible to confirmed in a world.
 materialize(ppvPlanetGivenDetection, 2).
 materialize(confirmsInWorld, 2).
 materialize(rejectsInWorld, 2).
@@ -31,6 +34,7 @@ ppv_planet(Candidate, PPV) :-
   add(Numerator, FalsePositiveMass, Denominator),
   div(Numerator, Denominator, PPV).
 
+% The world predicates encode different modelling assumptions for the same candidate.
 confirms_in_world(Candidate, w0) :-
   ppv_planet(Candidate, PPV),
   ge(PPV, 0.90).

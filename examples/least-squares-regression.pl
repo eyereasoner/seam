@@ -4,6 +4,9 @@
 % fitted slope, intercept, and coefficient of determination R^2.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Accumulating sufficient statistics keeps the regression formulas compact and
+% makes the proof show the same intermediate values a hand calculation would use.
 materialize(slope, 2).
 materialize(intercept, 2).
 materialize(rSquared, 2).
@@ -14,6 +17,7 @@ materialize(reason, 2).
 dataset(regression1, [point(1.0, 2.0), point(2.0, 3.0), point(3.0, 5.0), point(4.0, 4.0)]).
 threshold(regression1, minimum_r_squared, 0.60).
 
+% stats/7 folds points into N, Σx, Σy, Σx², Σxy, and Σy².
 stats([], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0).
 % Derivation rules: each rule below contributes one logical step toward the displayed results.
 stats([point(X, Y)|Rest], N, SumX, SumY, SumXX, SumXY, SumYY) :-

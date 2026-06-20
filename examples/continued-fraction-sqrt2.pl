@@ -1,5 +1,6 @@
 % Convergents of sqrt(2) by memoized recurrence.
-% conv(N, P, Q) gives the Nth convergent numerator/denominator for [1;2,2,...].
+% conv(N, P, Q) gives the Nth numerator/denominator pair for the continued fraction [1; 2, 2, ...].
+% The Pell-error check shows how these convergents alternately approximate solutions to P^2 - 2Q^2 = +/-1.
 materialize(convergent_answer, 2).
 
 memoize(conv, 3).

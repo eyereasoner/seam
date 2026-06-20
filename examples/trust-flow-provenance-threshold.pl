@@ -1,4 +1,6 @@
 % Provenance-derived trust-flow thresholding in eyelang.
+% Each message combines publisher trust, signature strength, and transform quality into one confidence score.
+% Receiver-specific thresholds then classify messages as accepted or quarantined and derive status/risk facts.
 
 materialize(confidence, 2).
 materialize(trust_flow_state, 2).

@@ -1,4 +1,6 @@
-% Term tools: inspect and build structured terms, then validate all facts with forall/2.
+% Term-tool builtins for inspecting, constructing, rendering, and validating structured terms.
+% functor/3, arg/3, and compound_name_arguments/3 expose term shape and arguments.
+% term_string/2 renders a term, and forall/2 validates that every edge weight is positive.
 materialize(report, 2).
 
 edge(a, b, 3).

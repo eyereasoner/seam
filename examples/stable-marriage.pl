@@ -1,4 +1,6 @@
-% Stable-marriage search with blocking-pair detection.
+% Stable-marriage search with explicit blocking-pair detection.
+% matching/1 enumerates all one-to-one pairings for four men and four women.
+% blocking_pair/3 encodes instability: two people would both prefer each other over their assigned partners.
 materialize(stable_marriage_answer, 2).
 
 man(adam).

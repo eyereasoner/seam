@@ -1,5 +1,6 @@
 % Integer partition counts by memoized dynamic programming.
-% partitions(N, K, Count) counts partitions of N using parts no larger than K.
+% partitions(N, K, Count) counts ways to write N as an unordered sum using parts no larger than K.
+% The recurrence splits the search into partitions that use at least one K and partitions that use none.
 materialize(partition_answer, 2).
 
 memoize(partitions, 3).

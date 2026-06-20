@@ -1,12 +1,13 @@
 % Ackermann-style hyperoperation benchmark adapted from Eyeling ackermann.n3.
-% The two-argument entry point follows the Eyeling encoding:
-%   ackermann(X, Y) = hyper(X, Y + 3, 2) - 3.
+% The public ackermann/2 answers are small, but the helper relation exercises
+% deeply nested arithmetic recursion: hyper/4 encodes successor, addition,
+% multiplication, exponentiation, and then the Ackermann-style offset
+% ackermann(X, Y) = hyper(X, Y + 3, 2) - 3.
+% Keeping the selected inputs explicit avoids unbounded generation while still
+% testing the solver's recursive numeric workload.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(ackermann, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 ackermann(X, Y, A) :-
   add(Y, 3, B),
   hyper(X, B, 2, C),

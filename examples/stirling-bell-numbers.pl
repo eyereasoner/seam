@@ -1,5 +1,6 @@
 % Stirling numbers of the second kind and Bell numbers.
-% stirling2(N, K, Count) partitions N labelled elements into K nonempty blocks.
+% stirling2(N, K, Count) counts partitions of N labelled elements into K nonempty blocks.
+% Bell numbers are then obtained by summing all K columns for a fixed N.
 materialize(stirling_bell_answer, 2).
 
 memoize(stirling2, 3).

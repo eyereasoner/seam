@@ -1,10 +1,11 @@
-% GDPR-style compliance check: purpose, basis, minimisation, safeguards, and export.
+% GDPR-style compliance check.
+% Each processing case is tested for purpose compatibility, legal basis,
+% minimisation, special-category safeguards, and international-transfer safety.
+% Separate failure rules produce concise reasons for noncompliant cases.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % case_alpha is intended to pass; case_beta is intentionally incomplete.
 processing(case_alpha).
 processing(case_beta).
@@ -29,7 +30,6 @@ third_country_transfer(case_beta).
 adequacy_decision(case_alpha).
 
 % Compliance is decomposed into reusable checks so reasons can be reported.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 has_required_basis(Case) :- legal_basis(Case, explicit_consent).
 has_required_basis(Case) :- legal_basis(Case, medical_care).
 

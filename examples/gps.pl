@@ -1,6 +1,8 @@
-% Memoize route paths because the same candidate routes are checked repeatedly
-% for explanation and verification relations.
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% GPS route-planning example translated from Eyeling's gps.n3.
+% The map is stored as quoted formula data and projected with holds/3.  Route
+% paths accumulate action sequence, duration, cost, belief, and comfort; memoize
+% keeps repeated comparison and explanation queries from recomputing paths.
+
 materialize(recommendedRoute, 2).
 materialize(outcome, 2).
 materialize(statement, 3).
@@ -13,15 +15,8 @@ materialize(comfort, 2).
 materialize(selectedRoute, 2).
 materialize(comparison, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 memoize(path, 7).
 memoize(traveller_path, 6).
-
-% GPS — ARC-style goal-driven route planning, translated from Eyeling's gps.n3.
-%
-% The map is kept as quoted formula data.  Rules project gps_description
-% statements from that formula, chain them into paths, compare the two complete
-% routes from Gent to Oostende, and produce a compact explanation report.
 
 case_graph(caseGraph, (
   location(i1, gent),
@@ -37,7 +32,6 @@ map_graph(mapBE, (
   gps_description(mapBE, description(location(S, brugge), true, location(S, oostende), drive_brugge_oostende, 900.0, 0.004, 0.98, 1.0))
 )).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 case_statement(S, P, O) :-
   case_graph(caseGraph, Context),
   holds(Context, P, [S, O]).

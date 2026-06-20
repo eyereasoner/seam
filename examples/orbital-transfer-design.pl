@@ -5,6 +5,9 @@
 % second, and time in days.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The design is a Hohmann-transfer estimate: compute transfer orbit geometry,
+% departure/arrival burns, total delta-v, transfer time, and budget status.
 materialize(transferSemiMajorAxis_km, 2).
 materialize(departureDeltaV_km_s, 2).
 materialize(arrivalDeltaV_km_s, 2).

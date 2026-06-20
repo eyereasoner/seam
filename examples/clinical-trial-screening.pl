@@ -5,6 +5,10 @@
 % public relation report.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Inclusion criteria are positive requirements; exclusion criteria veto a
+% candidate even when the inclusion checks pass. The emitted reason/2 facts are
+% the audit trail a coordinator would need for a screen-failure report.
 materialize(type, 2).
 materialize(status, 2).
 materialize(reason, 2).
@@ -58,6 +62,7 @@ exclusion_renal(Patient) :-
 exclusion_pregnancy(Patient) :-
   condition(Patient, pregnant).
 
+% A patient is eligible only when all inclusion checks pass and no exclusion is proven.
 screen_eligible(Patient) :-
   inclusion_adult(Patient),
   inclusion_diagnosis(Patient),

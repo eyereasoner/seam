@@ -1,12 +1,12 @@
-% Adapted from Eyeling's easter.n3.
-% Gregorian computus for a sample decade, with independent range/window checks.
+% Gregorian Easter computus adapted from Eyeling's easter.n3.
+% Each case is a year in a sample decade.  The rules derive the Meeus/Jones/
+% Butcher remainders, the final month/day, and a separate window check showing
+% that the result lies in the legal Gregorian Easter range.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(easterDate, 2).
 materialize(computusRemainders, 2).
 materialize(legalGregorianWindow, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Sample years for which the computed Easter date is materialized.
 case(y2026, 2026).
 case(y2027, 2027).
@@ -20,7 +20,6 @@ case(y2034, 2034).
 case(y2035, 2035).
 
 % These checks document the legal ranges of intermediate computus values.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 valid_golden(N) :- between(0, 18, N).
 valid_epact(N) :- between(0, 29, N).
 valid_weekday(N) :- between(0, 6, N).

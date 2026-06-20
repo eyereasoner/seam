@@ -4,6 +4,10 @@
 % feedforward compensation, square-root normalization, and nonlinear feedback.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Each derived quantity is represented as its own predicate rather than a single
+% formula blob, making the proof trace useful for debugging a failed actuator
+% normalization or control-signal calculation.
 materialize(controlSignal, 2).
 materialize(status, 2).
 materialize(normalizedMeasurement, 2).

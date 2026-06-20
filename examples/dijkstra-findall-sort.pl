@@ -1,12 +1,12 @@
 % Eyelet-inspired Dijkstra example using findall/3 and sort/2.
-% Adapted to eyelang's explicit built-ins and relation report style.
+% The priority queue is represented as sorted list entries [Cost, Node | Path].
+% Each expansion collects unvisited neighbors with findall/3, appends them to
+% the frontier, and uses sort/2 so the cheapest frontier entry is processed next.
 
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(shortestPath, 2).
 materialize(cost, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 % Weighted undirected graph; the symmetric edge rule below adds reverse arcs.
 edge(a, b, 4).
 edge(a, c, 2).
@@ -17,7 +17,6 @@ edge(c, e, 10).
 edge(d, e, 2).
 edge(d, f, 6).
 edge(e, f, 3).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
 edge(A, B, Cost) :- edge(B, A, Cost).
 
 % The frontier is represented as [Cost, Node | ReversePath] entries.

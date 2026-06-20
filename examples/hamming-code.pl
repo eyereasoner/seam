@@ -4,6 +4,9 @@
 % position, then the corrected codeword and decoded payload are derived.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Positions are one-based to match the textbook parity-check layout. The
+% syndrome value is both the error certificate and the index of the bit to fix.
 materialize(syndrome, 2).
 materialize(errorBit, 2).
 materialize(correctedCodeword, 2).
@@ -51,6 +54,7 @@ syndrome_bit4(Code, S4) :-
   received_bit(Code, 7, B7),
   parity4(B4, B5, B6, B7, S4).
 
+% syndrome/2 combines parity checks as S1 + 2*S2 + 4*S4.
 syndrome(Code, Syndrome) :-
   syndrome_bit1(Code, S1),
   syndrome_bit2(Code, S2),

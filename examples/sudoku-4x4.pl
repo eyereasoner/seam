@@ -1,4 +1,6 @@
-% A compact 4x4 Sudoku search with row permutations and column/box constraints.
+% Compact 4x4 Sudoku search with row permutations and column/box constraints.
+% The givens are baked into row1/1 ... row4/1, so each candidate row is already a permutation of 1..4.
+% sudoku_solution/1 then checks the remaining column and 2x2 box distinctness constraints.
 materialize(sudoku_answer, 2).
 
 perm([], []).

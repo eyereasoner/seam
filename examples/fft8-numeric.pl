@@ -2,6 +2,9 @@
 % A radix-2 FFT over explicit complex pairs c(Re, Im).
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% This is deliberately unrolled enough to keep the proof readable while still
+% showing butterfly composition, twiddle factors, and magnitude reporting.
 materialize(fft, 2).
 materialize(dcComponent, 2).
 
@@ -53,6 +56,7 @@ fft4([X0, X1, X2, X3], [Y0, Y1, Y2, Y3]) :-
   c_sub(E1, T1, Y3).
 
 % Split even/odd samples, transform halves, then combine with W8 factors.
+% fft8/2 composes two four-point FFTs with the four required twiddle factors.
 fft8([X0, X1, X2, X3, X4, X5, X6, X7], [Y0, Y1, Y2, Y3, Y4, Y5, Y6, Y7]) :-
   fft4([X0, X2, X4, X6], [E0, E1, E2, E3]),
   fft4([X1, X3, X5, X7], [O0, O1, O2, O3]),
