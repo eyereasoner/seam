@@ -525,6 +525,25 @@ function whiteBoxCases() {
       },
     },
     {
+      name: 'challenging examples keep dynamic-programming predicates memoized',
+      run: () => {
+        const checks = [
+          ['chart-parser.pl', 'span', 4, true],
+          ['critical-path-schedule.pl', 'earliest_start', 2, false],
+          ['critical-path-schedule.pl', 'finish_time', 2, false],
+          ['weighted-interval-scheduling.pl', 'best_from', 2, true],
+        ];
+        for (const [filename, name, arity, recursive] of checks) {
+          const text = fs.readFileSync(path.join(packageRoot, 'examples', filename), 'utf8');
+          const program = Program.parseSources([{ text, filename }]);
+          const group = program.findGroup(name, arity);
+          assertEqual(Boolean(group), true, `${filename} ${name}/${arity} group exists`);
+          assertEqual(group.memoized, true, `${filename} ${name}/${arity} memoized`);
+          assertEqual(group.recursive, recursive, `${filename} ${name}/${arity} recursive`);
+        }
+      },
+    },
+    {
       name: 'n-queens example keeps diagonal checks memoized',
       run: () => {
         const text = fs.readFileSync(path.join(packageRoot, 'examples', 'n-queens-8.pl'), 'utf8');

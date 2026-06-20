@@ -328,6 +328,7 @@ Each example has a checked golden output in `examples/output`.
 | [`cache-performance.pl`](../examples/cache-performance.pl) | Summarizes cache latency performance. | [`output/cache-performance.pl`](../examples/output/cache-performance.pl) |
 | [`canary-release.pl`](../examples/canary-release.pl) | Decides canary rollout or rollback. | [`output/canary-release.pl`](../examples/output/canary-release.pl) |
 | [`cat-koko.pl`](../examples/cat-koko.pl) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.pl`](../examples/output/cat-koko.pl) |
+| [`chart-parser.pl`](../examples/chart-parser.pl) | Parses small sentences with a memoized chart parser. | [`output/chart-parser.pl`](../examples/output/chart-parser.pl) |
 | [`clinical-trial-screening.pl`](../examples/clinical-trial-screening.pl) | Screens candidates for a trial. | [`output/clinical-trial-screening.pl`](../examples/output/clinical-trial-screening.pl) |
 | [`collatz-1000.pl`](../examples/collatz-1000.pl) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.pl`](../examples/output/collatz-1000.pl) |
 | [`combinatorics-findall-sort.pl`](../examples/combinatorics-findall-sort.pl) | Collects and sorts finite combinations. | [`output/combinatorics-findall-sort.pl`](../examples/output/combinatorics-findall-sort.pl) |
@@ -337,6 +338,7 @@ Each example has a checked golden output in `examples/output`.
 | [`context-association.pl`](../examples/context-association.pl) | Associates named contexts with their contents. | [`output/context-association.pl`](../examples/output/context-association.pl) |
 | [`context-schema-audit.pl`](../examples/context-schema-audit.pl) | Audits mixed-arity context members with `holds/3`. | [`output/context-schema-audit.pl`](../examples/output/context-schema-audit.pl) |
 | [`control-system.pl`](../examples/control-system.pl) | Evaluates control-system measurements and targets. | [`output/control-system.pl`](../examples/output/control-system.pl) |
+| [`critical-path-schedule.pl`](../examples/critical-path-schedule.pl) | Computes earliest starts and the critical path for a project network. | [`output/critical-path-schedule.pl`](../examples/output/critical-path-schedule.pl) |
 | [`cyclic-path.pl`](../examples/cyclic-path.pl) | Computes paths in a cyclic graph. | [`output/cyclic-path.pl`](../examples/output/cyclic-path.pl) |
 | [`d3-group.pl`](../examples/d3-group.pl) | Enumerates subgroups of the D3 group. | [`output/d3-group.pl`](../examples/output/d3-group.pl) |
 | [`dairy-energy-balance.pl`](../examples/dairy-energy-balance.pl) | Classifies dairy cow energy balance. | [`output/dairy-energy-balance.pl`](../examples/output/dairy-energy-balance.pl) |
@@ -400,6 +402,7 @@ Each example has a checked golden output in `examples/output`.
 | [`lldm.pl`](../examples/lldm.pl) | Calculates leg-length discrepancy measurements. | [`output/lldm.pl`](../examples/output/lldm.pl) |
 | [`manufacturing-quality-control.pl`](../examples/manufacturing-quality-control.pl) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.pl`](../examples/output/manufacturing-quality-control.pl) |
 | [`microgrid-dispatch.pl`](../examples/microgrid-dispatch.pl) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.pl`](../examples/output/microgrid-dispatch.pl) |
+| [`missionaries-cannibals.pl`](../examples/missionaries-cannibals.pl) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.pl`](../examples/output/missionaries-cannibals.pl) |
 | [`monkey-bananas.pl`](../examples/monkey-bananas.pl) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.pl`](../examples/output/monkey-bananas.pl) |
 | [`n-queens-8.pl`](../examples/n-queens-8.pl) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.pl`](../examples/output/n-queens-8.pl) |
 | [`network-sla.pl`](../examples/network-sla.pl) | Checks network path SLA compliance. | [`output/network-sla.pl`](../examples/output/network-sla.pl) |
@@ -430,15 +433,18 @@ Each example has a checked golden output in `examples/output`.
 | [`socrates.pl`](../examples/socrates.pl) | Derives that Socrates is mortal. | [`output/socrates.pl`](../examples/output/socrates.pl) |
 | [`stable-marriage.pl`](../examples/stable-marriage.pl) | Finds stable matchings by excluding blocking pairs. | [`output/stable-marriage.pl`](../examples/output/stable-marriage.pl) |
 | [`statistics-summary.pl`](../examples/statistics-summary.pl) | Computes population statistics for a sample. | [`output/statistics-summary.pl`](../examples/output/statistics-summary.pl) |
+| [`sudoku-4x4.pl`](../examples/sudoku-4x4.pl) | Solves a compact 4x4 Sudoku by finite constraint search. | [`output/sudoku-4x4.pl`](../examples/output/sudoku-4x4.pl) |
 | [`superdense-coding.pl`](../examples/superdense-coding.pl) | Models superdense-coding bit transmission. | [`output/superdense-coding.pl`](../examples/output/superdense-coding.pl) |
 | [`term-tools.pl`](../examples/term-tools.pl) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.pl`](../examples/output/term-tools.pl) |
 | [`trust-flow-provenance-threshold.pl`](../examples/trust-flow-provenance-threshold.pl) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.pl`](../examples/output/trust-flow-provenance-threshold.pl) |
 | [`turing.pl`](../examples/turing.pl) | Simulates a binary-increment Turing machine. | [`output/turing.pl`](../examples/output/turing.pl) |
 | [`vector-similarity.pl`](../examples/vector-similarity.pl) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.pl`](../examples/output/vector-similarity.pl) |
 | [`vulnerability-impact.pl`](../examples/vulnerability-impact.pl) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.pl`](../examples/output/vulnerability-impact.pl) |
+| [`weighted-interval-scheduling.pl`](../examples/weighted-interval-scheduling.pl) | Selects the best non-overlapping weighted intervals with memoized dynamic programming. | [`output/weighted-interval-scheduling.pl`](../examples/output/weighted-interval-scheduling.pl) |
 | [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
 | [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |
 | [`zebra.pl`](../examples/zebra.pl) | Solves the zebra logic puzzle. | [`output/zebra.pl`](../examples/output/zebra.pl) |
+
 
 
 ## Golden outputs, tests, and conformance
