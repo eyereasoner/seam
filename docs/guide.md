@@ -302,10 +302,10 @@ Use `holds/2` when you want to match the member term directly, for example `name
 
 ## Example catalog
 
-The repository includes examples for recursion, graph reachability, finite search, arithmetic, list processing, optimization, policies, puzzles, and applied scientific calculations. Bundled examples use relation-style output.
+Each example has a checked golden output in `examples/output`.
 
-| Input | Short description | Output |
-| --- | --- | --- |
+| Example | What it demonstrates | Golden output |
+|---|---|---|
 | [`access-control-policy.pl`](../examples/access-control-policy.pl) | Evaluates role and condition based access decisions. | [`output/access-control-policy.pl`](../examples/output/access-control-policy.pl) |
 | [`ackermann.pl`](../examples/ackermann.pl) | Computes Ackermann-style hyperoperation values. | [`output/ackermann.pl`](../examples/output/ackermann.pl) |
 | [`age.pl`](../examples/age.pl) | Checks whether people meet age thresholds. | [`output/age.pl`](../examples/output/age.pl) |
@@ -391,6 +391,8 @@ The repository includes examples for recursion, graph reachability, finite searc
 | [`heron-theorem.pl`](../examples/heron-theorem.pl) | Computes triangle area by Heron's theorem. | [`output/heron-theorem.pl`](../examples/output/heron-theorem.pl) |
 | [`ideal-gas-law.pl`](../examples/ideal-gas-law.pl) | Applies the ideal gas law. | [`output/ideal-gas-law.pl`](../examples/output/ideal-gas-law.pl) |
 | [`illegitimate-reasoning.pl`](../examples/illegitimate-reasoning.pl) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.pl`](../examples/output/illegitimate-reasoning.pl) |
+| [`job-shop-scheduling.pl`](../examples/job-shop-scheduling.pl) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.pl`](../examples/output/job-shop-scheduling.pl) |
+| [`knapsack-optimization.pl`](../examples/knapsack-optimization.pl) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.pl`](../examples/output/knapsack-optimization.pl) |
 | [`knowledge-engineering-alignment-flow.pl`](../examples/knowledge-engineering-alignment-flow.pl) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.pl`](../examples/output/knowledge-engineering-alignment-flow.pl) |
 | [`law-of-cosines.pl`](../examples/law-of-cosines.pl) | Computes a triangle side by cosine law. | [`output/law-of-cosines.pl`](../examples/output/law-of-cosines.pl) |
 | [`least-squares-regression.pl`](../examples/least-squares-regression.pl) | Fits a least-squares regression line. | [`output/least-squares-regression.pl`](../examples/output/least-squares-regression.pl) |
@@ -399,6 +401,7 @@ The repository includes examples for recursion, graph reachability, finite searc
 | [`manufacturing-quality-control.pl`](../examples/manufacturing-quality-control.pl) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.pl`](../examples/output/manufacturing-quality-control.pl) |
 | [`microgrid-dispatch.pl`](../examples/microgrid-dispatch.pl) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.pl`](../examples/output/microgrid-dispatch.pl) |
 | [`monkey-bananas.pl`](../examples/monkey-bananas.pl) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.pl`](../examples/output/monkey-bananas.pl) |
+| [`n-queens-8.pl`](../examples/n-queens-8.pl) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.pl`](../examples/output/n-queens-8.pl) |
 | [`network-sla.pl`](../examples/network-sla.pl) | Checks network path SLA compliance. | [`output/network-sla.pl`](../examples/output/network-sla.pl) |
 | [`newton-raphson.pl`](../examples/newton-raphson.pl) | Finds roots by Newton-Raphson iteration. | [`output/newton-raphson.pl`](../examples/output/newton-raphson.pl) |
 | [`nixon-diamond.pl`](../examples/nixon-diamond.pl) | Reports the classic Nixon-diamond conflict. | [`output/nixon-diamond.pl`](../examples/output/nixon-diamond.pl) |
@@ -418,12 +421,14 @@ The repository includes examples for recursion, graph reachability, finite searc
 | [`reusable-builtins.pl`](../examples/reusable-builtins.pl) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.pl`](../examples/output/reusable-builtins.pl) |
 | [`riemann-hypothesis.pl`](../examples/riemann-hypothesis.pl) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.pl`](../examples/output/riemann-hypothesis.pl) |
 | [`security-incident-correlation.pl`](../examples/security-incident-correlation.pl) | Correlates security incidents across signals. | [`output/security-incident-correlation.pl`](../examples/output/security-incident-correlation.pl) |
+| [`send-more-money.pl`](../examples/send-more-money.pl) | Solves the SEND + MORE = MONEY cryptarithm. | [`output/send-more-money.pl`](../examples/output/send-more-money.pl) |
 | [`service-impact.pl`](../examples/service-impact.pl) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.pl`](../examples/output/service-impact.pl) |
 | [`sieve.pl`](../examples/sieve.pl) | Enumerates primes with a sieve-style program. | [`output/sieve.pl`](../examples/output/sieve.pl) |
 | [`skolem-functions.pl`](../examples/skolem-functions.pl) | Generates deterministic functional terms. | [`output/skolem-functions.pl`](../examples/output/skolem-functions.pl) |
 | [`socket-age.pl`](../examples/socket-age.pl) | Shows socket-declared age reasoning inputs and plugs. | [`output/socket-age.pl`](../examples/output/socket-age.pl) |
 | [`socket-family.pl`](../examples/socket-family.pl) | Shows socket-declared family-source inputs and ancestry rules. | [`output/socket-family.pl`](../examples/output/socket-family.pl) |
 | [`socrates.pl`](../examples/socrates.pl) | Derives that Socrates is mortal. | [`output/socrates.pl`](../examples/output/socrates.pl) |
+| [`stable-marriage.pl`](../examples/stable-marriage.pl) | Finds stable matchings by excluding blocking pairs. | [`output/stable-marriage.pl`](../examples/output/stable-marriage.pl) |
 | [`statistics-summary.pl`](../examples/statistics-summary.pl) | Computes population statistics for a sample. | [`output/statistics-summary.pl`](../examples/output/statistics-summary.pl) |
 | [`superdense-coding.pl`](../examples/superdense-coding.pl) | Models superdense-coding bit transmission. | [`output/superdense-coding.pl`](../examples/output/superdense-coding.pl) |
 | [`term-tools.pl`](../examples/term-tools.pl) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.pl`](../examples/output/term-tools.pl) |

@@ -525,6 +525,17 @@ function whiteBoxCases() {
       },
     },
     {
+      name: 'n-queens example keeps diagonal checks memoized',
+      run: () => {
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'n-queens-8.pl'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'n-queens-8.pl' }]);
+        const group = program.findGroup('no_diagonal_attack', 3);
+        assertEqual(Boolean(group), true, 'no_diagonal_attack/3 group exists');
+        assertEqual(group.memoized, true, 'no_diagonal_attack/3 memoized');
+        assertEqual(group.recursive, true, 'no_diagonal_attack/3 recursive');
+      },
+    },
+    {
       name: 'collatz example keeps recursive trajectory predicate memoized',
       run: () => {
         const text = fs.readFileSync(path.join(packageRoot, 'examples', 'collatz-1000.pl'), 'utf8');
@@ -683,6 +694,9 @@ function playgroundStaticIssues() {
   }
   if (!html.includes('id="create-gist"') || !html.includes('createGistShare') || !html.includes('GIST_STATE_FILENAME') || !html.includes("fetch('https://api.github.com/gists'")) {
     issues.push('playground must support Gist-backed sharing for large programs');
+  }
+  if (!html.includes('await createGistShare({') || html.includes('Use “Create Gist share” instead')) {
+    issues.push('playground Copy share link must automatically fall back to Gist sharing for large programs');
   }
   if (!html.includes("params.has('state-url')") || !html.includes('#state-url=')) {
     issues.push('playground must restore state from raw Gist state URLs');
