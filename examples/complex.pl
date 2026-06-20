@@ -8,7 +8,8 @@
 % The example derives arithmetic identities, polar conversions, powers, roots,
 % exponential/trigonometric functions, and distance/normalization results from
 % a small complex-number toolkit.
-materialize(is, 2).
+materialize(complex_power, 4).
+materialize(complex_function, 4).
 
 % Program structure: facts set up the scenario, and rules derive the materialized conclusions.
 pi(3.141592653589793).
@@ -110,17 +111,23 @@ complex_dial(X, Y, T, Tp) :-
   mul(Pi, 2, Z1),
   sub(Z1, T, Tp).
 
-is(test, (
-  complex_exponentiation(input(exponentiation, [-1, 0], [0.5, 0]), C1),
-  complex_exponentiation(input(exponentiation, [2.718281828459045, 0], [0, 3.141592653589793]), C2),
-  complex_exponentiation(input(exponentiation, [0, 1], [0, 1]), C3),
-  complex_exponentiation(input(exponentiation, [2.718281828459045, 0], [-1.57079632679, 0]), C4),
-  complex_asin(input(asin, [2, 0]), C5),
-  complex_acos(input(acos, [2, 0]), C6)
-)) :-
-  complex_exponentiation([-1, 0], [0.5, 0], C1),
-  complex_exponentiation([2.718281828459045, 0], [0, 3.141592653589793], C2),
-  complex_exponentiation([0, 1], [0, 1], C3),
-  complex_exponentiation([2.718281828459045, 0], [-1.57079632679, 0], C4),
-  complex_asin([2, 0], C5),
-  complex_acos([2, 0], C6).
+% Named result rows keep the example output readable.  Each row records the
+% operation name, the input value(s), and the computed complex result rather
+% than packing all assertions into one large nested term.
+complex_power(sqrt_minus_one, [-1, 0], [0.5, 0], Result) :-
+  complex_exponentiation([-1, 0], [0.5, 0], Result).
+
+complex_power(e_to_i_pi, [2.718281828459045, 0], [0, 3.141592653589793], Result) :-
+  complex_exponentiation([2.718281828459045, 0], [0, 3.141592653589793], Result).
+
+complex_power(i_to_i, [0, 1], [0, 1], Result) :-
+  complex_exponentiation([0, 1], [0, 1], Result).
+
+complex_power(e_to_minus_pi_over_two, [2.718281828459045, 0], [-1.57079632679, 0], Result) :-
+  complex_exponentiation([2.718281828459045, 0], [-1.57079632679, 0], Result).
+
+complex_function(asin, two, [2, 0], Result) :-
+  complex_asin([2, 0], Result).
+
+complex_function(acos, two, [2, 0], Result) :-
+  complex_acos([2, 0], Result).
