@@ -623,7 +623,7 @@ function playgroundStaticIssues() {
   const html = fs.readFileSync(playgroundPath, 'utf8');
   const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
   if (!pkg.files?.includes('playground.html')) issues.push('package files must include playground.html');
-  if (!readme.includes('[Playground](playground.html)')) issues.push('README must link to playground.html');
+  if (!readme.includes('[Playground](https://eyereasoner.github.io/eyelang/playground)')) issues.push('README must link to the GitHub Pages playground URL');
   if (!html.includes('<meta name="viewport" content="width=device-width, initial-scale=1">')) issues.push('missing mobile viewport meta');
   if (!html.includes('@media (max-width: 900px)') || !html.includes('main { grid-template-columns: 1fr; }')) {
     issues.push('playground must collapse the editor/output grid on tablet/mobile widths');

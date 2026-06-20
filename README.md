@@ -45,7 +45,7 @@ console.log(result.stdout);
 
 ## Documentation
 
-- [Playground](playground.html)
+- [Playground](https://eyereasoner.github.io/eyelang/playground)
 - [Guide](docs/guide.md)
 - [Language reference](docs/language-reference.md)
 
