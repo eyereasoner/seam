@@ -1,11 +1,14 @@
 % Euler totients and coprimality by memoized Euclidean gcd.
-% This is still ordinary Horn-clause search: phi(N) is the count of K <= N
-% with gcd(N, K) = 1.
+%
+% phi(N) is modeled directly as the count of integers K in 1..N with gcd(N,K)=1.
+% The summatory query reuses many gcd/totient subgoals, so memoization keeps the
+% example responsive while preserving the relational presentation.
 materialize(totient_answer, 2).
 
 memoize(gcd, 3).
 memoize(totient, 2).
 
+% Euclid's algorithm is expressed recursively over remainders.
 gcd(A, 0, A) :- ge(A, 0).
 gcd(A, B, G) :-
   gt(B, 0),
@@ -16,6 +19,7 @@ coprime_upto(N, K) :-
   between(1, N, K),
   gcd(N, K, 1).
 
+% Count the finite coprime generator instead of constructing an explicit list.
 totient(N, Count) :-
   gt(N, 0),
   countall(coprime_upto(N, _K), Count).

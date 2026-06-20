@@ -1,8 +1,11 @@
 % Tiny job-shop scheduling benchmark.
-% Three jobs each need one mill operation and one lathe operation; the solver
-% searches start times and minimizes the makespan.
+%
+% Three jobs each require one mill operation and one lathe operation, with fixed
+% within-job precedence constraints.  The solver enumerates bounded start times,
+% rejects machine overlaps, and uses aggregate_min/5 to keep the minimum makespan.
 materialize(job_shop_answer, 2).
 
+% Two operations on the same machine are compatible when either one finishes before the other starts.
 nonoverlap(_StartA, EndA, StartB, _EndB) :- le(EndA, StartB).
 nonoverlap(StartA, _EndA, _StartB, EndB) :- le(EndB, StartA).
 
@@ -36,6 +39,7 @@ feasible_schedule(Makespan, [
   max(J1LatheEnd, J2MillEnd, PartialMakespan),
   max(PartialMakespan, J3LatheEnd, Makespan).
 
+% aggregate_min/5 returns both the best makespan and the schedule that achieved it.
 best_schedule(Makespan, Schedule) :-
   aggregate_min(Makespan, Schedule, feasible_schedule(Makespan, Schedule), Makespan, Schedule).
 

@@ -1,11 +1,15 @@
 % Critical-path scheduling for a small project network.
-% earliest_start/2 and finish_time/2 are memoized because many schedule and
-% critical-path queries reuse the same predecessor subproblems.
+%
+% earliest_start/2 is the maximum finish time over all predecessors; finish_time/2
+% adds task duration.  Critical tasks are reconstructed by following predecessors
+% that attain those maxima.  Memoization lets the schedule, finish date, and path
+% queries share the same project-network subproblems.
 materialize(critical_path_answer, 2).
 
 memoize(earliest_start, 2).
 memoize(finish_time, 2).
 
+% Durations are in arbitrary project time units.
 task(requirements, 2).
 task(architecture, 3).
 task(api_design, 2).
@@ -47,6 +51,7 @@ finish_time(Task, Finish) :-
   earliest_start(Task, Start),
   add(Start, Duration, Finish).
 
+% For each task, choose a predecessor that determines its earliest start.
 critical_predecessor(Task, Pred) :-
   depends(Task, _AnyPred),
   aggregate_max(Finish, P,

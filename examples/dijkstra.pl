@@ -1,9 +1,9 @@
 % Weighted path enumeration adapted from Eyeling dijkstra.n3.
-% The Eyeling source uses collect/sort built-ins for Dijkstra's queue.
-% This eyelang variant enumerates simple paths and keeps the bounded frontier
-% that appears in the Eyeling output for a -> f.
-% The input weighted graph is quoted as ... data and projected locally,
-% so the route network is not asserted as ambient edge facts.
+%
+% The Eyeling source uses collect/sort built-ins for Dijkstra's queue.  This
+% eyelang variant enumerates simple paths, keeps the bounded frontier shown in
+% the Eyeling output for a -> f, and scopes the graph inside a quoted term so the
+% route network is not asserted as ambient edge facts.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(edge, 2).
@@ -29,6 +29,7 @@ base_link(A, B, Cost) :-
   weighted_graph(dijkstraGraph, Context),
   holds(Context, edge(A, arc(B, Cost))).
 
+% Build an undirected view from directed base edges.
 link(A, B, Cost) :- base_link(A, B, Cost).
 link(B, A, Cost) :- base_link(A, B, Cost).
 
@@ -43,6 +44,7 @@ path(Node, Goal, Visited, [Node|Path], Cost) :-
 edge([B, A], Cost) :-
   base_link(A, B, Cost).
 
+% Only paths within the displayed cost bound are materialized.
 path([a, f], [Path, Cost]) :-
   path(a, f, [a], Path, Cost),
   le(Cost, 16).

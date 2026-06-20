@@ -1,10 +1,13 @@
 % Modular exponentiation by repeated squaring.
-% pow_mod/4 is logarithmic in the exponent and memoized so repeated primality
-% and congruence checks share subproblems.
+%
+% pow_mod(Base, Exp, Modulus, Result) uses the even/odd exponent split, giving
+% logarithmic-depth arithmetic.  Memoization matters when the same modular powers
+% are reused by Fermat-style congruence checks.
 materialize(modular_answer, 2).
 
 memoize(pow_mod, 4).
 
+% Base case: any nonzero base to exponent zero is 1 modulo Mod.
 pow_mod(_Base, 0, Mod, Result) :- mod(1, Mod, Result).
 pow_mod(Base, Exp, Modulus, Result) :-
   gt(Exp, 0),
@@ -21,6 +24,7 @@ pow_mod(Base, Exp, Modulus, Result) :-
   mul(Base, EvenPower, Product),
   mod(Product, Modulus, Result).
 
+% This is a Fermat congruence check, not a full primality proof.
 fermat_witness(Base, PrimeCandidate) :-
   sub(PrimeCandidate, 1, Exponent),
   pow_mod(Base, Exponent, PrimeCandidate, 1).

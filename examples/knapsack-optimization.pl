@@ -1,8 +1,11 @@
 % 0/1 knapsack optimization with aggregate_max/5.
-% subset/2 enumerates each possible expedition pack; total_weight/2 and total_value/2 score it.
-% feasible_pack/3 enforces the capacity limit, and best_pack/3 keeps the highest-value feasible choice.
+%
+% subset/2 enumerates candidate expedition packs; total_weight/2 and total_value/2
+% score each pack.  feasible_pack/3 applies the capacity limit, and best_pack/3
+% keeps the highest-value feasible choice together with its weight.
 materialize(knapsack_answer, 2).
 
+% Capacity and item table are separated from the optimization rule for easy tuning.
 capacity(15).
 items([atlas, battery, camera, drone, emergency_radio, field_laptop, medkit, sensor]).
 
@@ -15,6 +18,7 @@ item(field_laptop, 7, 16).
 item(medkit, 4, 9).
 item(sensor, 2, 7).
 
+% The include/exclude subset generator explores every 0/1 choice once.
 subset([], []).
 subset([Item|Rest], [Item|Chosen]) :- subset(Rest, Chosen).
 subset([_Item|Rest], Chosen) :- subset(Rest, Chosen).

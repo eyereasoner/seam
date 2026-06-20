@@ -7,6 +7,8 @@ materialize(matrix_chain_answer, 2).
 
 memoize(cost, 3).
 
+% Matrix dimensions are stored as adjacent p-values: matrix I has dimensions P_{I-1} x P_I.
+
 % Dimensions for the CLRS-style chain: A1 is 30x35, A2 is 35x15, and so on.
 % The dim/2 facts store boundary dimensions, so multiplying Ai..Ak by A(k+1)..Aj
 % costs dim(I-1) * dim(K) * dim(J).

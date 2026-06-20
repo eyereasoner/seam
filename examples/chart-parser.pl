@@ -1,9 +1,13 @@
 % A tiny memoized chart parser for a context-free grammar.
-% span/4 is the dynamic-programming chart relation: sentence, category,
-% start index, and end index.
+%
+% span(Sentence, Category, Start, End) is the dynamic-programming chart item:
+% Category covers a half-open token interval.  Memoizing span/4 turns recursive
+% grammar recognition into chart parsing, so ambiguous phrases share subparses.
 materialize(chart_parser_answer, 2).
 
 memoize(span, 4).
+
+% Two sample sentences share the same tiny grammar but have different parse counts.
 
 sentence(command, 5).
 sentence(ambiguous_pp, 8).
@@ -38,10 +42,12 @@ rule(vp, verb, np).
 rule(vp, vp, pp).
 rule(pp, prep, np).
 
+% Lexical chart items come directly from words and terminal categories.
 span(Sentence, Category, Start, End) :-
   word(Sentence, Start, Token),
   terminal(Category, Token),
   add(Start, 1, End).
+% Nonterminal chart items split the interval at a Middle point.
 span(Sentence, Category, Start, End) :-
   rule(Category, Left, Right),
   span(Sentence, Left, Start, Middle),

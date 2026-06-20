@@ -1,9 +1,9 @@
-% Memoize route costs: selected paths, route relations, and trust checks reuse
-% the same path-list reductions.
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% Risk-adjusted route selection adapted from Eyeling dijkstra-risk-path.n3.
 %
-% path/5 carries a visited list to avoid cycles. The materialized answer reports
-% both the winning route and its accumulated risk score.
+% The score is raw delivery cost plus ten times accumulated risk.  Candidate
+% routes are fixed path lists, while route_cost/4 reduces each list to raw cost,
+% risk, and edge count.  Memoization lets selected-path, scoring, and trust-gate
+% relations reuse those reductions.
 materialize(route, 2).
 materialize(rawCost, 2).
 materialize(riskSum, 2).
@@ -14,13 +14,10 @@ materialize(trustGate, 2).
 materialize(notes, 2).
 materialize(selects, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% Cache route-list reductions because several materialized reports ask for the same metrics.
 memoize(route_cost, 4).
 
-% Risk-adjusted route selection adapted from Eyeling dijkstra-risk-path.n3.
-% The score is raw delivery cost plus ten times the accumulated risk.
-% Segments live in a quoted formula term, while candidate paths remain lists.
-
+% Segments live in a quoted formula term, while candidate paths remain ordinary lists.
 route_network(riskNetwork, (
   segment(depotA, segment(depotB, 4.0, 0.2)),
   segment(depotB, segment(labD, 4.0, 0.3)),
@@ -61,6 +58,7 @@ path_metrics(Path, Route, Raw, Risk, Score, Edges) :-
   route_cost(Route, Raw, Risk, Edges),
   score(Raw, Risk, Score).
 
+% Pick the known winner by comparing its score with every other candidate.
 best_path(pathB) :-
   path_metrics(pathB, _BestRoute, _BestRaw, _BestRisk, BestScore, _BestEdges),
   path_metrics(pathC, _CRoute, _CRaw, _CRisk, CScore, _CEdges),

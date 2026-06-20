@@ -1,6 +1,8 @@
 % Compact 4x4 Sudoku search with row permutations and column/box constraints.
-% The givens are baked into row1/1 ... row4/1, so each candidate row is already a permutation of 1..4.
-% sudoku_solution/1 then checks the remaining column and 2x2 box distinctness constraints.
+%
+% The givens are baked into row1/1 ... row4/1, so each candidate row is already
+% a permutation of 1..4.  sudoku_solution/1 then checks the remaining columns
+% and 2x2 boxes, which keeps the example clear and playground-friendly.
 materialize(sudoku_answer, 2).
 
 perm([], []).
@@ -8,6 +10,7 @@ perm(Items, [X|Rest]) :-
   select(X, Items, Remaining),
   perm(Remaining, Rest).
 
+% distinct/1 is the reusable all-different constraint.
 distinct([]).
 distinct([X|Xs]) :-
   not_member(X, Xs),
@@ -24,6 +27,7 @@ column([R1, R2, R3, R4], Index, [A, B, C, D]) :-
   nth0(Index, R3, C),
   nth0(Index, R4, D).
 
+% The four boxes are extracted as lists, then passed through distinct/1.
 boxes([R1, R2, R3, R4], [Box1, Box2, Box3, Box4]) :-
   nth0(0, R1, A), nth0(1, R1, B), nth0(0, R2, C), nth0(1, R2, D),
   eq(Box1, [A, B, C, D]),

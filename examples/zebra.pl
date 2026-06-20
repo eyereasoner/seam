@@ -1,16 +1,16 @@
 % Zebra puzzle, adapted from Eyelet's input/zebra.pl.
 %
 % Five houses are represented as house(Color, Nationality, Pet, Beverage,
-% Cigarette).  The answer is the classic one: the Norwegian drinks water and the
-% Japanese owns the zebra.
+% Cigarette).  Each clue is a member/2, first/2, third/2, next_to/3, or adjacent/3
+% constraint over that list.  The answer is the classic one: the Norwegian drinks
+% water and the Japanese owns the zebra.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(waterDrinker, 2).
 materialize(zebraOwner, 2).
 materialize(solved, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The single zebra/2 rule is a finite constraint model over the five house slots.
 zebra(WaterDrinker, ZebraOwner) :-
   eq(Houses, [_, _, _, _, _]),
   first(Houses, house(_, norwegian, _, _, _)),
@@ -30,6 +30,7 @@ zebra(WaterDrinker, ZebraOwner) :-
   member(house(_, WaterDrinker, _, water, _), Houses),
   member(house(_, ZebraOwner, zebra, _, _), Houses).
 
+% Positional and neighborhood helpers keep the clue encoding readable.
 first([X|_], X).
 third([_, _, X|_], X).
 

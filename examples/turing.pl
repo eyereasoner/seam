@@ -1,15 +1,15 @@
 % Universal Turing machine example adapted from Eyelet's input/turing.pl.
 %
 % The machine below adds 1 to a binary number represented as a list of bits.
-% The blank tape symbol is #.
+% A tape is split into a reversed left side, current cell, and right side; move/7
+% updates that zipper representation.  The blank tape symbol is #.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(input, 2).
 materialize(output, 2).
 materialize(addsOne, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% compute/2 initializes the tape and starts from the machine's start state.
 compute([], OutTape) :-
   start(_Machine, I),
   find(I, [], #, [], OutTape).
@@ -18,6 +18,7 @@ compute([Head|Tail], OutTape) :-
   start(_Machine, I),
   find(I, [], Head, Tail, OutTape).
 
+% find/5 executes one transition, moves the head, and either halts or recurses.
 find(State, Left, Cell, Right, OutTape) :-
   t([State, Cell, Write, Move], Next),
   move(Move, Left, Write, Right, A, B, C),
@@ -30,6 +31,7 @@ continue(halt, Left, Cell, Right, OutTape) :-
 continue(State, Left, Cell, Right, OutTape) :-
   find(State, Left, Cell, Right, OutTape).
 
+% Head movement defines the tape zipper update, including blank extension.
 move(l, [], Cell, Right, [], #, [Cell|Right]).
 move(l, [Head|Tail], Cell, Right, Tail, Head, [Cell|Right]).
 move(s, Left, Cell, Right, Left, Cell, Right).

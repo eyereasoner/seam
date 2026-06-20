@@ -1,14 +1,18 @@
 % Missionaries-and-cannibals river crossing as guarded state-space search.
+%
 % A state records missionaries and cannibals on the left bank plus the boat side.
-% crossing/3 generates only legal boat moves, and journey/4 avoids revisiting states while finding a safe path.
+% crossing/3 applies one legal boat load and state_safe/1 checks both banks.
+% journey/4 carries a visited list to avoid loops in the finite state graph.
 materialize(missionaries_cannibals_answer, 2).
 
+% Boat loads: one or two passengers, with at least one passenger per crossing.
 move(1, 0).
 move(0, 1).
 move(2, 0).
 move(0, 2).
 move(1, 1).
 
+% A bank is safe if there are no missionaries or missionaries are not outnumbered.
 bank_safe(0, _C).
 bank_safe(M, C) :- gt(M, 0), ge(M, C).
 

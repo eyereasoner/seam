@@ -1,6 +1,8 @@
 % Weighted interval scheduling via memoized dynamic programming.
-% Intervals are ordered by finish time; next_compatible/2 jumps to the first interval that can follow a chosen one.
-% best_from/2 compares the take and skip branches, while chosen_from/2 reconstructs one optimal schedule.
+%
+% Intervals are ordered by finish time.  best_from(I,Best) compares the two
+% choices at position I: skip it, or take it and jump to the next compatible
+% interval.  chosen_from/2 then walks the memoized decisions to report a schedule.
 materialize(weighted_interval_answer, 2).
 
 memoize(best_from, 2).
@@ -17,6 +19,7 @@ interval(6, 5, 9, 3).
 interval(7, 6, 10, 2).
 interval(8, 8, 11, 4).
 
+% Find the earliest later interval whose start is not before I's finish.
 next_compatible(I, J) :-
   interval(I, _Start, Finish, _Value),
   aggregate_min(K, K,
@@ -38,6 +41,7 @@ best_from(I, Best) :-
   add(Value, Tail, Take),
   max(Take, Skip, Best).
 
+% Reconstruction emits an interval when the take branch matches the optimal value.
 chosen_from(I, I) :-
   best_from(I, Best),
   add(I, 1, Next),

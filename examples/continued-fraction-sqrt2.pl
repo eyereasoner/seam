@@ -1,10 +1,14 @@
 % Convergents of sqrt(2) by memoized recurrence.
-% conv(N, P, Q) gives the Nth numerator/denominator pair for the continued fraction [1; 2, 2, ...].
-% The Pell-error check shows how these convergents alternately approximate solutions to P^2 - 2Q^2 = +/-1.
+%
+% conv(N, P, Q) gives the Nth numerator/denominator pair for [1; 2, 2, ...].
+% Because each convergent depends on the previous two, memoization avoids the
+% exponential recomputation that the direct Horn-clause recurrence would have.
+% pell_error/2 connects the approximation sequence with P^2 - 2Q^2 = +/-1.
 materialize(convergent_answer, 2).
 
 memoize(conv, 3).
 
+% Base convergents are 1/1 and 3/2.
 conv(0, 1, 1).
 conv(1, 3, 2).
 conv(N, P, Q) :-
@@ -18,6 +22,7 @@ conv(N, P, Q) :-
   mul(2, Q1, TwiceQ1),
   add(TwiceQ1, Q2, Q).
 
+% The signed error alternates between +1 and -1 for these convergents.
 pell_error(N, Error) :-
   conv(N, P, Q),
   mul(P, P, P2),

@@ -1,6 +1,8 @@
 % Stable-marriage search with explicit blocking-pair detection.
-% matching/1 enumerates all one-to-one pairings for four men and four women.
-% blocking_pair/3 encodes instability: two people would both prefer each other over their assigned partners.
+%
+% matching/1 enumerates one-to-one pairings for four men and four women.  A
+% pairing is stable precisely when no blocking pair exists: two people who would
+% both prefer each other over their assigned partners.
 materialize(stable_marriage_answer, 2).
 
 man(adam).
@@ -47,6 +49,7 @@ rank_woman(dana, drew, 2).
 rank_woman(dana, cole, 3).
 rank_woman(dana, adam, 4).
 
+% Permutations give every complete one-to-one matching over the four women.
 perm([], []).
 perm(Items, [X|Rest]) :-
   select(X, Items, Remaining),
@@ -72,6 +75,7 @@ prefers_woman(Woman, Candidate, Current) :-
   rank_woman(Woman, Current, CurrentRank),
   lt(CandidateRank, CurrentRank).
 
+% A blocking pair witnesses instability of a candidate matching.
 blocking_pair(Matching, Man, Woman) :-
   assigned(Matching, Man, CurrentWoman),
   woman(Woman),

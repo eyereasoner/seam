@@ -1,8 +1,11 @@
 % Cryptarithm search for SEND + MORE = MONEY.
-% The solver assigns distinct decimal digits to letters while enforcing the usual column-by-column carries.
-% Early constraints for M=1, O=0, and each column sum prune most of the search before full numbers are built.
+%
+% The solver assigns distinct decimal digits to letters while enforcing the
+% column-by-column carries.  Rather than generate all digit assignments first,
+% each column constraint is applied as soon as its letters are chosen.
 materialize(cryptarithm_answer, 2).
 
+% The search domain is a shrinking digit list threaded through select/3 calls.
 all_digits([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).
 
 send_more_money(solution(S, E, N, D, M, O, R, Y)) :-
@@ -38,6 +41,7 @@ send_more_money(solution(S, E, N, D, M, O, R, Y)) :-
   mod(ThousandsSum, 10, O),
   div(ThousandsSum, 10, M).
 
+% Number constructors are used only for readable output after a solution is found.
 number4(A, B, C, D, Value) :-
   mul(A, 1000, APart),
   mul(B, 100, BPart),

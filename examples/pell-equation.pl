@@ -1,10 +1,13 @@
 % Pell equation x^2 - 2y^2 = 1 by memoized recurrence.
-% Starting from the fundamental solution (3, 2), pell/3 generates successive positive solutions.
-% pell_holds/2 recomputes the Diophantine identity as a check on the generated pair.
+%
+% The fundamental solution (3,2) induces a linear recurrence for all positive
+% solutions of x^2 - 2y^2 = 1.  The example materializes later solutions and also
+% rechecks the Diophantine identity so the generated sequence is auditable.
 materialize(pell_answer, 2).
 
 memoize(pell, 3).
 
+% N=0 is the neutral solution; each recursive step multiplies by 3 + 2*sqrt(2).
 pell(0, 1, 0).
 pell(N, X, Y) :-
   gt(N, 0),
@@ -17,6 +20,7 @@ pell(N, X, Y) :-
   mul(3, Y0, DY),
   add(CX, DY, Y).
 
+% Verification is intentionally independent of the recurrence equations above.
 pell_holds(N, true) :-
   pell(N, X, Y),
   mul(X, X, X2),

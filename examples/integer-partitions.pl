@@ -1,10 +1,13 @@
 % Integer partition counts by memoized dynamic programming.
-% partitions(N, K, Count) counts ways to write N as an unordered sum using parts no larger than K.
-% The recurrence splits the search into partitions that use at least one K and partitions that use none.
+%
+% partitions(N, K, Count) counts unordered sums of N using parts no larger than K.
+% The two recursive branches are the standard include-K / exclude-K split.  Without
+% memoization the same (N,K) subproblems are reached many times.
 materialize(partition_answer, 2).
 
 memoize(partitions, 3).
 
+% One empty sum partitions zero; positive N with K=0 is impossible.
 partitions(0, _K, 1).
 partitions(N, 0, 0) :- gt(N, 0).
 partitions(N, K, Count) :-
@@ -23,6 +26,7 @@ partitions(N, K, Count) :-
   partitions(N, K1, WithoutK),
   add(WithK, WithoutK, Count).
 
+% The ordinary partition number p(N) allows all parts up to N.
 partition_count(N, Count) :- partitions(N, N, Count).
 
 partition_answer(p_12, Count) :- partition_count(12, Count).

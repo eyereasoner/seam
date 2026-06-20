@@ -1,4 +1,8 @@
 % Binomial coefficients and Vandermonde's identity.
+%
+% choose(N,K,C) is computed by a multiplicative recurrence, then vandermonde/5 checks
+% the finite convolution sum: sum_i C(R,i) C(S,N-i) = C(R+S,N).  Memoization keeps
+% the binomial-row prefixes shared across both sides of the identity.
 % choose_step/5 uses the multiplicative recurrence
 %   C(N, I+1) = C(N, I) * (N-I) / (I+1)
 % and is memoized because row sums and identities reuse prefixes.
