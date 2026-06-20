@@ -1,11 +1,12 @@
 % Tiny expression evaluator adapted from Eyeling's expression-eval.n3 example.
-% Data: (2 * 3) + (10 - 4) = 12.
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The expression tree represents (2 * 3) + (10 - 4).  value/2 recursively folds
+% the tree, so proof output shows how the final result 12 is assembled from
+% smaller arithmetic subexpressions.
 materialize(result, 2).
 
-% The expression tree is data: number/2 labels leaves, expr/4 labels
-% internal operator nodes, and root/1 chooses the term to evaluate.
-% Leaves are number/2 facts; internal nodes name an operator and two children.
+% The expression tree is data: number/2 labels leaves, expr/4 labels internal
+% operator nodes, and root/1 chooses the term to evaluate.
 number(n2, 2).
 number(n3, 3).
 number(n10, 10).
@@ -16,9 +17,8 @@ expr(eSub, sub, n10, n4).
 expr(eAdd, add, eMul, eSub).
 root(eAdd).
 
-% Evaluation is recursive over the expression tree.
-% value/2 recursively folds the tree.  Each arithmetic operator has its own
-% rule so proof output shows the exact evaluation path.
+% Each arithmetic operator has its own rule, which makes the proof tree mirror
+% the shape of the expression tree.
 value(Node, Value) :-
   number(Node, Value).
 

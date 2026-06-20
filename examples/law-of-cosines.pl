@@ -1,14 +1,14 @@
 % Law of cosines: c^2 = a^2 + b^2 - 2ab cos(C).
+%
 % The example uses a 60-degree included angle, so cos(C) is represented as 0.5.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% It reports both c^2 and c to make the arithmetic derivation explicit.
 materialize(sideCSquared, 2).
 materialize(sideC, 2).
 materialize(status, 2).
 
 % The triangle fact stores the two known sides and the cosine of the included
-% angle, which avoids needing trigonometric inverse functions in the example.
-% Stored tuple is triangle(Name, sideA, sideB, cosIncludedAngle).
+% angle.  Storing cos(C) directly avoids needing trigonometric built-ins while
+% still demonstrating the geometric formula.
 triangle(tri60, 7, 9, 0.5).
 
 % Compute c^2 first so both squared and square-rooted outputs can be shown.

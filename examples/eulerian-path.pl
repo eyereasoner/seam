@@ -1,18 +1,15 @@
 % Eyelet-inspired Eulerian path example using findall/3 and sort/2.
-% The graph is undirected; edges are represented by identifiers so each edge is used once.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 %
-% The remaining-edge list is the state of the search. Selecting and deleting an
-% outgoing edge models classical trail construction directly in Horn clauses.
+% The graph is undirected; edges have identifiers so the trail consumes each
+% physical edge exactly once even when vertices are revisited.  The remaining
+% edge-id list is the explicit search state.
 materialize(oddVertices, 2).
 materialize(path, 2).
 materialize(edgeCount, 2).
 materialize(reason, 2).
 
-% The edge identifiers are part of the search state: a trail consumes ids, not
-% just endpoints, so parallel or repeated vertex visits remain well-defined.
-% Edge identifiers let the search remove each physical edge exactly once.
+% Edge identifiers are part of the search state: the DFS removes ids, not just
+% endpoints, so repeated vertex visits do not accidentally reuse an edge.
 edge(e12, v1, v2).
 edge(e13, v1, v3).
 edge(e15, v1, v5).
@@ -25,8 +22,8 @@ edge(e36, v3, v6).
 edge(e45, v4, v5).
 edge(e46, v4, v6).
 
-% Degree parity is computed with findall/3, and trail/4 then removes one
-% incident edge at a time until the remaining-edge list is empty.
+% Degree parity is computed with findall/3.  The Eulerian-start rule then chooses
+% an odd-degree vertex when exactly two exist, or any vertex for an Eulerian cycle.
 vertex(V) :- edge(_E, V, _U).
 vertex(V) :- edge(_E, _U, V).
 

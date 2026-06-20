@@ -1,16 +1,13 @@
 % Adapted from Eyeling's fft8-numeric.n3.
-% A radix-2 FFT over explicit complex pairs c(Re, Im).
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 %
-% This is deliberately unrolled enough to keep the proof readable while still
-% showing butterfly composition, twiddle factors, and magnitude reporting.
+% This is an 8-point radix-2 FFT over explicit complex pairs c(Real, Imag).
+% The rules are deliberately unrolled enough to keep proofs readable while still
+% showing butterfly composition, twiddle factors, and selected output bins.
 materialize(fft, 2).
 materialize(dcComponent, 2).
 
-% The 8-point signal and twiddle factors are explicit facts.  Complex values
-% use c(Real, Imag) terms so every butterfly stays visible in proofs.
-% Twiddle factors are encoded as complex pairs c(Real, Imag).
+% Twiddle factors are encoded as complex pairs.  Keeping them as facts makes the
+% numerical transform deterministic and keeps every multiplication visible.
 w8(0, c(1.0, 0.0)).
 w8(1, c(0.7071067811865476, -0.7071067811865476)).
 w8(2, c(0.0, -1.0)).
@@ -20,9 +17,8 @@ w8(5, c(-0.7071067811865476, 0.7071067811865476)).
 w8(6, c(0.0, 1.0)).
 w8(7, c(0.7071067811865476, 0.7071067811865476)).
 
-% Complex arithmetic is expressed through ordinary numeric built-ins.
-% Complex add/subtract/multiply rules are composed into radix-2 butterflies,
-% then the materialized facts expose selected FFT bins and the DC component.
+% Complex arithmetic is expressed through ordinary numeric built-ins.  These
+% helpers are then composed into two-point, four-point, and eight-point FFTs.
 c_add(c(AR, AI), c(BR, BI), c(CR, CI)) :-
   add(AR, BR, CR),
   add(AI, BI, CI).

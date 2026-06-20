@@ -1,16 +1,19 @@
 % Fast exponentiation examples adapted from Eyeling fastpow.n3.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% pow/3 demonstrates exponentiation by squaring, while pow_mod/4 performs the
+% same recursion under a modulus so huge powers remain small enough for ordinary
+% output and proof display.
 materialize(pow, 2).
 materialize(powSlow, 2).
 materialize(powMod1e6, 2).
 materialize(tower, 2).
 materialize(towerMod1e6, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% pow/3 uses exponentiation by squaring.
+% Base case and parity split for exponentiation by squaring.  Even exponents
+% square the half-power; odd exponents peel off one base factor.
 pow(_Base, 0, 1).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Recursive even/odd clauses reduce the exponent quickly rather than counting
+% down one multiplication at a time.
 pow(Base, Exp, Value) :-
   gt(Exp, 0),
   mod(Exp, 2, 0),
@@ -41,7 +44,8 @@ pow_mod(Base, Exp, Mod, Value) :-
   mul(Base, EvenValue, Product),
   mod(Product, Mod, Value).
 
-% Tetration values from the Eyeling output set.
+% Tetration examples are kept as facts here so this file focuses on fast power
+% and modular power rather than an additional tower evaluator.
 tower(2, 4, 65536).
 tower_mod(2, 5, 1000000, 156736).
 

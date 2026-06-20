@@ -1,21 +1,23 @@
 % Science example: radioactive decay.
 %
 % Activity remaining after elapsed time is initial_activity * 0.5^(t/half_life).
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% The file materializes half-lives elapsed, remaining activity, decayed activity,
+% and a threshold-based low-activity status.
 materialize(halfLivesElapsed, 2).
 materialize(remainingActivity_Bq, 2).
 materialize(decayedActivity_Bq, 2).
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The iodine sample has elapsed for two half-lives, making the expected remaining
+% activity one quarter of the initial activity.
 sample(iodine_sample, initial_activity_bq, 80.0).
 sample(iodine_sample, half_life_h, 8.0).
 sample(iodine_sample, elapsed_h, 16.0).
 threshold(iodine_sample, low_activity_bq, 25.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The derivation first computes elapsed half-lives, then a remaining fraction,
+% and finally converts that fraction into Bq.
 half_lives(Sample, Count) :-
   sample(Sample, elapsed_h, Elapsed),
   sample(Sample, half_life_h, HalfLife),

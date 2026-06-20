@@ -1,11 +1,8 @@
 % EYE-inspired field nitrogen balance case study.
-% Fields are classified from soil N, fertilizer N, losses, and crop demand.
-
-% field(Field, SoilN, FertilizerN, LossFraction, CropDemandN).
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 %
-% The balance is a simple agronomic accounting model. Status and reason facts
-% separate nutrient sufficiency from environmental surplus warnings.
+% field(Field, SoilN, FertilizerN, LossFraction, CropDemandN) stores a compact
+% nutrient budget.  Rules derive retained nitrogen, deficit, surplus, and a
+% leaching-risk index before assigning each field a status.
 materialize(availableN_kg_ha, 2).
 materialize(deficitN_kg_ha, 2).
 materialize(surplusN_kg_ha, 2).
@@ -14,8 +11,8 @@ materialize(status, 2).
 materialize(highestLeachingRisk, 2).
 materialize(reason, 2).
 
-% field/5 stores soil nitrogen, fertilizer, loss fraction, and crop demand.
-% These facts are enough to derive both agronomic and environmental statuses.
+% The four fields cover under-supplied, balanced, and over-supplied scenarios
+% with different loss fractions so leaching risk is not just total surplus.
 field(low_input, 25, 40, 0.10, 110).
 field(balanced_loam, 45, 80, 0.12, 110).
 field(sandy_high, 30, 150, 0.35, 105).

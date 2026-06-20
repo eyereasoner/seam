@@ -1,16 +1,18 @@
 % Heron's theorem: area = sqrt(s(s-a)(s-b)(s-c)).
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% The example uses the classic 13-14-15 triangle.  It materializes both the
+% intermediate semiperimeter/product and the final area so the numerical proof
+% can be inspected step by step.
 materialize(semiperimeter, 2).
 materialize(heronProduct, 2).
 materialize(area, 2).
 materialize(status, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% 13-14-15 is a classic integer-sided triangle with area 84.
+% A single survey triangle is enough to demonstrate the formula; 13-14-15 has
+% integer area 84, which makes the computed result easy to check.
 triangle(field_plot, 13, 14, 15).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% semiperimeter/2 is the reusable first step in Heron's formula.
 semiperimeter(Triangle, S) :-
   triangle(Triangle, A, B, C),
   add(A, B, AB),

@@ -1,5 +1,9 @@
-% Parse unstructured service logs with named regex captures, then reason over
-% the extracted context to correlate events that share a trace id.
+% Observability example: parse unstructured service logs with named regex
+% captures, then reason over the extracted context to correlate events that
+% share a W3C trace id.
+%
+% The noisy health-check line is deliberately present to show that only logs
+% matching the pattern become parsed events.
 materialize(parsed_event, 5).
 materialize(captured_field, 3).
 materialize(trace_alert, 3).
@@ -16,7 +20,9 @@ parsed(Log, Context) :-
   log_pattern(Pattern),
   matches(Text, Pattern, Context).
 
-% holds/3 lets one generic rule project every named capture as field data.
+% matches/3 returns a context term containing named captures.  holds/3 then
+% projects either Name, Value pairs or field(Value) shorthand facts from that
+% same context without writing one regex per field.
 captured_field(Log, Name, Value) :-
   parsed(Log, Context),
   holds(Context, Name, [Value]).

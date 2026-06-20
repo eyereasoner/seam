@@ -1,18 +1,16 @@
 % EYE-inspired electric-vehicle range worlds.
-% Four simple worlds estimate whether trips fit the available battery.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 %
-% Each world changes consumption with temperature, speed, payload, or safety
-% buffer assumptions. The reported status shows which worlds keep the route
-% inside the usable battery envelope.
+% The same trips are evaluated under four modelling worlds: base consumption,
+% speed-aware consumption, physics-aware consumption, and physics plus safety
+% reserve.  This makes the output a small possible-worlds comparison.
 materialize(safeInWorld, 2).
 materialize(riskyInWorld, 2).
 materialize(reason, 2).
 materialize(status, 2).
 
 % trip_data/7 stores distance, speed, temperature, payload, battery, and base
-% energy use so the same trip can be evaluated under several modelling worlds.
+% energy use.  The factors below adjust base consumption rather than duplicating
+% one rule per trip/world pair.
 trip(city_errand).
 trip(winter_highway).
 trip(heavy_delivery).

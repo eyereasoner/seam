@@ -1,16 +1,18 @@
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% Order-theory proof sketch: greatest lower bounds are unique.
+%
+% Two candidate GLBs are asserted for the same pair.  The rules derive that
+% each must be below the other, then use antisymmetry-style sameTerm/2 reasoning
+% to report that the candidates denote the same lower bound.
 materialize(sameGreatestLowerBound, 4).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% Greatest-lower-bound uniqueness example adapted from Eyeling
-% greatest-lower-bound-uniqueness.n3.
-% If M and N are both greatest lower bounds of A and B, each is below the other;
-% antisymmetry is represented by the ordinary derived relation sameTerm/2.
+% Adapted from Eyeling greatest-lower-bound-uniqueness.n3.  The named facts
+% intentionally use two different symbols, g1 and g2, so the final output shows
+% the equality-style conclusion as an explicit derived relation.
 
 glbOf(g1, a, b).
 glbOf(g2, a, b).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% leq/2 captures the defining property of a GLB: every lower bound is below it.
 lowerBoundOf(M, A, B) :- glbOf(M, A, B).
 
 leq(L, M) :-

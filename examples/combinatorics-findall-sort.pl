@@ -1,15 +1,16 @@
 % Eyelet-inspired combinations example using findall/3 and sort/2.
-% The source-level select/3 relation remains an ordinary eyelang rule.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% combination/3 generates the same subset in several selection orders.  findall/3
+% collects those candidates, and sort/2 canonicalizes the list so each unordered
+% 3-combination of five items is reported once.
 materialize(combinations, 2).
 materialize(count, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% select/3 nondeterministically removes one item from a list.
+% select/3 nondeterministically removes one item from a list; because it is an
+% ordinary rule, the example also demonstrates user-level list recursion.
 select(Item, [Item | Rest], Rest).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The recursive clause keeps the non-selected head and searches the tail.
 select(Item, [Head | Tail], [Head | Rest]) :-
   select(Item, Tail, Rest).
 

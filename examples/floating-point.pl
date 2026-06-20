@@ -1,13 +1,13 @@
 % Floating-point arithmetic and comparisons.
-% Integer-only operands continue to use arbitrary-size integer arithmetic.
-
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+%
+% Integer-only arithmetic stays exact, but decimal inputs use JavaScript numbers.
+% This example keeps the calculations small and transparent so differences
+% between add/sub/mul/div/pow and comparison predicates are visible.
 materialize(value, 2).
 materialize(than, 2).
 
-% The sample facts mix decimal and integer inputs to demonstrate that numeric
-% built-ins choose the appropriate JavaScript number or BigInt-like path.
-% Floating-point constants can be mixed with integer constants in built-ins.
+% Sample facts provide a small thermostat scenario used by the comparison
+% rules; separate value/2 facts below exercise standalone decimal arithmetic.
 sample(roomC, 21.5).
 sample(targetC, 19.25).
 

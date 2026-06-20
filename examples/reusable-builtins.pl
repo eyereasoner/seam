@@ -1,6 +1,8 @@
 % Reusable builtin tour for text, list, numeric, and quantifier helpers.
-% Each report/2 clause demonstrates a small reusable operation: trimming/lowercasing, splitting/joining, de-duplicating, slicing, and aggregating.
-% The last report uses forall/2 to validate a property over all matching facts.
+%
+% Each report/2 clause demonstrates a small reusable operation: trimming and
+% lowercasing text, splitting and joining tags, de-duplicating lists, slicing a
+% window, aggregating scores, and validating facts with forall/2.
 materialize(report, 2).
 
 name_raw("  Ada Lovelace  ").

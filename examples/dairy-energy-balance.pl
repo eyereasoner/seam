@@ -1,25 +1,21 @@
 % EYE-inspired dairy energy balance case study.
-% Cows are classified from maintenance, milk requirement, and ration supply.
-
-% cow(Cow, BodyWeightKg, MilkKgPerDay, RationEnergyMcalPerKgDM, IntakeKgDM).
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
 %
-% This is a small domain-calculation example: facts are measurements, helper
-% predicates compute metabolizable energy and demand, and status/reason facts
-% summarize the herd-management conclusion.
+% cow(Cow, BodyWeightKg, MilkKgPerDay, RationEnergyMcalPerKgDM, IntakeKgDM)
+% records a small herd.  Rules estimate maintenance demand, milk-production
+% demand, ration supply, and the resulting energy-balance class.
 materialize(energyBalance_Mcal, 2).
 materialize(rationSupportedMilk_kg, 2).
 materialize(status, 2).
 materialize(reason, 2).
 materialize(strongestDeficit, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% Four cows cover negative, near-neutral, and positive balance cases.
 cow(early_lactation, 650, 38, 6.4, 22).
 cow(mid_lactation, 610, 24, 6.5, 26).
 cow(late_lactation, 580, 16, 6.7, 25).
 cow(grazing, 540, 18, 5.8, 21).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Maintenance scales with body weight; milk requirement scales with daily milk.
 maintenance(C, M) :-
   cow(C, Weight, _, _, _),
   mul(Weight, 0.08, M).
