@@ -11,7 +11,8 @@ materialize(riskyInWorld, 2).
 materialize(reason, 2).
 materialize(status, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% trip_data/7 stores distance, speed, temperature, payload, battery, and base
+% energy use so the same trip can be evaluated under several modelling worlds.
 trip(city_errand).
 trip(winter_highway).
 trip(heavy_delivery).
@@ -23,7 +24,8 @@ trip_data(winter_highway, 260, 115, -5, 400, 60, 0.20).
 trip_data(heavy_delivery, 180, 80, 15, 700, 55, 0.22).
 trip_data(cold_commute, 120, 90, -8, 100, 35, 0.19).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Each world adds a different combination of speed, temperature, payload, and
+% reserve factors before comparing required energy with usable battery.
 speed_factor(T, 1.20) :- trip_data(T, _, S, _, _, _, _), gt(S, 100).
 speed_factor(T, 1.00) :- trip_data(T, _, S, _, _, _, _), le(S, 100).
 

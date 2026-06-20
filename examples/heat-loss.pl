@@ -9,14 +9,16 @@ materialize(thermalResistance_K_W, 2).
 materialize(heatLoss_W, 2).
 materialize(status, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% Wall properties are stored as key/value facts: conductivity, area, thickness,
+% and inside/outside temperatures.
 wall(wall1, conductivity_W_mK, 0.8).
 wall(wall1, area_m2, 12.0).
 wall(wall1, thickness_m, 0.2).
 wall(wall1, indoor_C, 21.0).
 wall(wall1, outdoor_C, -4.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The model first derives the temperature difference and thermal resistance,
+% then divides DeltaT by resistance to classify the heat loss.
 temperature_difference(Wall, DeltaT) :-
   wall(Wall, indoor_C, Indoor),
   wall(Wall, outdoor_C, Outdoor),

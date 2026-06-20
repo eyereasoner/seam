@@ -13,7 +13,8 @@ materialize(rejectsInWorld, 2).
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% candidate/4 stores occurrence rate, sensitivity, and specificity.  world/2
+% names the alternative validation policies applied to the same signals.
 candidate(rare_wide_orbit, 0.001, 0.99, 0.99).
 candidate(mstar_short_period, 0.20, 0.99, 0.99).
 candidate(common_hot_neptune_good, 0.25, 0.95, 0.97).
@@ -24,7 +25,8 @@ world(w1, sensitivity_only_naive).
 world(w2, occurrence_sensitivity_specificity_heuristic).
 world(w3, cautious_bayes_threshold).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The Bayes world computes positive predictive value, while the other worlds
+% intentionally use simpler or stricter thresholds for contrast.
 ppv_planet(Candidate, PPV) :-
   candidate(Candidate, Occurrence, Sensitivity, Specificity),
   mul(Sensitivity, Occurrence, Numerator),

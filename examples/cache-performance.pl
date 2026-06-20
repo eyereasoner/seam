@@ -10,12 +10,14 @@ materialize(averageLatency_ms, 2).
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% cache_sample/5 contains hits, misses, and the two latency classes; threshold/3
+% contains the operational targets used by the status rule.
 cache_sample(api_cache, 8600.0, 1400.0, 5.0, 80.0).
 threshold(api_cache, minimum_hit_rate, 0.80).
 threshold(api_cache, maximum_average_latency_ms, 20.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The rules compute total requests, hit rate, and weighted latency before
+% applying both acceptance thresholds together.
 total_requests(Cache, Total) :-
   cache_sample(Cache, Hits, Misses, _HitLatency, _MissLatency),
   add(Hits, Misses, Total).

@@ -12,7 +12,8 @@ materialize(dp_mealNo, 2).
 materialize(dp_inSlot, 2).
 materialize(dp_usesFork, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The trace is represented as numbered configurations and slots.  Each slot
+% records who is hungry, which forks are held, and how fork ownership changes.
 left_fork(dp_P1, dp_F51). right_fork(dp_P1, dp_F12).
 left_fork(dp_P2, dp_F12). right_fork(dp_P2, dp_F23).
 left_fork(dp_P3, dp_F23). right_fork(dp_P3, dp_F34).
@@ -100,7 +101,8 @@ meal_handle(dp_P3, 1, dp_mP3_1). meal_handle(dp_P3, 2, dp_mP3_2). meal_handle(dp
 meal_handle(dp_P4, 1, dp_mP4_1). meal_handle(dp_P4, 2, dp_mP4_2). meal_handle(dp_P4, 3, dp_mP4_3).
 meal_handle(dp_P5, 1, dp_mP5_1). meal_handle(dp_P5, 2, dp_mP5_2). meal_handle(dp_P5, 3, dp_mP5_3).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Rules derive requests, sends, kept forks, and eating events for each
+% configuration transition, mirroring Chandy-Misra message passing.
 request(C, P, Q, F) :-
   hungry(C, P), left_fork(P, F), start_state(C, F, Q, _Cleanliness), neq(Q, P).
 request(C, P, Q, F) :-

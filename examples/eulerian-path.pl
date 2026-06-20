@@ -10,7 +10,8 @@ materialize(path, 2).
 materialize(edgeCount, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The edge identifiers are part of the search state: a trail consumes ids, not
+% just endpoints, so parallel or repeated vertex visits remain well-defined.
 % Edge identifiers let the search remove each physical edge exactly once.
 edge(e12, v1, v2).
 edge(e13, v1, v3).
@@ -24,7 +25,8 @@ edge(e36, v3, v6).
 edge(e45, v4, v5).
 edge(e46, v4, v6).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Degree parity is computed with findall/3, and trail/4 then removes one
+% incident edge at a time until the remaining-edge list is empty.
 vertex(V) :- edge(_E, V, _U).
 vertex(V) :- edge(_E, _U, V).
 

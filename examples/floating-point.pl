@@ -5,12 +5,14 @@
 materialize(value, 2).
 materialize(than, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The sample facts mix decimal and integer inputs to demonstrate that numeric
+% built-ins choose the appropriate JavaScript number or BigInt-like path.
 % Floating-point constants can be mixed with integer constants in built-ins.
 sample(roomC, 21.5).
 sample(targetC, 19.25).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Each value/2 fact is a small arithmetic check; than/2 and comfortable/2
+% show that comparisons work over decimal results too.
 value(sum, X) :- add(1.5, 2.25, X).
 value(difference, X) :- sub(10.0, 3.125, X).
 value(product, X) :- mul(2.5, 4.0, X).

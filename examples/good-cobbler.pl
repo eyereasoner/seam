@@ -6,9 +6,11 @@
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(is, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The asserted fact is kept separate from the output form so the rule can show
+% how a quoted Eyeling assertion maps to an ordinary eyelang term.
 assertedIs(joe, good(cobbler)).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The single rule is intentionally simple: it preserves the subject and
+% profession while wrapping the conclusion as is(X, good(Y)).
 is(test, is(X, good(Y))) :-
   assertedIs(X, good(Y)).

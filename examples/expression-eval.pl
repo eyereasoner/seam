@@ -3,7 +3,8 @@
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(result, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The expression tree is data: number/2 labels leaves, expr/4 labels
+% internal operator nodes, and root/1 chooses the term to evaluate.
 % Leaves are number/2 facts; internal nodes name an operator and two children.
 number(n2, 2).
 number(n3, 3).
@@ -16,7 +17,8 @@ expr(eAdd, add, eMul, eSub).
 root(eAdd).
 
 % Evaluation is recursive over the expression tree.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% value/2 recursively folds the tree.  Each arithmetic operator has its own
+% rule so proof output shows the exact evaluation path.
 value(Node, Value) :-
   number(Node, Value).
 

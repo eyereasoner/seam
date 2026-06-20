@@ -9,7 +9,8 @@
 materialize(edge, 2).
 materialize(path, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The weighted graph stays inside weighted_graph/2; base_link/3 projects only
+% the scoped edges needed by this example before the undirected link/3 view is built.
 weighted_graph(dijkstraGraph, (
   edge(a, arc(b, 4)),
   edge(a, arc(c, 2)),
@@ -22,7 +23,8 @@ weighted_graph(dijkstraGraph, (
   edge(e, arc(f, 3))
 )).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% path/5 carries both the visited list and accumulated cost, so the search
+% enumerates simple weighted routes without asserting intermediate route facts.
 base_link(A, B, Cost) :-
   weighted_graph(dijkstraGraph, Context),
   holds(Context, edge(A, arc(B, Cost))).

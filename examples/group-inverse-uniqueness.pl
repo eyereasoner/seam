@@ -6,13 +6,15 @@
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(sameInverse, 3).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The group table is deliberately tiny: e is the identity, and i and j are
+% two names that both behave as the inverse of x.
 element(e).
 element(x).
 element(i).
 element(j).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% leftInverse/2 and rightInverse/2 are proved from op/3.  sameInverse/3
+% then derives uniqueness by combining both inverse directions with sameTerm/2.
 op(e, X, X) :- element(X).
 op(X, e, X) :- element(X).
 op(i, x, e).

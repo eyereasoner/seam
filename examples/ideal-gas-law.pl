@@ -8,12 +8,14 @@ materialize(pressure_Pa, 2).
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% gas_cell/5 records n, R, T, and V; pressure_limit/3 gives the tolerance band
+% used to classify the result as near atmospheric.
 gas_cell(cell1, 1.0, 8.0, 300.0, 0.024).
 pressure_limit(cell1, low_Pa, 95000.0).
 pressure_limit(cell1, high_Pa, 105000.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% pressure/2 computes nRT/V in three explicit arithmetic steps so the proof
+% output exposes numerator construction and final division.
 pressure(Cell, Pressure) :-
   gas_cell(Cell, Moles, GasConstant, Temperature, Volume),
   mul(Moles, GasConstant, NR),

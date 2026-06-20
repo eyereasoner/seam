@@ -9,11 +9,13 @@ materialize(mean, 2).
 materialize(populationVariance, 2).
 materialize(populationStddev, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The sample is one list fact, which lets recursive list folds demonstrate
+% aggregation without introducing a separate row relation.
 sample(scores, [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]).
 
 sum([], 0.0).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% sum/2 and squared_error_sum/3 are recursive folds; the public relations then
+% derive count, mean, population variance, and standard deviation.
 sum([X|Xs], Total) :-
   sum(Xs, Rest),
   add(X, Rest, Total).

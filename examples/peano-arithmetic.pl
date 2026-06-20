@@ -6,9 +6,11 @@
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(factorial, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% Numbers are represented only with 0 and successor terms s(...).  The final
+% query constructs the Peano value for five through add and multiply.
 peano_add(A, 0, A).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% peano_add/3, peano_multiply/3, and fac/3 are structurally recursive, so
+% the proof mirrors the Peano definitions of arithmetic.
 peano_add(A, s(B), s(C)) :-
   peano_add(A, B, C).
 

@@ -6,12 +6,14 @@ materialize(sideCSquared, 2).
 materialize(sideC, 2).
 materialize(status, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The triangle fact stores the two known sides and the cosine of the included
+% angle, which avoids needing trigonometric inverse functions in the example.
 % Stored tuple is triangle(Name, sideA, sideB, cosIncludedAngle).
 triangle(tri60, 7, 9, 0.5).
 
 % Compute c^2 first so both squared and square-rooted outputs can be shown.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% side_c_squared/2 follows the law of cosines step by step, then side_c/2
+% takes the square root for the reported side length.
 side_c_squared(Triangle, C2) :-
   triangle(Triangle, A, B, CosC),
   mul(A, A, A2),

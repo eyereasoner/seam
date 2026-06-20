@@ -7,11 +7,13 @@
 materialize(discriminant, 2).
 materialize(root, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% equation/4 stores coefficients A, B, and C for each quadratic.  The examples
+% use decimal constants so roots and discriminants flow through floating arithmetic.
 equation(eq1, 1.0, -5.0, 6.0).
 equation(eq2, 2.0, -4.0, -6.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The formula is decomposed into discriminant, square root, -B, denominator,
+% and the plus/minus branches so each algebraic step can be inspected.
 discriminant(Case, D) :-
   equation(Case, A, B, C),
   pow(B, 2.0, B2),

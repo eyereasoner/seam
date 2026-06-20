@@ -8,7 +8,8 @@
 materialize(hasHamiltonianPath, 2).
 materialize(hamiltonianPath, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The finite six-vertex graph is small enough to search directly.  adjacent/2
+% is memoized because every candidate path repeatedly asks the same edge tests.
 memoize(adjacent, 2).
 
 edge(v1, v2).
@@ -23,7 +24,8 @@ edge(v3, v6).
 edge(v4, v5).
 edge(v4, v6).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% hamiltonian_path/1 is intentionally unrolled to six positions: each next
+% vertex must be adjacent to the previous one and absent from the prefix.
 adjacent(V, U) :- edge(V, U).
 adjacent(V, U) :- edge(U, V).
 

@@ -5,7 +5,8 @@ materialize(generation, 2).
 materialize(branch, 2).
 materialize(cousin, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The family tree is scoped inside family_graph/2.  family_statement/3 projects
+% only the parent and seedBranch facts that the cousin rules need.
 memoize(family_statement, 3).
 memoize(generation, 2).
 memoize(branch, 2).
@@ -32,7 +33,8 @@ family_graph(familyGraph, (
   seedBranch(grace, c)
 )).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% generation/2 walks parent links from Adam, branch/2 propagates seed labels,
+% and cousin/2 combines equal generation with different branches.
 family_statement(S, P, O) :- family_graph(familyGraph, Context), holds(Context, P, [S, O]).
 
 parent(Parent, Child) :- family_statement(Parent, parent, Child).

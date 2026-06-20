@@ -8,12 +8,14 @@ materialize(append, 2).
 materialize(head, 2).
 materialize(tail, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The collection/2 facts keep complete lists as first-class terms rather than
+% expanding them into separate item facts.
 % Lists are first-class terms in facts and rule heads/bodies.
 collection(numbers, [1, 2, 3]).
 collection(letters, [a, b]).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The derived predicates show list length, membership, append, and pattern
+% matching with [Head|Tail] in the smallest possible setting.
 length(numbers, N) :-
   collection(numbers, List),
   length(List, N).

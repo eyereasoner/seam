@@ -8,7 +8,8 @@
 materialize(fft, 2).
 materialize(dcComponent, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The 8-point signal and twiddle factors are explicit facts.  Complex values
+% use c(Real, Imag) terms so every butterfly stays visible in proofs.
 % Twiddle factors are encoded as complex pairs c(Real, Imag).
 w8(0, c(1.0, 0.0)).
 w8(1, c(0.7071067811865476, -0.7071067811865476)).
@@ -20,7 +21,8 @@ w8(6, c(0.0, 1.0)).
 w8(7, c(0.7071067811865476, 0.7071067811865476)).
 
 % Complex arithmetic is expressed through ordinary numeric built-ins.
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% Complex add/subtract/multiply rules are composed into radix-2 butterflies,
+% then the materialized facts expose selected FFT bins and the DC component.
 c_add(c(AR, AI), c(BR, BI), c(CR, CI)) :-
   add(AR, BR, CR),
   add(AI, BI, CI).

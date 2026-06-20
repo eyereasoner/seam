@@ -3,7 +3,8 @@
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(fibonacci, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% fib_case/1 bounds the public queries, while fib_pair/3 implements the
+% fast-doubling recurrence F(2n), F(2n+1) over arbitrary-size integers.
 memoize(fib_pair, 3).
 
 % BigInt Fibonacci via fast doubling, implemented in Prolog using generic
@@ -16,7 +17,8 @@ fib_case(100).
 fib_case(1000).
 fib_case(10000).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The even and odd fib_pair/3 clauses share the same half-size recursive call;
+% memoization makes repeated large cases reuse those subproblems.
 fib(N, Value) :- fib_pair(N, Value, _Next).
 
 fib_pair(0, 0, 1).

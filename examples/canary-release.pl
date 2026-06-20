@@ -10,12 +10,14 @@ materialize(latencyCheck, 2).
 materialize(status, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% canary/4 records request count, error count, and p95 latency; thresholds
+% make the rollout policy explicit data rather than constants hidden in rules.
 canary(canary42, 5000.0, 75.0, 180.0).
 threshold(canary42, maximum_error_rate, 0.01).
 threshold(canary42, maximum_p95_latency_ms, 200.0).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% The latency and error-budget checks are independent so the final rollback
+% reason can point to the failing guard.
 error_rate(Release, Rate) :-
   canary(Release, Requests, Errors, _P95Latency),
   div(Errors, Requests, Rate).

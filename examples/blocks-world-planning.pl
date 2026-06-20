@@ -10,7 +10,8 @@ materialize(plan, 2).
 materialize(finalState, 2).
 materialize(blockCount, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% The initial and goal states are lists of on/2 facts.  Sorting successor states
+% gives canonical terms for equality and visited-state checks.
 initial([on(a, table), on(b, a), on(c, b), on(d, c), on(e, d)]).
 goal([on(a, table), on(b, a), on(c, table), on(d, c), on(e, d)]).
 
@@ -21,7 +22,8 @@ block(d).
 block(e).
 
 support(table, _State).
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% move/3 chooses a clear block and a clear support; the bounded planner chains
+% those legal moves while avoiding previously seen states.
 support(Block, State) :-
   block(Block),
   member(on(Block, _Below), State).

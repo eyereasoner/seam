@@ -14,13 +14,15 @@ materialize(status, 2).
 materialize(highestLeachingRisk, 2).
 materialize(reason, 2).
 
-% Program structure: facts set up the scenario, and rules derive the materialized conclusions.
+% field/5 stores soil nitrogen, fertilizer, loss fraction, and crop demand.
+% These facts are enough to derive both agronomic and environmental statuses.
 field(low_input, 25, 40, 0.10, 110).
 field(balanced_loam, 45, 80, 0.12, 110).
 field(sandy_high, 30, 150, 0.35, 105).
 field(clay_surplus, 70, 90, 0.08, 120).
 
-% Derivation rules: each rule below contributes one logical step toward the displayed results.
+% total_n/2 and available_n/2 build the nutrient budget; surplus/deficit and
+% leaching rules then explain the resulting field status.
 total_n(F, Total) :-
   field(F, Soil, Fert, _, _),
   add(Soil, Fert, Total).
