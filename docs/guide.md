@@ -397,17 +397,20 @@ Each example has a checked golden output in `examples/output`.
 | [`ideal-gas-law.pl`](../examples/ideal-gas-law.pl) | Applies the ideal gas law. | [`output/ideal-gas-law.pl`](../examples/output/ideal-gas-law.pl) |
 | [`illegitimate-reasoning.pl`](../examples/illegitimate-reasoning.pl) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.pl`](../examples/output/illegitimate-reasoning.pl) |
 | [`integer-partitions.pl`](../examples/integer-partitions.pl) | Counts integer partitions with memoized dynamic programming. | [`output/integer-partitions.pl`](../examples/output/integer-partitions.pl) |
+| [`intuitionistic-logic-kripke.pl`](../examples/intuitionistic-logic-kripke.pl) | Emulates intuitionistic Kripke forcing and constructive implication. | [`output/intuitionistic-logic-kripke.pl`](../examples/output/intuitionistic-logic-kripke.pl) |
 | [`job-shop-scheduling.pl`](../examples/job-shop-scheduling.pl) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.pl`](../examples/output/job-shop-scheduling.pl) |
 | [`knapsack-optimization.pl`](../examples/knapsack-optimization.pl) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.pl`](../examples/output/knapsack-optimization.pl) |
 | [`knowledge-engineering-alignment-flow.pl`](../examples/knowledge-engineering-alignment-flow.pl) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.pl`](../examples/output/knowledge-engineering-alignment-flow.pl) |
 | [`law-of-cosines.pl`](../examples/law-of-cosines.pl) | Computes a triangle side by cosine law. | [`output/law-of-cosines.pl`](../examples/output/law-of-cosines.pl) |
 | [`least-squares-regression.pl`](../examples/least-squares-regression.pl) | Fits a least-squares regression line. | [`output/least-squares-regression.pl`](../examples/output/least-squares-regression.pl) |
+| [`linear-logic-resources.pl`](../examples/linear-logic-resources.pl) | Emulates linear logic resource consumption with explicit state threading. | [`output/linear-logic-resources.pl`](../examples/output/linear-logic-resources.pl) |
 | [`list-collection.pl`](../examples/list-collection.pl) | Demonstrates list and collection built-ins. | [`output/list-collection.pl`](../examples/output/list-collection.pl) |
 | [`lldm.pl`](../examples/lldm.pl) | Calculates leg-length discrepancy measurements. | [`output/lldm.pl`](../examples/output/lldm.pl) |
 | [`manufacturing-quality-control.pl`](../examples/manufacturing-quality-control.pl) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.pl`](../examples/output/manufacturing-quality-control.pl) |
 | [`matrix-chain-order.pl`](../examples/matrix-chain-order.pl) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.pl`](../examples/output/matrix-chain-order.pl) |
 | [`microgrid-dispatch.pl`](../examples/microgrid-dispatch.pl) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.pl`](../examples/output/microgrid-dispatch.pl) |
 | [`missionaries-cannibals.pl`](../examples/missionaries-cannibals.pl) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.pl`](../examples/output/missionaries-cannibals.pl) |
+| [`modal-logic-kripke.pl`](../examples/modal-logic-kripke.pl) | Emulates modal box and diamond operators over a finite Kripke frame. | [`output/modal-logic-kripke.pl`](../examples/output/modal-logic-kripke.pl) |
 | [`modular-exponentiation.pl`](../examples/modular-exponentiation.pl) | Computes modular powers by repeated squaring. | [`output/modular-exponentiation.pl`](../examples/output/modular-exponentiation.pl) |
 | [`monkey-bananas.pl`](../examples/monkey-bananas.pl) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.pl`](../examples/output/monkey-bananas.pl) |
 | [`n-queens-8.pl`](../examples/n-queens-8.pl) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.pl`](../examples/output/n-queens-8.pl) |
@@ -453,7 +456,6 @@ Each example has a checked golden output in `examples/output`.
 | [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
 | [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |
 | [`zebra.pl`](../examples/zebra.pl) | Solves the zebra logic puzzle. | [`output/zebra.pl`](../examples/output/zebra.pl) |
-
 ## Golden outputs, tests, and conformance
 
 Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:eyelang` covers the eyelang integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.pl` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:
