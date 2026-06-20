@@ -45,8 +45,16 @@ console.log(result.stdout);
 
 ## Documentation
 
+- [Playground](playground.html)
 - [Guide](docs/guide.md)
 - [Language reference](docs/language-reference.md)
+
+For local browser use, serve the checkout first so the playground can load ES modules and example files:
+
+```bash
+python3 -m http.server
+# then open http://localhost:8000/playground.html
+```
 
 ## Tests
 

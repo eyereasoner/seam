@@ -287,8 +287,16 @@ function documentationSyncCases() {
       },
     },
     {
-      name: 'guide example catalog matches examples directory',
-      run: () => assertArrayEqual(guideCatalogExampleNames(), listExampleNames(), 'example catalog'),
+      name: 'guide example catalog source and output links match examples directory',
+      run: () => assertArrayEqual(guideExampleCatalogIssues(), [], 'guide example catalog'),
+    },
+    {
+      name: 'playground example catalog and relative loaders match examples directory',
+      run: () => assertArrayEqual(playgroundExampleIssues(), [], 'playground examples'),
+    },
+    {
+      name: 'playground static page is browser-ready and packaged',
+      run: () => assertArrayEqual(playgroundStaticIssues(), [], 'playground static page'),
     },
     {
       name: 'documentation local links and anchors resolve',
@@ -572,13 +580,73 @@ function listExampleNames() {
     .sort();
 }
 
-function guideCatalogExampleNames() {
+function guideExampleCatalogIssues() {
+  const issues = [];
+  const expected = listExampleNames();
   const guide = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
   const section = between(guide, '## Example catalog', '## Golden outputs, tests, and conformance');
-  return [...section.matchAll(/examples\/([A-Za-z0-9_-]+)\.pl/g)]
-    .map((match) => match[1])
-    .filter((name, index, names) => names.indexOf(name) === index)
-    .sort();
+  const rows = [...section.matchAll(/^\| \[`([A-Za-z0-9_-]+)\.pl`\]\(\.\.\/examples\/\1\.pl\) \|[^|]+\| \[`output\/\1\.pl`\]\(\.\.\/examples\/output\/\1\.pl\) \|$/gm)]
+    .map((match) => match[1]);
+  const sourceNames = [...section.matchAll(/\.\.\/examples\/([A-Za-z0-9_-]+)\.pl/g)].map((match) => match[1]).sort();
+  const outputNames = [...section.matchAll(/\.\.\/examples\/output\/([A-Za-z0-9_-]+)\.pl/g)].map((match) => match[1]).sort();
+  if (rows.length !== expected.length) issues.push(`expected ${expected.length} complete example rows, found ${rows.length}`);
+  issues.push(...arrayDiffMessages(rows.sort(), expected, 'complete example rows'));
+  issues.push(...arrayDiffMessages(sourceNames, expected, 'source links'));
+  issues.push(...arrayDiffMessages(outputNames, expected, 'output links'));
+  for (const name of expected) {
+    const outputPath = path.join(packageRoot, 'examples', 'output', `${name}.pl`);
+    if (!fs.existsSync(outputPath)) issues.push(`missing examples/output/${name}.pl`);
+  }
+  return issues.sort();
+}
+
+function playgroundExampleIssues() {
+  const issues = [];
+  const expected = listExampleNames();
+  const html = fs.readFileSync(path.join(packageRoot, 'playground.html'), 'utf8');
+  const match = html.match(/const EXAMPLES = (\[[\s\S]*?\]);/);
+  if (match == null) return ['playground EXAMPLES array not found'];
+  const examples = JSON.parse(match[1]).sort();
+  issues.push(...arrayDiffMessages(examples, expected, 'playground EXAMPLES'));
+  if (!html.includes('new URL(`./examples/${name}.pl`, location.href)')) {
+    issues.push('playground must load selected examples from relative ./examples/*.pl URLs');
+  }
+  if (!html.includes("fetch(exampleUrl, { cache: 'no-store' })")) {
+    issues.push('playground must fetch selected example source from its relative URL');
+  }
+  return issues.sort();
+}
+
+function playgroundStaticIssues() {
+  const issues = [];
+  const playgroundPath = path.join(packageRoot, 'playground.html');
+  const html = fs.readFileSync(playgroundPath, 'utf8');
+  const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
+  if (!pkg.files?.includes('playground.html')) issues.push('package files must include playground.html');
+  if (!readme.includes('[Playground](playground.html)')) issues.push('README must link to playground.html');
+  if (!html.includes('<meta name="viewport" content="width=device-width, initial-scale=1">')) issues.push('missing mobile viewport meta');
+  if (!html.includes('@media (max-width: 900px)') || !html.includes('main { grid-template-columns: 1fr; }')) {
+    issues.push('playground must collapse the editor/output grid on tablet/mobile widths');
+  }
+  if (!html.includes('@media (max-width: 560px)') || !html.includes('button,') || !html.includes('width: 100%')) {
+    issues.push('playground must make controls usable at phone widths');
+  }
+  if (!html.includes('<script type="module">')) issues.push('playground script must be an ES module');
+  if (!html.includes("new URL('./src/index.js', location.href)")) issues.push('playground must import the public browser API');
+  if (!html.includes('class="editor"') || !html.includes('id="highlight"') || !html.includes('id="source"')) {
+    issues.push('playground must include layered syntax-colored editor');
+  }
+  if (!html.includes('id="example-search"') || !html.includes('id="examples"')) issues.push('playground must include searchable examples');
+  const scriptMatch = html.match(new RegExp('<script type="module">\\n([\\s\\S]*?)\\n  <\\/script>'));
+  if (scriptMatch == null) {
+    issues.push('module script not found');
+  } else {
+    const scriptFile = path.join(tmp, 'playground-script.mjs');
+    fs.writeFileSync(scriptFile, scriptMatch[1]);
+    const result = spawnSync(process.execPath, ['--check', scriptFile], { encoding: 'utf8' });
+    if (result.status !== 0) issues.push(`playground module syntax check failed: ${result.stderr.trim()}`);
+  }
+  return issues.sort();
 }
 
 function registeredBuiltinNames() {
@@ -763,6 +831,16 @@ function assertIncludes(actual, expected, label) {
 
 function assertNotIncludes(actual, expected, label) {
   if (String(actual).includes(expected)) throw new Error(`${label} unexpectedly included ${format(expected)}\nactual: ${format(actual)}`);
+}
+
+function arrayDiffMessages(actual, expected, label) {
+  const messages = [];
+  const actualSet = new Set(actual);
+  const expectedSet = new Set(expected);
+  for (const item of expected) if (!actualSet.has(item)) messages.push(`${label} missing ${item}`);
+  for (const item of actual) if (!expectedSet.has(item)) messages.push(`${label} has unexpected ${item}`);
+  if (new Set(actual).size !== actual.length) messages.push(`${label} has duplicate entries`);
+  return messages;
 }
 
 function assertArrayEqual(actual, expected, label) {

@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eyelang Playground</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-soft: #eef2f7;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #d7dce5;
+      --accent: #0969da;
+      --accent-strong: #0757b8;
+      --danger: #b42318;
+      --code-bg: #0f172a;
+      --code-text: #dbeafe;
+      --comment: #94a3b8;
+      --string: #86efac;
+      --number: #fbbf24;
+      --variable: #93c5fd;
+      --keyword: #c084fc;
+      --predicate: #f0abfc;
+      --punctuation: #cbd5e1;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1020;
+        --panel: #111827;
+        --panel-soft: #1f2937;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --border: #374151;
+        --accent: #60a5fa;
+        --accent-strong: #93c5fd;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 1rem clamp(1rem, 4vw, 2rem);
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+    }
+
+    header p { margin: 0.35rem 0 0; color: var(--muted); }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
+      gap: 1rem;
+      padding: 1rem clamp(1rem, 4vw, 2rem) 2rem;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    section,
+    aside {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 0.9rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+
+    .panel-body { padding: 1rem; }
+
+    .toolbar,
+    .example-row,
+    .button-row,
+    .option-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .toolbar {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-soft);
+    }
+
+    label { font-weight: 650; }
+
+    select,
+    input,
+    textarea,
+    button {
+      font: inherit;
+      font-size: 1rem;
+    }
+
+    select,
+    input[type="url"],
+    input[type="search"] {
+      min-height: 2.65rem;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 0.55rem;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    select { min-width: min(100%, 18rem); flex: 1; }
+    input[type="url"] { flex: 1 1 20rem; min-width: 12rem; }
+    input[type="search"] { flex: 1 1 12rem; min-width: 10rem; }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: 0.55rem;
+      padding: 0.58rem 0.78rem;
+      min-height: 2.65rem;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+
+    button.primary:hover { background: var(--accent-strong); }
+    button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+    .option-row label {
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .editor-shell { padding: 0; }
+
+    .editor-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .editor {
+      position: relative;
+      min-height: 58vh;
+      background: var(--code-bg);
+      overflow: hidden;
+    }
+
+    .editor pre,
+    .editor textarea {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 1rem;
+      border: 0;
+      width: 100%;
+      height: 100%;
+      resize: none;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 2;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .editor pre {
+      pointer-events: none;
+      color: var(--code-text);
+    }
+
+    .editor textarea {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.02);
+      caret-color: white;
+      outline: none;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .editor textarea::selection { background: rgba(96, 165, 250, 0.35); }
+
+    .tok-comment { color: var(--comment); font-style: italic; }
+    .tok-string { color: var(--string); }
+    .tok-number { color: var(--number); }
+    .tok-variable { color: var(--variable); }
+    .tok-keyword { color: var(--keyword); font-weight: 700; }
+    .tok-predicate { color: var(--predicate); }
+    .tok-punctuation { color: var(--punctuation); }
+
+    .output {
+      min-height: 18rem;
+      max-height: 58vh;
+      overflow: auto;
+      padding: 1rem;
+      margin: 0;
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0.4rem 0 0;
+    }
+
+    .error { color: var(--danger); }
+
+    footer {
+      color: var(--muted);
+      padding: 0 1rem 1.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    footer a { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      header { position: static; }
+      main { grid-template-columns: 1fr; }
+      .editor { min-height: 54vh; }
+      .output { max-height: 42vh; }
+    }
+
+    @media (max-width: 560px) {
+      .toolbar,
+      .panel-body,
+      .editor-label { padding: 0.8rem; }
+      button,
+      select,
+      input[type="url"],
+      input[type="search"] { width: 100%; }
+      .button-row > button { flex: 1 1 8rem; }
+      .editor pre,
+      .editor textarea { font-size: 0.9rem; padding: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>The Eyelang Playground</h1>
+    <p>Run Eyelang programs in your browser with syntax coloring, examples, proofs, and shareable editor links.</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="editor-heading">
+      <div class="toolbar" aria-label="Example loader">
+        <label for="example-search">Load example</label>
+        <input id="example-search" type="search" placeholder="Filter examples" autocomplete="off">
+        <select id="examples" aria-label="Examples"></select>
+        <button id="load-example" type="button">Load</button>
+      </div>
+
+      <div class="toolbar" aria-label="URL loader">
+        <label for="source-url">Load from URL</label>
+        <input id="source-url" type="url" placeholder="https://example.org/program.pl">
+        <button id="load-url" type="button">Load URL</button>
+      </div>
+
+      <div class="toolbar option-row" aria-label="Run options">
+        <label><input id="proof" type="checkbox"> proof explanations</label>
+        <label><input id="stats" type="checkbox"> show stats</label>
+      </div>
+
+      <div class="editor-shell">
+        <div class="editor-label">
+          <strong id="editor-heading">Editable Eyelang program</strong>
+          <span id="source-name" class="hint">custom program</span>
+        </div>
+        <div class="editor">
+          <pre id="highlight" aria-hidden="true"><code></code></pre>
+          <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editable Eyelang source"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <aside aria-labelledby="output-heading">
+      <div class="toolbar button-row">
+        <button id="run" type="button" class="primary">Run</button>
+        <button id="stop" type="button" disabled>Stop</button>
+        <button id="copy-source" type="button">Copy source</button>
+        <button id="copy-output" type="button">Copy output</button>
+        <button id="share" type="button">Copy share link</button>
+      </div>
+      <div class="editor-label">
+        <strong id="output-heading">Output</strong>
+        <span id="elapsed" class="hint">Idle.</span>
+      </div>
+      <pre id="output" class="output">(no output yet)</pre>
+      <div class="status">
+        <span id="status">Ready.</span>
+        <span id="version">eyelang v…</span>
+      </div>
+      <div class="panel-body">
+        <p class="hint">For local use, serve the checkout with a small HTTP server first; browser modules and example loading usually do not work from <code>file://</code>.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Powered by <a href="https://github.com/eyereasoner/eyelang">Eyelang</a>.
+  </footer>
+
+  <script type="module">
+    const EXAMPLES = [
+  "access-control-policy",
+  "ackermann",
+  "age",
+  "aliases-and-namespaces",
+  "alignment-demo",
+  "allen-interval-calculus",
+  "ancestor",
+  "animal",
+  "annotation",
+  "auroracare",
+  "backward",
+  "basic-monadic",
+  "bayes-diagnosis",
+  "bayes-therapy",
+  "beam-deflection",
+  "blocks-world-planning",
+  "bmi",
+  "braking-safety-worlds",
+  "buck-converter-design",
+  "cache-performance",
+  "canary-release",
+  "cat-koko",
+  "clinical-trial-screening",
+  "collatz-1000",
+  "combinatorics-findall-sort",
+  "competitive-enzyme-kinetics",
+  "complex",
+  "composition-of-injective-functions-is-injective",
+  "context-association",
+  "context-schema-audit",
+  "control-system",
+  "cyclic-path",
+  "d3-group",
+  "dairy-energy-balance",
+  "data-negotiation",
+  "deep-taxonomy-10",
+  "deep-taxonomy-100",
+  "deep-taxonomy-1000",
+  "deep-taxonomy-10000",
+  "deep-taxonomy-100000",
+  "delfour",
+  "deontic-logic",
+  "derived-backward-rule",
+  "derived-rule",
+  "diamond-property",
+  "dijkstra-findall-sort",
+  "dijkstra-risk-path",
+  "dijkstra",
+  "dining-philosophers",
+  "dog",
+  "dpv-odrl-purpose-mapping",
+  "drone-corridor-planner",
+  "easter-computus",
+  "electrical-rc-filter",
+  "epidemic-policy",
+  "equivalence-classes-overlap-implies-same-class",
+  "eulerian-path",
+  "ev-range-worlds",
+  "existential-rule",
+  "exoplanet-validation-worlds",
+  "expression-eval",
+  "family-cousins",
+  "fastpow",
+  "fft8-numeric",
+  "fibonacci",
+  "field-nitrogen-balance",
+  "flandor",
+  "floating-point",
+  "four-color-map",
+  "fundamental-theorem-arithmetic",
+  "gd-step-certified",
+  "gdpr-compliance",
+  "good-cobbler",
+  "gps",
+  "graph-reachability",
+  "gray-code-counter",
+  "greatest-lower-bound-uniqueness",
+  "group-inverse-uniqueness",
+  "hamiltonian-path",
+  "hamming-code",
+  "hanoi",
+  "heat-loss",
+  "heron-theorem",
+  "ideal-gas-law",
+  "illegitimate-reasoning",
+  "knowledge-engineering-alignment-flow",
+  "law-of-cosines",
+  "least-squares-regression",
+  "list-collection",
+  "lldm",
+  "manufacturing-quality-control",
+  "microgrid-dispatch",
+  "monkey-bananas",
+  "network-sla",
+  "newton-raphson",
+  "nixon-diamond",
+  "observability-log-correlation",
+  "odrl-dpv-fpv-trust-flow",
+  "odrl-dpv-healthcare-risk-ranked",
+  "odrl-dpv-risk-ranked",
+  "orbital-transfer-design",
+  "path-discovery",
+  "peano-arithmetic",
+  "peasant",
+  "pendulum-period",
+  "polynomial",
+  "proof-contrapositive",
+  "quadratic-formula",
+  "radioactive-decay",
+  "reusable-builtins",
+  "riemann-hypothesis",
+  "security-incident-correlation",
+  "service-impact",
+  "sieve",
+  "skolem-functions",
+  "socket-age",
+  "socket-family",
+  "socrates",
+  "statistics-summary",
+  "superdense-coding",
+  "term-tools",
+  "trust-flow-provenance-threshold",
+  "turing",
+  "vector-similarity",
+  "vulnerability-impact",
+  "witch",
+  "wolf-goat-cabbage",
+  "zebra"
+];
+    const FALLBACK_SOURCE = `materialize(answer, 1).
+answer(ok) :- eq(ok, ok).
+`;
+    const KEYWORDS = new Set(['materialize', 'memoize']);
+    const BUILTINS = new Set([
+            "abs",
+            "acos",
+            "add",
+            "aggregate_max",
+            "aggregate_min",
+            "append",
+            "arg",
+            "asin",
+            "atan2",
+            "atom_string",
+            "between",
+            "ceiling",
+            "compound_name_arguments",
+            "contains",
+            "cos",
+            "countall",
+            "difference",
+            "div",
+            "drop",
+            "eq",
+            "exp",
+            "findall",
+            "floor",
+            "forall",
+            "functor",
+            "ge",
+            "gt",
+            "head",
+            "holds",
+            "join",
+            "last",
+            "le",
+            "length",
+            "list_to_set",
+            "local_time",
+            "log",
+            "lowercase",
+            "lt",
+            "matches",
+            "max",
+            "max_list",
+            "member",
+            "min",
+            "min_list",
+            "mod",
+            "mul",
+            "neg",
+            "neq",
+            "not",
+            "not_matches",
+            "not_member",
+            "nth0",
+            "number_string",
+            "once",
+            "pow",
+            "replace",
+            "rest",
+            "reverse",
+            "rounded",
+            "select",
+            "set_nth0",
+            "sin",
+            "slice",
+            "smallest_divisor_from",
+            "sort",
+            "split",
+            "sqrt",
+            "str_concat",
+            "sub",
+            "substring",
+            "sum_list",
+            "sumall",
+            "take",
+            "tan",
+            "term_string",
+            "trim",
+            "trunc",
+            "uppercase"
+      ]);
+
+    const source = document.querySelector('#source');
+    const highlight = document.querySelector('#highlight');
+    const exampleSelect = document.querySelector('#examples');
+    const exampleSearch = document.querySelector('#example-search');
+    const output = document.querySelector('#output');
+    const status = document.querySelector('#status');
+    const elapsed = document.querySelector('#elapsed');
+    const sourceName = document.querySelector('#source-name');
+    const proof = document.querySelector('#proof');
+    const stats = document.querySelector('#stats');
+    const runButton = document.querySelector('#run');
+    const stopButton = document.querySelector('#stop');
+    let activeWorker = null;
+    let activeWorkerUrl = null;
+
+    populateExamples(EXAMPLES);
+    restoreFromHash() || loadExample('ancestor');
+    loadVersion();
+
+    source.addEventListener('input', render);
+    source.addEventListener('scroll', syncScroll);
+    exampleSearch.addEventListener('input', () => populateExamples(filterExamples(exampleSearch.value)));
+    document.querySelector('#load-example').addEventListener('click', () => loadExample(exampleSelect.value));
+    document.querySelector('#load-url').addEventListener('click', loadUrl);
+    document.querySelector('#run').addEventListener('click', runProgram);
+    document.querySelector('#stop').addEventListener('click', stopProgram);
+    document.querySelector('#copy-source').addEventListener('click', () => copyText(source.value, 'Source copied.'));
+    document.querySelector('#copy-output').addEventListener('click', () => copyText(output.textContent, 'Output copied.'));
+    document.querySelector('#share').addEventListener('click', copyShareLink);
+
+    function populateExamples(names) {
+      const current = exampleSelect.value;
+      exampleSelect.replaceChildren(...names.map((name) => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        return option;
+      }));
+      if (names.includes(current)) exampleSelect.value = current;
+      else if (names.length) exampleSelect.value = names[0];
+    }
+
+    function filterExamples(query) {
+      const needle = query.trim().toLowerCase();
+      if (!needle) return EXAMPLES;
+      return EXAMPLES.filter((name) => name.includes(needle));
+    }
+
+    async function loadExample(name) {
+      if (!name) return;
+      try {
+        setStatus(`Loading ${name}…`);
+        const exampleUrl = new URL(`./examples/${name}.pl`, location.href);
+        const response = await fetch(exampleUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        setSource(await response.text(), `examples/${name}.pl`);
+        setStatus(`Loaded examples/${name}.pl.`);
+      } catch (error) {
+        setSource(FALLBACK_SOURCE, 'fallback program');
+        setStatus(`Could not load examples/${name}.pl: ${formatError(error)}`, true);
+      }
+    }
+
+    async function loadUrl() {
+      const url = document.querySelector('#source-url').value.trim();
+      if (!url) return;
+      try {
+        setStatus(`Loading ${url}…`);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        setSource(await response.text(), url);
+        setStatus(`Loaded ${url}.`);
+      } catch (error) {
+        setStatus(`Could not load URL: ${formatError(error)}`, true);
+      }
+    }
+
+    function setSource(text, name) {
+      source.value = text;
+      sourceName.textContent = name;
+      render();
+    }
+
+    function render() {
+      highlight.firstElementChild.innerHTML = colorize(source.value) + (source.value.endsWith('\n') ? ' ' : '');
+      syncScroll();
+    }
+
+    function syncScroll() {
+      highlight.scrollTop = source.scrollTop;
+      highlight.scrollLeft = source.scrollLeft;
+    }
+
+    function colorize(text) {
+      let out = '';
+      for (let i = 0; i < text.length;) {
+        const ch = text[i];
+        if (ch === '%') {
+          const end = text.indexOf('\n', i);
+          const stop = end === -1 ? text.length : end;
+          out += span('comment', text.slice(i, stop));
+          i = stop;
+        } else if (ch === '"' || ch === "'") {
+          const quote = ch;
+          let j = i + 1;
+          while (j < text.length) {
+            if (text[j] === '\\') j += 2;
+            else if (text[j] === quote) { j++; break; }
+            else j++;
+          }
+          out += span('string', text.slice(i, j));
+          i = j;
+        } else if (/\d/.test(ch)) {
+          let j = i + 1;
+          while (j < text.length && /[\d.]/.test(text[j])) j++;
+          out += span('number', text.slice(i, j));
+          i = j;
+        } else if (/[A-Z_]/.test(ch)) {
+          let j = i + 1;
+          while (j < text.length && /[A-Za-z0-9_]/.test(text[j])) j++;
+          out += span('variable', text.slice(i, j));
+          i = j;
+        } else if (/[a-z]/.test(ch)) {
+          let j = i + 1;
+          while (j < text.length && /[A-Za-z0-9_]/.test(text[j])) j++;
+          const word = text.slice(i, j);
+          if (KEYWORDS.has(word)) out += span('keyword', word);
+          else if (BUILTINS.has(word) || text[j] === '(') out += span('predicate', word);
+          else out += escapeHtml(word);
+          i = j;
+        } else if ('()[]{},.;|:-'.includes(ch)) {
+          out += span('punctuation', ch);
+          i++;
+        } else {
+          out += escapeHtml(ch);
+          i++;
+        }
+      }
+      return out;
+    }
+
+    function span(kind, text) { return `<span class="tok-${kind}">${escapeHtml(text)}</span>`; }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+    }
+
+    function runProgram() {
+      stopProgram(false);
+      output.textContent = '';
+      elapsed.textContent = 'Running…';
+      setStatus('Running Eyelang…');
+      runButton.disabled = true;
+      stopButton.disabled = false;
+
+      const engineUrl = new URL('./src/index.js', location.href).href;
+      const workerCode = `
+        import { run } from ${JSON.stringify(engineUrl)};
+        self.onmessage = (event) => {
+          const started = performance.now();
+          try {
+            const result = run(event.data.source, event.data.options);
+            self.postMessage({
+              ok: true,
+              stdout: result.stdout,
+              stats: result.stats,
+              elapsedMs: performance.now() - started,
+            });
+          } catch (error) {
+            self.postMessage({ ok: false, error: error?.stack || error?.message || String(error) });
+          }
+        };
+      `;
+      activeWorkerUrl = URL.createObjectURL(new Blob([workerCode], { type: 'text/javascript' }));
+      activeWorker = new Worker(activeWorkerUrl, { type: 'module' });
+      activeWorker.onmessage = (event) => finishRun(event.data);
+      activeWorker.onerror = (event) => finishRun({ ok: false, error: event.message || 'worker error' });
+      activeWorker.postMessage({
+        source: source.value,
+        options: { proof: proof.checked, stats: stats.checked },
+      });
+    }
+
+    function finishRun(message) {
+      const worker = activeWorker;
+      cleanupWorker();
+      runButton.disabled = false;
+      stopButton.disabled = true;
+      if (!message.ok) {
+        output.textContent = message.error || 'Unknown error.';
+        elapsed.textContent = 'Failed.';
+        setStatus('Run failed.', true);
+        return;
+      }
+      let text = message.stdout || '(no materialized output)\n';
+      if (stats.checked && message.stats) text += '\n% stats\n' + formatStats(message.stats);
+      output.textContent = text;
+      const seconds = (message.elapsedMs / 1000).toFixed(3);
+      elapsed.textContent = `${seconds} sec`;
+      setStatus(worker ? 'Run complete.' : 'Run complete.');
+    }
+
+    function stopProgram(report = true) {
+      if (!activeWorker) return;
+      cleanupWorker();
+      runButton.disabled = false;
+      stopButton.disabled = true;
+      elapsed.textContent = 'Stopped.';
+      if (report) setStatus('Run stopped.');
+    }
+
+    function cleanupWorker() {
+      if (activeWorker) activeWorker.terminate();
+      activeWorker = null;
+      if (activeWorkerUrl) URL.revokeObjectURL(activeWorkerUrl);
+      activeWorkerUrl = null;
+    }
+
+    function formatStats(values) {
+      return Object.entries(values).map(([key, value]) => `${key}: ${value}`).join('\n') + '\n';
+    }
+
+    async function copyText(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus(message);
+      } catch (_) {
+        setStatus('Clipboard access is not available in this browser.', true);
+      }
+    }
+
+    async function copyShareLink() {
+      const payload = JSON.stringify({ source: source.value, proof: proof.checked, stats: stats.checked });
+      const data = new TextEncoder().encode(payload);
+      let binary = '';
+      for (const byte of data) binary += String.fromCharCode(byte);
+      const encoded = btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+      await copyText(`${location.href.split('#')[0]}#state=${encoded}`, 'Share link copied.');
+    }
+
+    function restoreFromHash() {
+      if (!location.hash.startsWith('#state=')) return false;
+      try {
+        const encoded = location.hash.slice(7).replaceAll('-', '+').replaceAll('_', '/');
+        const padded = encoded + '='.repeat((4 - encoded.length % 4) % 4);
+        const bytes = Uint8Array.from(atob(padded), (ch) => ch.charCodeAt(0));
+        const payload = JSON.parse(new TextDecoder().decode(bytes));
+        setSource(String(payload.source || ''), 'shared program');
+        proof.checked = Boolean(payload.proof);
+        stats.checked = Boolean(payload.stats);
+        setStatus('Loaded shared program.');
+        return true;
+      } catch (error) {
+        setStatus(`Could not read shared state: ${formatError(error)}`, true);
+        return false;
+      }
+    }
+
+    async function loadVersion() {
+      try {
+        const response = await fetch('package.json', { cache: 'no-store' });
+        if (!response.ok) return;
+        const pkg = await response.json();
+        if (pkg.version) document.querySelector('#version').textContent = `eyelang v${pkg.version}`;
+      } catch (_) {
+        // Package metadata is optional when the page is copied elsewhere.
+      }
+    }
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function formatError(error) { return error?.message || String(error); }
+  </script>
+</body>
+</html>
