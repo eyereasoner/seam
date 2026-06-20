@@ -361,6 +361,16 @@ function apiCases() {
       },
     },
     {
+      name: 'run keeps recursive materializations independent in one solver',
+      run: () => {
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'alignment-demo.pl'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'alignment-demo.pl' }]);
+        const result = run(program);
+        assertIncludes(result.stdout, 'broaderTransitive(anpr_passenger_car, ref_car).\n', 'stdout');
+        assertIncludes(result.stdout, 'narrowerOrEqualOf(anpr_passenger_car, ref_car).\n', 'stdout');
+      },
+    },
+    {
       name: 'makeProgram creates indexed programs',
       run: () => {
         const program = makeProgram('edge(a, b).\npath(X, Y) :- edge(X, Y).\n');
@@ -525,6 +535,20 @@ function whiteBoxCases() {
         assertEqual(group.recursive, true, 'collatz/2 recursive');
       },
     },
+    {
+      name: 'collatz example remains stack-safe for browser-sized stacks',
+      run: () => {
+        // Use a deliberately tiny stack to catch browser-worker recursion regressions.
+        const result = spawnSync(process.execPath, ['--stack-size=100', bin, 'examples/collatz-1000.pl'], {
+          cwd: packageRoot,
+          encoding: 'utf8',
+        });
+        assertEqual(result.status, 0, `exit status${result.stderr ? `\nstderr: ${result.stderr}` : ''}`);
+        assertEqual(result.stderr, '', 'stderr');
+        assertIncludes(result.stdout, 'collatzTrajectory(1000, [1000, 500, 250, 125', 'stdout');
+        assertIncludes(result.stdout, 'collatzTrajectory(1, [1]).\n', 'stdout');
+      },
+    },
   ];
 }
 
@@ -625,16 +649,34 @@ function playgroundStaticIssues() {
   if (!pkg.files?.includes('playground.html')) issues.push('package files must include playground.html');
   if (!readme.includes('[Playground](https://eyereasoner.github.io/eyelang/playground)')) issues.push('README must link to the GitHub Pages playground URL');
   if (!html.includes('<meta name="viewport" content="width=device-width, initial-scale=1">')) issues.push('missing mobile viewport meta');
-  if (!html.includes('@media (max-width: 900px)') || !html.includes('main { grid-template-columns: 1fr; }')) {
-    issues.push('playground must collapse the editor/output grid on tablet/mobile widths');
+  if (!html.includes('main {') || !html.includes('display: block;')) {
+    issues.push('playground must use a simple vertical layout');
   }
   if (!html.includes('@media (max-width: 560px)') || !html.includes('button,') || !html.includes('width: 100%')) {
     issues.push('playground must make controls usable at phone widths');
+  }
+  if (!html.includes('<summary id="advanced-heading">⚙ Advanced configuration</summary>')) {
+    issues.push('playground must keep URL/proof controls inside advanced configuration');
+  }
+  if (!html.includes('id="load-background"') || !html.includes('backgroundSource') || !html.includes('combinedSource()')) {
+    issues.push('playground must support loading URL content as background knowledge');
+  }
+  if (!html.includes('HIGHLIGHT_LIMIT') || !html.includes('text.length > HIGHLIGHT_LIMIT')) {
+    issues.push('playground must avoid full syntax coloring for very large examples');
   }
   if (!html.includes('<script type="module">')) issues.push('playground script must be an ES module');
   if (!html.includes("new URL('./src/index.js', location.href)")) issues.push('playground must import the public browser API');
   if (!html.includes('class="editor"') || !html.includes('id="highlight"') || !html.includes('id="source"')) {
     issues.push('playground must include layered syntax-colored editor');
+  }
+  if (!html.includes('--editor-bg: #ffffff') || !html.includes('background: var(--editor-bg)')) {
+    issues.push('playground editor must use a light editor background');
+  }
+  if (!html.includes('id="error-line-marker"') || !html.includes('extractParseErrorLine') || !html.includes('markSyntaxErrorLine') || !html.includes('--editor-error-line')) {
+    issues.push('playground must highlight syntax-error lines in the editor');
+  }
+  if (!html.includes('id="line-numbers"') || !html.includes('updateLineNumbers') || !html.includes('lineNumbersInner.style.transform') || !html.includes('--line-number-bg')) {
+    issues.push('playground editor must include synced line numbers');
   }
   if (!html.includes('id="example-search"') || !html.includes('id="examples"')) issues.push('playground must include searchable examples');
   const scriptMatch = html.match(new RegExp('<script type="module">\\n([\\s\\S]*?)\\n  <\\/script>'));

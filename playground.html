@@ -16,15 +16,24 @@
       --accent: #0969da;
       --accent-strong: #0757b8;
       --danger: #b42318;
+      --editor-bg: #ffffff;
+      --editor-text: #172033;
+      --editor-caret: #111827;
+      --editor-selection: rgba(9, 105, 218, 0.18);
+      --editor-error-line: #fee2e2;
+      --editor-error-border: #dc2626;
+      --line-number-bg: #f8fafc;
+      --line-number-text: #64748b;
+      --line-number-border: #e2e8f0;
       --code-bg: #0f172a;
       --code-text: #dbeafe;
-      --comment: #94a3b8;
-      --string: #86efac;
-      --number: #fbbf24;
-      --variable: #93c5fd;
-      --keyword: #c084fc;
-      --predicate: #f0abfc;
-      --punctuation: #cbd5e1;
+      --comment: #64748b;
+      --string: #047857;
+      --number: #b45309;
+      --variable: #1d4ed8;
+      --keyword: #7c3aed;
+      --predicate: #be123c;
+      --punctuation: #475569;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -50,14 +59,14 @@
       line-height: 1.45;
     }
 
-    header {
-      padding: 1rem clamp(1rem, 4vw, 2rem);
-      border-bottom: 1px solid var(--border);
-      background: var(--panel);
-      position: sticky;
-      top: 0;
-      z-index: 5;
+    header,
+    main,
+    footer {
+      width: min(100% - 2rem, 72rem);
+      margin: 0 auto;
     }
+
+    header { padding: 1.25rem 0 0.9rem; }
 
     h1 {
       margin: 0;
@@ -67,21 +76,17 @@
     header p { margin: 0.35rem 0 0; color: var(--muted); }
 
     main {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
-      gap: 1rem;
-      padding: 1rem clamp(1rem, 4vw, 2rem) 2rem;
-      max-width: 1500px;
-      margin: 0 auto;
+      display: block;
+      padding: 0 0 2rem;
     }
 
-    section,
-    aside {
+    section {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 0.9rem;
       box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
       overflow: hidden;
+      margin: 1rem 0;
     }
 
     .panel-body { padding: 1rem; }
@@ -89,7 +94,8 @@
     .toolbar,
     .example-row,
     .button-row,
-    .option-row {
+    .option-row,
+    .background-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.6rem;
@@ -101,6 +107,18 @@
       border-bottom: 1px solid var(--border);
       background: var(--panel-soft);
     }
+
+    .toolbar:last-child { border-bottom: 0; }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 0.85rem 1rem;
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--border);
+    }
+
+    details:not([open]) summary { border-bottom: 0; }
 
     label { font-weight: 650; }
 
@@ -147,7 +165,8 @@
     button.primary:hover { background: var(--accent-strong); }
     button:disabled { cursor: not-allowed; opacity: 0.6; }
 
-    .option-row label {
+    .option-row label,
+    .background-row label {
       display: inline-flex;
       gap: 0.35rem;
       align-items: center;
@@ -168,9 +187,48 @@
 
     .editor {
       position: relative;
-      min-height: 58vh;
-      background: var(--code-bg);
+      min-height: 56vh;
+      background: var(--editor-bg);
       overflow: hidden;
+    }
+
+    .line-numbers,
+    .editor pre,
+    .editor textarea {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .line-numbers {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3.6rem;
+      padding: 1rem 0.65rem 1rem 0.35rem;
+      overflow: hidden;
+      text-align: right;
+      color: var(--line-number-text);
+      background: var(--line-number-bg);
+      border-right: 1px solid var(--line-number-border);
+      user-select: none;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .line-numbers-inner { will-change: transform; }
+
+    .line-number {
+      display: block;
+      min-height: 1.55em;
+      padding-right: 0.1rem;
+    }
+
+    .line-number.error {
+      color: var(--danger);
+      background: var(--editor-error-line);
+      font-weight: 700;
+      margin: 0 -0.65rem 0 -0.35rem;
+      padding: 0 0.65rem 0 0.35rem;
     }
 
     .editor pre,
@@ -178,7 +236,7 @@
       position: absolute;
       inset: 0;
       margin: 0;
-      padding: 1rem;
+      padding: 1rem 1rem 1rem 4.35rem;
       border: 0;
       width: 100%;
       height: 100%;
@@ -186,25 +244,36 @@
       overflow: auto;
       white-space: pre;
       tab-size: 2;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-size: 0.95rem;
-      line-height: 1.55;
+    }
+
+    .error-line-marker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      display: none;
+      pointer-events: none;
+      background: var(--editor-error-line);
+      border-left: 0.28rem solid var(--editor-error-border);
+      z-index: 0;
     }
 
     .editor pre {
       pointer-events: none;
-      color: var(--code-text);
+      color: var(--editor-text);
+      z-index: 1;
     }
 
     .editor textarea {
       background: transparent;
-      color: rgba(255, 255, 255, 0.02);
-      caret-color: white;
+      color: rgba(17, 24, 39, 0.025);
+      caret-color: var(--editor-caret);
       outline: none;
-      -webkit-text-fill-color: rgba(255, 255, 255, 0.02);
+      z-index: 2;
+      -webkit-text-fill-color: rgba(17, 24, 39, 0.025);
     }
 
-    .editor textarea::selection { background: rgba(96, 165, 250, 0.35); }
+    .editor textarea::selection { background: var(--editor-selection); }
 
     .tok-comment { color: var(--comment); font-style: italic; }
     .tok-string { color: var(--string); }
@@ -250,31 +319,34 @@
 
     footer {
       color: var(--muted);
-      padding: 0 1rem 1.5rem;
+      padding: 0 0 1.5rem;
       text-align: center;
       font-size: 0.95rem;
     }
 
     footer a { color: var(--accent); }
 
-    @media (max-width: 900px) {
-      header { position: static; }
-      main { grid-template-columns: 1fr; }
-      .editor { min-height: 54vh; }
-      .output { max-height: 42vh; }
-    }
-
     @media (max-width: 560px) {
+      header,
+      main,
+      footer { width: min(100% - 1rem, 72rem); }
       .toolbar,
       .panel-body,
-      .editor-label { padding: 0.8rem; }
+      .editor-label,
+      details summary { padding: 0.8rem; }
       button,
       select,
       input[type="url"],
       input[type="search"] { width: 100%; }
       .button-row > button { flex: 1 1 8rem; }
+      .editor { min-height: 58vh; }
+      .line-numbers,
       .editor pre,
-      .editor textarea { font-size: 0.9rem; padding: 0.8rem; }
+      .editor textarea { font-size: 0.9rem; }
+      .line-numbers { width: 3.2rem; padding: 0.8rem 0.55rem 0.8rem 0.25rem; }
+      .line-number.error { margin: 0 -0.55rem 0 -0.25rem; padding: 0 0.55rem 0 0.25rem; }
+      .editor pre,
+      .editor textarea { padding: 0.8rem 0.8rem 0.8rem 3.85rem; }
     }
   </style>
 </head>
@@ -285,45 +357,61 @@
   </header>
 
   <main>
-    <section aria-labelledby="editor-heading">
+    <section aria-labelledby="examples-heading">
       <div class="toolbar" aria-label="Example loader">
-        <label for="example-search">Load example</label>
+        <label id="examples-heading" for="example-search">Load an example</label>
         <input id="example-search" type="search" placeholder="Filter examples" autocomplete="off">
         <select id="examples" aria-label="Examples"></select>
-        <button id="load-example" type="button">Load</button>
+        <button id="load-example" type="button">Load example</button>
       </div>
+    </section>
 
-      <div class="toolbar" aria-label="URL loader">
-        <label for="source-url">Load from URL</label>
-        <input id="source-url" type="url" placeholder="https://example.org/program.pl">
-        <button id="load-url" type="button">Load URL</button>
-      </div>
+    <section aria-labelledby="advanced-heading">
+      <details>
+        <summary id="advanced-heading">⚙ Advanced configuration</summary>
+        <div class="toolbar" aria-label="URL loader">
+          <label for="source-url">Load Eyelang from URL</label>
+          <input id="source-url" type="url" placeholder="https://example.org/program.pl">
+          <button id="load-url" type="button">Load from URL</button>
+        </div>
+        <div class="toolbar background-row">
+          <label><input id="load-background" type="checkbox"> Load into background knowledge instead of overwriting the editor</label>
+          <span id="background-status" class="hint">No background knowledge loaded.</span>
+          <button id="clear-background" type="button">Clear background</button>
+        </div>
+        <div class="toolbar option-row" aria-label="Run options">
+          <label><input id="proof" type="checkbox"> Show proof explanations</label>
+          <label><input id="stats" type="checkbox"> Show stats</label>
+        </div>
+        <div class="panel-body">
+          <p class="hint">Enter any Eyelang file URL and click “Load from URL”. Background knowledge is prepended when the program runs.</p>
+        </div>
+      </details>
+    </section>
 
-      <div class="toolbar option-row" aria-label="Run options">
-        <label><input id="proof" type="checkbox"> proof explanations</label>
-        <label><input id="stats" type="checkbox"> show stats</label>
-      </div>
-
+    <section aria-labelledby="editor-heading">
       <div class="editor-shell">
         <div class="editor-label">
           <strong id="editor-heading">Editable Eyelang program</strong>
           <span id="source-name" class="hint">custom program</span>
         </div>
         <div class="editor">
+          <div id="line-numbers" class="line-numbers" aria-hidden="true"><div class="line-numbers-inner"></div></div>
+          <div id="error-line-marker" class="error-line-marker" aria-hidden="true"></div>
           <pre id="highlight" aria-hidden="true"><code></code></pre>
           <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editable Eyelang source"></textarea>
         </div>
       </div>
-    </section>
-
-    <aside aria-labelledby="output-heading">
       <div class="toolbar button-row">
-        <button id="run" type="button" class="primary">Run</button>
+        <button id="run" type="button" class="primary">Run reasoning</button>
         <button id="stop" type="button" disabled>Stop</button>
         <button id="copy-source" type="button">Copy source</button>
         <button id="copy-output" type="button">Copy output</button>
         <button id="share" type="button">Copy share link</button>
       </div>
+    </section>
+
+    <section aria-labelledby="output-heading">
       <div class="editor-label">
         <strong id="output-heading">Output</strong>
         <span id="elapsed" class="hint">Idle.</span>
@@ -336,7 +424,7 @@
       <div class="panel-body">
         <p class="hint">For local use, serve the checkout with a small HTTP server first; browser modules and example loading usually do not work from <code>file://</code>.</p>
       </div>
-    </aside>
+    </section>
   </main>
 
   <footer>
@@ -477,6 +565,7 @@
     const FALLBACK_SOURCE = `materialize(answer, 1).
 answer(ok) :- eq(ok, ok).
 `;
+    const HIGHLIGHT_LIMIT = 200000;
     const KEYWORDS = new Set(['materialize', 'memoize']);
     const BUILTINS = new Set([
             "abs",
@@ -561,28 +650,41 @@ answer(ok) :- eq(ok, ok).
 
     const source = document.querySelector('#source');
     const highlight = document.querySelector('#highlight');
+    const lineNumbers = document.querySelector('#line-numbers');
+    const lineNumbersInner = lineNumbers.firstElementChild;
+    const errorLineMarker = document.querySelector('#error-line-marker');
     const exampleSelect = document.querySelector('#examples');
     const exampleSearch = document.querySelector('#example-search');
     const output = document.querySelector('#output');
     const status = document.querySelector('#status');
     const elapsed = document.querySelector('#elapsed');
     const sourceName = document.querySelector('#source-name');
+    const backgroundStatus = document.querySelector('#background-status');
+    const loadBackground = document.querySelector('#load-background');
     const proof = document.querySelector('#proof');
     const stats = document.querySelector('#stats');
     const runButton = document.querySelector('#run');
     const stopButton = document.querySelector('#stop');
+    let backgroundSource = '';
+    let backgroundName = '';
     let activeWorker = null;
     let activeWorkerUrl = null;
+    let renderToken = 0;
+    let syntaxErrorLine = null;
 
     populateExamples(EXAMPLES);
     restoreFromHash() || loadExample('ancestor');
     loadVersion();
 
-    source.addEventListener('input', render);
+    source.addEventListener('input', () => {
+      clearSyntaxError();
+      render();
+    });
     source.addEventListener('scroll', syncScroll);
     exampleSearch.addEventListener('input', () => populateExamples(filterExamples(exampleSearch.value)));
     document.querySelector('#load-example').addEventListener('click', () => loadExample(exampleSelect.value));
     document.querySelector('#load-url').addEventListener('click', loadUrl);
+    document.querySelector('#clear-background').addEventListener('click', clearBackground);
     document.querySelector('#run').addEventListener('click', runProgram);
     document.querySelector('#stop').addEventListener('click', stopProgram);
     document.querySelector('#copy-source').addEventListener('click', () => copyText(source.value, 'Source copied.'));
@@ -629,27 +731,71 @@ answer(ok) :- eq(ok, ok).
         setStatus(`Loading ${url}…`);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-        setSource(await response.text(), url);
-        setStatus(`Loaded ${url}.`);
+        const text = await response.text();
+        if (loadBackground.checked) {
+          backgroundSource = text;
+          backgroundName = url;
+          updateBackgroundStatus();
+          setStatus(`Loaded background knowledge from ${url}.`);
+        } else {
+          setSource(text, url);
+          setStatus(`Loaded ${url}.`);
+        }
       } catch (error) {
         setStatus(`Could not load URL: ${formatError(error)}`, true);
       }
     }
 
+    function clearBackground() {
+      backgroundSource = '';
+      backgroundName = '';
+      updateBackgroundStatus();
+      setStatus('Background knowledge cleared.');
+    }
+
+    function updateBackgroundStatus() {
+      backgroundStatus.textContent = backgroundSource
+        ? `Background loaded from ${backgroundName} (${backgroundSource.length.toLocaleString()} chars).`
+        : 'No background knowledge loaded.';
+    }
+
     function setSource(text, name) {
       source.value = text;
       sourceName.textContent = name;
+      clearSyntaxError();
       render();
     }
 
     function render() {
-      highlight.firstElementChild.innerHTML = colorize(source.value) + (source.value.endsWith('\n') ? ' ' : '');
-      syncScroll();
+      const token = ++renderToken;
+      const text = source.value;
+      requestAnimationFrame(() => {
+        if (token !== renderToken) return;
+        highlight.firstElementChild.innerHTML = renderHighlightedSource(text);
+        updateLineNumbers(text);
+        syncScroll();
+      });
+    }
+
+    function renderHighlightedSource(text) {
+      const rendered = text.length > HIGHLIGHT_LIMIT ? escapeHtml(text) : colorize(text);
+      return rendered + (text.endsWith('\n') ? ' ' : '');
     }
 
     function syncScroll() {
       highlight.scrollTop = source.scrollTop;
       highlight.scrollLeft = source.scrollLeft;
+      lineNumbersInner.style.transform = `translateY(${-source.scrollTop}px)`;
+      updateErrorLineMarker();
+    }
+
+    function updateLineNumbers(text = source.value) {
+      const count = Math.max(1, text.split('\n').length);
+      lineNumbersInner.innerHTML = Array.from({ length: count }, (_, index) => {
+        const line = index + 1;
+        const className = line === syntaxErrorLine ? 'line-number error' : 'line-number';
+        return `<span class="${className}">${line}</span>`;
+      }).join('');
     }
 
     function colorize(text) {
@@ -708,6 +854,7 @@ answer(ok) :- eq(ok, ok).
 
     function runProgram() {
       stopProgram(false);
+      clearSyntaxError();
       output.textContent = '';
       elapsed.textContent = 'Running…';
       setStatus('Running Eyelang…');
@@ -737,20 +884,83 @@ answer(ok) :- eq(ok, ok).
       activeWorker.onmessage = (event) => finishRun(event.data);
       activeWorker.onerror = (event) => finishRun({ ok: false, error: event.message || 'worker error' });
       activeWorker.postMessage({
-        source: source.value,
+        source: combinedSource(),
         options: { proof: proof.checked, stats: stats.checked },
       });
     }
 
+    function combinedSource() {
+      if (!backgroundSource.trim()) return source.value;
+      return `${backgroundSource}\n${source.value}`;
+    }
+
+    function extractParseErrorLine(text) {
+      const match = String(text).match(/parse line (\d+)/i);
+      return match ? Number(match[1]) : null;
+    }
+
+    function editorLineForParseLine(parseLine) {
+      if (!Number.isFinite(parseLine) || parseLine < 1) return null;
+      if (!backgroundSource.trim()) return parseLine;
+      const backgroundLines = backgroundSource.split('\n').length;
+      const editorLine = parseLine - backgroundLines;
+      return editorLine >= 1 ? editorLine : null;
+    }
+
+    function markSyntaxErrorLine(line) {
+      syntaxErrorLine = line;
+      updateLineNumbers();
+      revealLine(line);
+      updateErrorLineMarker();
+    }
+
+    function clearSyntaxError() {
+      syntaxErrorLine = null;
+      updateLineNumbers();
+      updateErrorLineMarker();
+    }
+
+    function revealLine(line) {
+      const metrics = editorMetrics();
+      const y = metrics.paddingTop + (line - 1) * metrics.lineHeight;
+      const top = source.scrollTop;
+      const bottom = top + source.clientHeight - metrics.lineHeight;
+      if (y < top || y > bottom) {
+        source.scrollTop = Math.max(0, y - source.clientHeight / 3);
+      }
+    }
+
+    function updateErrorLineMarker() {
+      if (syntaxErrorLine == null) {
+        errorLineMarker.style.display = 'none';
+        return;
+      }
+      const metrics = editorMetrics();
+      errorLineMarker.style.display = 'block';
+      errorLineMarker.style.height = `${metrics.lineHeight}px`;
+      errorLineMarker.style.top = `${metrics.paddingTop + (syntaxErrorLine - 1) * metrics.lineHeight - source.scrollTop}px`;
+    }
+
+    function editorMetrics() {
+      const style = getComputedStyle(source);
+      const fontSize = parseFloat(style.fontSize) || 15;
+      const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.55;
+      const paddingTop = parseFloat(style.paddingTop) || 0;
+      return { lineHeight, paddingTop };
+    }
+
     function finishRun(message) {
-      const worker = activeWorker;
       cleanupWorker();
       runButton.disabled = false;
       stopButton.disabled = true;
       if (!message.ok) {
-        output.textContent = message.error || 'Unknown error.';
+        const errorText = message.error || 'Unknown error.';
+        const parseLine = extractParseErrorLine(errorText);
+        const editorLine = editorLineForParseLine(parseLine);
+        if (editorLine != null) markSyntaxErrorLine(editorLine);
+        output.textContent = errorText;
         elapsed.textContent = 'Failed.';
-        setStatus('Run failed.', true);
+        setStatus(editorLine == null ? 'Run failed.' : `Syntax error on line ${editorLine}.`, true);
         return;
       }
       let text = message.stdout || '(no materialized output)\n';
@@ -758,7 +968,7 @@ answer(ok) :- eq(ok, ok).
       output.textContent = text;
       const seconds = (message.elapsedMs / 1000).toFixed(3);
       elapsed.textContent = `${seconds} sec`;
-      setStatus(worker ? 'Run complete.' : 'Run complete.');
+      setStatus('Run complete.');
     }
 
     function stopProgram(report = true) {
@@ -791,7 +1001,13 @@ answer(ok) :- eq(ok, ok).
     }
 
     async function copyShareLink() {
-      const payload = JSON.stringify({ source: source.value, proof: proof.checked, stats: stats.checked });
+      const payload = JSON.stringify({
+        source: source.value,
+        proof: proof.checked,
+        stats: stats.checked,
+        backgroundSource,
+        backgroundName,
+      });
       const data = new TextEncoder().encode(payload);
       let binary = '';
       for (const byte of data) binary += String.fromCharCode(byte);
@@ -809,6 +1025,9 @@ answer(ok) :- eq(ok, ok).
         setSource(String(payload.source || ''), 'shared program');
         proof.checked = Boolean(payload.proof);
         stats.checked = Boolean(payload.stats);
+        backgroundSource = String(payload.backgroundSource || '');
+        backgroundName = String(payload.backgroundName || 'shared background');
+        updateBackgroundStatus();
         setStatus('Loaded shared program.');
         return true;
       } catch (error) {

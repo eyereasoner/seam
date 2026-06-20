@@ -38,50 +38,122 @@ export class Solver {
   }
 
   *solve(goals, env = new Env(), depth = 0) {
-    this.stats.solve_goals_calls++;
-    this.stats.max_depth = Math.max(this.stats.max_depth, depth);
-    this.stats.max_goal_count = Math.max(this.stats.max_goal_count, goals.length);
-    if (depth > this.maxDepth || this.solutionsSeen >= this.solutionLimit) return;
     if (!Array.isArray(goals)) goals = [goals];
 
-    if (goals.length === 0) {
-      this.solutionsSeen++;
-      this.stats.completed_goal_lists++;
-      yield env;
-      return;
-    }
-
-    // eyelang normally solves left-to-right, but ready deterministic builtins can
-    // be run early as pure filters. This gives large pruning wins without
-    // reordering user predicates or nondeterministic generators.
-    const selectedIndex = selectReadyDeterministicBuiltin(goals, env, this.registry);
-    const goal = goals[selectedIndex];
-    const rest = selectedIndex === 0 ? goals.slice(1) : [...goals.slice(0, selectedIndex), ...goals.slice(selectedIndex + 1)];
-    if (goal.type === COMPOUND && goal.name === ',' && goal.arity === 2) {
-      yield* this.solve([...flattenConjunction(goal), ...rest], env, depth + 1);
-      return;
-    }
-
-    const def = goal.type === COMPOUND ? this.registry.get(goal.name, goal.arity) : null;
-    if (def && builtinIsReadyOrAuthoritative(def, this, goal, env)) {
-      let produced = false;
-      for (const next of def.handler({ solver: this, goal, env })) {
-        produced = true;
-        yield* this.solve(rest, next, depth + 1);
-        if (this.solutionsSeen >= this.solutionLimit) return;
+    const savedActive = this.active;
+    try {
+      const stack = [{ kind: 'goals', goals, env, depth, active: savedActive.slice() }];
+      while (stack.length) {
+      const frame = stack.pop();
+      if (frame.kind === 'completeMemo') {
+        frame.entry.computing = false;
+        frame.entry.complete = true;
+        continue;
       }
-      if (def.deterministic) {
-        if (produced) this.stats.deterministic_builtin_successes++;
-        else this.stats.deterministic_builtin_failures++;
-      }
-      return;
-    }
 
-    yield* this.solveUserGoal(goal, rest, env, depth);
+      goals = frame.goals;
+      env = frame.env;
+      depth = frame.depth;
+      let active = frame.active;
+
+      while (true) {
+        this.stats.solve_goals_calls++;
+        this.stats.max_depth = Math.max(this.stats.max_depth, depth);
+        this.stats.max_goal_count = Math.max(this.stats.max_goal_count, goals.length);
+        if (depth > this.maxDepth || this.solutionsSeen >= this.solutionLimit) break;
+
+        if (goals.length === 0) {
+          this.solutionsSeen++;
+          this.stats.completed_goal_lists++;
+          this.active = active;
+          yield env;
+          break;
+        }
+
+        const first = goals[0];
+        if (first?.kind === 'releaseActive') {
+          active = active.slice(0, -1);
+          goals = goals.slice(1);
+          continue;
+        }
+        if (first?.kind === 'memoStore') {
+          rememberMemoAnswer(first.entry, first.goal, env);
+          goals = goals.slice(1);
+          continue;
+        }
+
+        // eyelang normally solves left-to-right, but ready deterministic builtins can
+        // be run early as pure filters. Stop at internal sentinels so rule-body
+        // active guards are released before the caller's remaining goals are seen.
+        const selectedIndex = selectReadyDeterministicBuiltin(goals, env, this.registry);
+        const goal = goals[selectedIndex];
+        const rest = selectedIndex === 0 ? goals.slice(1) : [...goals.slice(0, selectedIndex), ...goals.slice(selectedIndex + 1)];
+        if (goal.type === COMPOUND && goal.name === ',' && goal.arity === 2) {
+          goals = [...flattenConjunction(goal), ...rest];
+          depth++;
+          continue;
+        }
+
+        const def = goal.type === COMPOUND ? this.registry.get(goal.name, goal.arity) : null;
+        this.active = active;
+        if (def && builtinIsReadyOrAuthoritative(def, this, goal, env)) {
+          const nextEnvs = [];
+          for (const next of def.handler({ solver: this, goal, env })) nextEnvs.push(next);
+          if (def.deterministic) {
+            if (nextEnvs.length) this.stats.deterministic_builtin_successes++;
+            else this.stats.deterministic_builtin_failures++;
+          }
+          if (nextEnvs.length === 0) break;
+          if (nextEnvs.length === 1) {
+            goals = rest;
+            env = nextEnvs[0];
+            depth++;
+            continue;
+          }
+          for (let i = nextEnvs.length - 1; i >= 0; i--) {
+            stack.push({ kind: 'goals', goals: rest, env: nextEnvs[i], depth: depth + 1, active });
+          }
+          break;
+        }
+
+        this.stats.solve_one_goal_calls++;
+        if (goal.type !== COMPOUND) break;
+        const group = this.program.findGroup(goal.name, goal.arity);
+        if (!group) break;
+
+        if (group.memoized) {
+          const key = memoKey(goal, env);
+          if (key.hasBound) {
+            const mapKey = `${goal.name}/${goal.arity}:${key.text}`;
+            let entry = this.memo.get(mapKey);
+            if (!entry) {
+              entry = { computing: false, complete: false, answers: [], answerKeys: new Set() };
+              this.memo.set(mapKey, entry);
+            }
+            if (entry.complete) {
+              pushMemoAnswerFrames(stack, entry, goal, rest, env, depth, active, this);
+              break;
+            }
+            if (!entry.computing) {
+              entry.computing = true;
+              stack.push({ kind: 'completeMemo', entry });
+              pushUserGoalUncachedFrames(stack, this, group, goal, [{ kind: 'memoStore', entry, goal }, ...rest], env, depth, active);
+              break;
+            }
+          }
+        }
+
+        pushUserGoalUncachedFrames(stack, this, group, goal, rest, env, depth, active);
+        break;
+      }
+      }
+    } finally {
+      this.active = savedActive;
+    }
   }
 
   activeVariant(goal, env) {
-    return this.active.some((entry) => variantTerms(goal, env, entry.goal, entry.env));
+    return activeVariantIn(goal, env, this.active);
   }
 
   *solveUserGoal(goal, rest, env, depth) {
@@ -180,6 +252,61 @@ export class Solver {
 }
 
 
+function pushMemoAnswerFrames(stack, entry, goal, rest, env, depth, active, solver) {
+  for (let answerIndex = entry.answers.length - 1; answerIndex >= 0; answerIndex--) {
+    const answerArgs = entry.answers[answerIndex];
+    const next = env.clone();
+    let ok = true;
+    for (let i = 0; i < goal.arity; i++) {
+      solver.stats.unify_calls++;
+      if (!unify(goal.args[i], answerArgs[i], next)) { ok = false; break; }
+    }
+    if (ok) stack.push({ kind: 'goals', goals: rest, env: next, depth: depth + 1, active });
+  }
+}
+
+function pushUserGoalUncachedFrames(stack, solver, group, goal, rest, env, depth, active) {
+  if (activeVariantIn(goal, env, active)) return;
+  const candidates = selectClauseCandidates(group, goal, env);
+  const frames = [];
+  for (const pass of [candidates.primary, candidates.fallback]) {
+    for (const clause of pass) {
+      if (headCannotMatch(goal, clause.head, env)) continue;
+      const id = nextFreshId();
+      const freshHead = freshTerm(clause.head, id);
+      const freshBody = clause.body.map((term) => freshTerm(term, id));
+      const next = env.clone();
+      solver.stats.unify_calls++;
+      if (!unify(goal, freshHead, next)) continue;
+      if (freshBody.length === 0) {
+        frames.push({ kind: 'goals', goals: rest, env: next, depth: depth + 1, active });
+      } else {
+        frames.push({
+          kind: 'goals',
+          goals: [...freshBody, { kind: 'releaseActive' }, ...rest],
+          env: next,
+          depth: depth + 1,
+          active: [...active, { goal, env }],
+        });
+      }
+    }
+  }
+  for (let i = frames.length - 1; i >= 0; i--) stack.push(frames[i]);
+}
+
+function rememberMemoAnswer(entry, goal, env) {
+  const answerArgs = goal.args.map((arg) => importResolved(arg, env));
+  const key = answerArgs.map((arg) => termToString(arg, new Env(), true)).join('\x1f');
+  if (entry.answerKeys.has(key)) return;
+  entry.answerKeys.add(key);
+  entry.answers.push(answerArgs);
+}
+
+function activeVariantIn(goal, env, active) {
+  return active.some((entry) => variantTerms(goal, env, entry.goal, entry.env));
+}
+
+
 function builtinIsReadyOrAuthoritative(def, solver, goal, env) {
   if (typeof def.shouldUse === 'function' && !def.shouldUse({ solver, goal, env })) return false;
   if (typeof def.ready !== 'function') return true;
@@ -190,6 +317,7 @@ function builtinIsReadyOrAuthoritative(def, solver, goal, env) {
 function selectReadyDeterministicBuiltin(goals, env, registry) {
   for (let i = 0; i < goals.length; i++) {
     const goal = goals[i];
+    if (goal?.kind === 'releaseActive' || goal?.kind === 'memoStore') return 0;
     if (goal.type !== COMPOUND) continue;
     const def = registry.get(goal.name, goal.arity);
     if (!def?.deterministic || typeof def.ready !== 'function') continue;
