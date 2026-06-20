@@ -302,10 +302,8 @@ Use `holds/2` when you want to match the member term directly, for example `name
 
 ## Example catalog
 
-Each example has a checked golden output in `examples/output`.
-
-| Example | What it demonstrates | Golden output |
-|---|---|---|
+| Example | Description | Golden output |
+| --- | --- | --- |
 | [`access-control-policy.pl`](../examples/access-control-policy.pl) | Evaluates role and condition based access decisions. | [`output/access-control-policy.pl`](../examples/output/access-control-policy.pl) |
 | [`ackermann.pl`](../examples/ackermann.pl) | Computes Ackermann-style hyperoperation values. | [`output/ackermann.pl`](../examples/output/ackermann.pl) |
 | [`age.pl`](../examples/age.pl) | Checks whether people meet age thresholds. | [`output/age.pl`](../examples/output/age.pl) |
@@ -453,10 +451,12 @@ Each example has a checked golden output in `examples/output`.
 | [`turing.pl`](../examples/turing.pl) | Simulates a binary-increment Turing machine. | [`output/turing.pl`](../examples/output/turing.pl) |
 | [`vector-similarity.pl`](../examples/vector-similarity.pl) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.pl`](../examples/output/vector-similarity.pl) |
 | [`vulnerability-impact.pl`](../examples/vulnerability-impact.pl) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.pl`](../examples/output/vulnerability-impact.pl) |
+| [`web-names.pl`](../examples/web-names.pl) | Uses compact `web(Space, Local)` terms as readable global names and expands selected names to URIs. | [`output/web-names.pl`](../examples/output/web-names.pl) |
 | [`weighted-interval-scheduling.pl`](../examples/weighted-interval-scheduling.pl) | Selects the best non-overlapping weighted intervals with memoized dynamic programming. | [`output/weighted-interval-scheduling.pl`](../examples/output/weighted-interval-scheduling.pl) |
 | [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
 | [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |
 | [`zebra.pl`](../examples/zebra.pl) | Solves the zebra logic puzzle. | [`output/zebra.pl`](../examples/output/zebra.pl) |
+
 ## Golden outputs, tests, and conformance
 
 Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:eyelang` covers the eyelang integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.pl` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:

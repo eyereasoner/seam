@@ -477,6 +477,13 @@ function whiteBoxCases() {
       },
     },
     {
+      name: 'parser preserves dotted atom constants for web-style names',
+      run: () => {
+        const clauses = parseProgramText('p(web(be.ugent, jos), org.schema).\n');
+        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(web(be.ugent, jos), org.schema)', 'head');
+      },
+    },
+    {
       name: 'list construction round-trips through properListItems',
       run: () => {
         const list = listFromItems([atom('a'), numberTerm(2), stringTerm('c')]);

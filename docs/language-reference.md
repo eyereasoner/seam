@@ -119,7 +119,7 @@ The punctuation tokens are:
 (  )  [  ]  ,  |  .  :-
 ```
 
-A colon outside `:-` is not part of the language. Namespace-like names SHOULD be written as plain atom constants such as `person_type` or `odrl_permission`.
+A colon outside `:-` is not part of the language. Namespace-like names SHOULD be written as plain atom constants such as `person_type`, `odrl_permission`, or dotted atom constants such as `org.schema`.
 
 ### 3.4 Variables
 
@@ -138,12 +138,15 @@ Each `_` anonymous variable occurrence is fresh.
 
 ### 3.5 Atom constants
 
-A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. This follows the usual Prolog unquoted-atom shape; names such as `a-b` or `http://example` MUST be quoted if they are meant as one atom constant:
+A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. For compact globally scoped names, eyelang also permits dot-separated plain atom segments, such as `be.ugent`, `org.schema`, or `eyereasoner.github`. A dot ends a clause only when it is not followed by another lowercase-starting segment. Names such as `a-b` or `http://example` MUST still be quoted if they are meant as one atom constant:
 
 ```prolog
 pat
 type
 case_123
+be.ugent
+org.schema
+eyereasoner.github
 'a-b'
 'http://example'
 ```
@@ -655,7 +658,7 @@ eyelang source is intended to be a subset of familiar Prolog term and Horn-claus
 - no variables in functor or predicate position;
 - no occurs check in unification.
 
-Programs intended to be portable to eyelang SHOULD avoid ISO-specific syntax and keep terms explicit. Atom names that are not plain lowercase-starting names or graphic atom tokens SHOULD be written as quoted atoms, for example `'a-b'`.
+Programs intended to be portable to eyelang SHOULD avoid ISO-specific syntax and keep terms explicit. Atom names that are not plain lowercase-starting names, dot-separated plain names, or graphic atom tokens SHOULD be written as quoted atoms, for example `'a-b'`.
 
 ## 16. Examples
 
