@@ -1,7 +1,11 @@
 % Law of cosines: c^2 = a^2 + b^2 - 2ab cos(C).
 %
-% The example uses a 60-degree included angle, so cos(C) is represented as 0.5.
-% It reports both c^2 and c to make the arithmetic derivation explicit.
+% This pure-geometry example keeps trigonometry outside the language by storing
+% cos(C) as data.  Eyelang then performs the algebraic part of the theorem with
+% ordinary arithmetic predicates and materializes both c^2 and c.
+%
+% The 60-degree sample uses cos(C) = 0.5, so the proof shows each intermediate
+% numeric step rather than hiding the computation in one builtin.
 materialize(sideCSquared, 2).
 materialize(sideC, 2).
 materialize(status, 2).

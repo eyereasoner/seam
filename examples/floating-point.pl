@@ -1,8 +1,11 @@
 % Floating-point arithmetic and comparisons.
 %
 % Integer-only arithmetic stays exact, but decimal inputs use JavaScript numbers.
-% This example keeps the calculations small and transparent so differences
-% between add/sub/mul/div/pow and comparison predicates are visible.
+% This example keeps the calculations small and transparent so differences between
+% add/sub/mul/div/pow and comparison predicates are visible.
+%
+% The thermostat facts provide a concrete comparison setting, while standalone
+% value/2 reports exercise individual decimal operations.
 materialize(value, 2).
 materialize(than, 2).
 

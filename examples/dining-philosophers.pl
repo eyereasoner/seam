@@ -1,6 +1,11 @@
 % Chandy-Misra dining philosophers trace adapted from Eyeling dining-philosophers.n3.
-% Requests and sends are derived; KeepFork facts copy forks that are not sent.
-
+%
+% The example does not search for an arbitrary schedule.  Instead, it reasons over
+% a finite trace of configurations and slots, deriving which fork requests are
+% sent, which forks are kept, and which philosopher uses which fork in each meal.
+%
+% It is useful as a larger rule-translation example because many output facts are
+% copied or transformed from state-transition relations.
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(dp_type, 2).
 materialize(dp_in, 2).

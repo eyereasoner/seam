@@ -1,6 +1,12 @@
-% Knowledge-engineering alignment flow in eyelang.
-% Local source predicates are aligned once and then reused to produce a target-shaped flow view.
-% fpv_* atoms denote a tiny local Flow/Policy Vocabulary profile.
+% Knowledge-engineering alignment flow in Eyelang.
+%
+% The source graph uses local observation predicates.  The mapping facts below
+% align those local names with small SOSA-like and FPV-like vocabulary atoms, then
+% generic rules emit a target-shaped flow view.
+%
+% This demonstrates a common knowledge-engineering pattern: keep source data in
+% its original shape, describe the alignment declaratively, and derive target facts
+% without rewriting the original assertions.
 
 materialize(type, 2).
 materialize(target_fact, 3).

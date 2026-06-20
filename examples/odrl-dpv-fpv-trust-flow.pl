@@ -1,6 +1,12 @@
-% ODRL + DPV + local FPV trust-flow decisioning in eyelang.
-% Flows are checked against permissions/prohibitions, data/purpose/action metadata, and local trust scores.
-% The derived decision, confidence, status, and risk facts show permit/review/deny outcomes for each flow.
+% ODRL + DPV + local FPV trust-flow decisioning in Eyelang.
+%
+% Each flow has a source, recipient, data item, action, and purpose.  Permissions
+% and prohibitions are checked together with source trust scores to produce
+% permit, review, or deny decisions.
+%
+% The example separates the policy vocabulary from the local FPV-style report
+% predicates, which keeps the final decision/confidence/status/risk facts easy to
+% consume.
 
 materialize(decision, 2).
 materialize(confidence, 2).

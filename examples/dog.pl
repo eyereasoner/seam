@@ -1,12 +1,11 @@
-% Dog-license rule adapted from Eyeling dog.n3.
-% hasDog/2 facts are counted per subject with countall/2.  The compliance rule
-% derives mustHave(Subject, dogLicense) exactly for subjects with more than four
-% registered dogs.
-
+% Dog-license compliance rule adapted from Eyeling dog.n3.
+%
+% hasDog/2 records individual dogs.  dogCount/2 uses countall/2 to aggregate all
+% dogs per subject, and mustHave/2 derives the license obligation exactly for
+% subjects with more than four registered dogs.
+%
+% The example is intentionally tiny but useful as an aggregate-counting pattern.
 materialize(mustHave, 2).
-
-% Dog-license example adapted from Eyeling dog.n3.
-% A subject with more than four dogs must have a dog license.
 
 hasDog(alice, dog1).
 hasDog(alice, dog2).

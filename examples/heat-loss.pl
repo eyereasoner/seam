@@ -1,7 +1,11 @@
 % Engineering example: one-dimensional conductive heat loss through a wall.
 %
-% Thermal resistance is L/(k*A), and heat loss is DeltaT/R.  The example reports
-% both intermediate physical quantities so unit-style reasoning remains visible.
+% Thermal resistance is L/(k*A), and heat loss is DeltaT/R.  The facts store wall
+% properties as a small attribute table, while rules derive temperature
+% difference, resistance, heat loss, and a qualitative status.
+%
+% Keeping each physical quantity as its own relation makes the proof explanation
+% read like a worked calculation.
 materialize(type, 2).
 materialize(temperatureDifference_K, 2).
 materialize(thermalResistance_K_W, 2).

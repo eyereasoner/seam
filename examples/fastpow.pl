@@ -3,6 +3,10 @@
 % pow/3 demonstrates exponentiation by squaring, while pow_mod/4 performs the
 % same recursion under a modulus so huge powers remain small enough for ordinary
 % output and proof display.
+%
+% The file also includes deliberately slower and tower-style reports, making it a
+% small arithmetic benchmark for recursive definitions, modular arithmetic, and
+% bounded output selection.
 materialize(pow, 2).
 materialize(powSlow, 2).
 materialize(powMod1e6, 2).

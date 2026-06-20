@@ -1,6 +1,11 @@
-% Memoize the fast-doubling helper: several requested Fibonacci numbers reuse
-% the same half-size subproblems.
-% Output declarations: materialize/2 selects the relations written to this example's golden output.
+% Fibonacci numbers by fast doubling.
+%
+% The public fibonacci/2 relation is bounded by fib_case/1 facts, while fib_pair/3
+% computes F(N) and F(N+1) together.  This exposes a logarithmic recursive
+% algorithm in a small relational program instead of enumerating all predecessors.
+%
+% Memoization is important for the large cases: several requested Fibonacci
+% numbers reuse the same half-size fib_pair/3 subproblems.
 materialize(fibonacci, 2).
 
 % fib_case/1 bounds the public queries, while fib_pair/3 implements the

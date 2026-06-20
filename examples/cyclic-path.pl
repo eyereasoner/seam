@@ -1,7 +1,11 @@
 % Cyclic transitive closure.
-% The graph deliberately contains a directed cycle a -> b -> c -> d -> a.  This
-% tests that recursive path/2 search can derive reachable pairs without getting
-% stuck repeatedly expanding the same active subgoal.
+%
+% The graph deliberately contains the directed cycle a -> b -> c -> d -> a.  The
+% recursive path/2 rule therefore has to deal with cycles while still deriving
+% the reachable pairs used by the golden output.
+%
+% This is a compact regression-style example for active-goal handling in recursive
+% graph search.
 
 materialize(path, 2).
 

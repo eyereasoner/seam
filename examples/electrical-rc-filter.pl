@@ -1,7 +1,10 @@
 % Engineering example: RC low-pass filter sizing.
+%
 % A resistor and capacitor define the time constant tau = R*C.  The cutoff
-% frequency rule then computes 1/(2*pi*tau) and materializes both engineering
-% quantities for the named filter.
+% frequency rule then computes fc = 1/(2*pi*tau).
+%
+% The model uses key/value component facts so the same pattern can be extended to
+% multiple named filters or extra component attributes without changing the rules.
 
 materialize(type, 2).
 materialize(timeConstant_s, 2).

@@ -1,7 +1,11 @@
 % Vector dot product, Euclidean norm, and cosine similarity.
-% Recursive list folds compute dot products and sums of squares.  The public
-% cosine relation then combines those folds as dot(A,B)/(norm(A)*norm(B)) for a
-% single named vector pair.
+%
+% Recursive list folds compute the dot product and squared-length sums.  The
+% public cosineSimilarity/2 report then combines those folds as
+% dot(A,B)/(norm(A)*norm(B)) for a named vector pair.
+%
+% The example keeps vectors as ordinary Eyelang lists, so it doubles as a compact
+% demonstration of numeric recursion over list structure.
 
 materialize(dotProduct, 2).
 materialize(normA, 2).

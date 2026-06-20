@@ -1,14 +1,12 @@
 % Equivalence-class overlap example adapted from Eyeling.
+%
 % The finite classMember/2 facts represent an already-computed equivalence
-% closure.  The rule emits a witness Z whenever X and Y are in the same class
-% because they share that member.
-
+% closure.  sameClassBecauseOfSharedMember/3 reports the witness Z proving that
+% X and Y belong to the same class because both contain that shared member.
+%
+% This is useful for proof output: the conclusion is not just that two class
+% labels coincide, but also which element explains the overlap.
 materialize(sameClassBecauseOfSharedMember, 3).
-
-% Equivalence-classes example adapted from Eyeling
-% equivalence-classes-overlap-implies-same-class.n3.
-% The finite class membership facts represent the equivalence closure generated
-% by b~a and b~c; the rule packages every shared-member witness.
 
 classMember(class_abc, a).
 classMember(class_abc, b).

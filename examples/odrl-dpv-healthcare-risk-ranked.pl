@@ -1,7 +1,11 @@
-% ODRL + DPV healthcare risk ranking adapted from Eyeling
-% odrl-dpv-healthcare-risk-ranked.n3.
-% The agreement policy and mitigation suggestions are formula-valued terms.
-
+% ODRL + DPV healthcare risk ranking adapted from Eyeling.
+%
+% The scenario models a healthcare data-use agreement, patient needs, processing
+% clauses, risk scores, and mitigation suggestions.  Rules derive violations, raw
+% and normalized scores, risk levels, and small formula-valued suggestion graphs.
+%
+% This is one of the richer policy examples: it combines structured policy data,
+% ranked risk computation, and report-oriented materialization.
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(policyGraph, 2).
 materialize(contains, 2).
