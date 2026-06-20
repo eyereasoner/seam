@@ -385,6 +385,7 @@ Each example has a checked golden output in `examples/output`.
 | [`gdpr-compliance.pl`](../examples/gdpr-compliance.pl) | Checks GDPR-style processing compliance. | [`output/gdpr-compliance.pl`](../examples/output/gdpr-compliance.pl) |
 | [`good-cobbler.pl`](../examples/good-cobbler.pl) | Demonstrates term-level structure with a good-cobbler statement. | [`output/good-cobbler.pl`](../examples/output/good-cobbler.pl) |
 | [`gps.pl`](../examples/gps.pl) | Finds and verifies route paths. | [`output/gps.pl`](../examples/output/gps.pl) |
+| [`graph.pl`](../examples/graph.pl) | Derives transitive paths over French-city road links while showing the productive recursive rule order. | [`output/graph.pl`](../examples/output/graph.pl) |
 | [`graph-reachability.pl`](../examples/graph-reachability.pl) | Derives reachable nodes in a graph. | [`output/graph-reachability.pl`](../examples/output/graph-reachability.pl) |
 | [`gray-code-counter.pl`](../examples/gray-code-counter.pl) | Generates Gray-code counter states. | [`output/gray-code-counter.pl`](../examples/output/gray-code-counter.pl) |
 | [`greatest-lower-bound-uniqueness.pl`](../examples/greatest-lower-bound-uniqueness.pl) | Shows uniqueness of greatest lower bounds in a finite order instance. | [`output/greatest-lower-bound-uniqueness.pl`](../examples/output/greatest-lower-bound-uniqueness.pl) |
