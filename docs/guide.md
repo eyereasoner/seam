@@ -197,7 +197,7 @@ The default output is then:
 answer(case1, accepted).
 ```
 
-`materialize/2` is a declaration, not a logical rule to prove. It affects which predicates the CLI prints, not the meaning of the rules themselves.
+`materialize/2` is a declaration, not a logical rule to prove. It affects which predicates the CLI prints, not the meaning of the rules themselves. Materialized output facts are not inserted back into the running program for later goals; if later output predicates reuse the same derived helper relation, eyelang proves it again unless that helper is declared with `memoize/2`. Source facts are indexed and reused normally, and memoized solved goals are reused inside the same solver run.
 
 ## Writing programs
 
@@ -321,6 +321,7 @@ Each example has a checked golden output in `examples/output`.
 | [`bayes-diagnosis.pl`](../examples/bayes-diagnosis.pl) | Computes scaled Bayesian diagnosis posteriors. | [`output/bayes-diagnosis.pl`](../examples/output/bayes-diagnosis.pl) |
 | [`bayes-therapy.pl`](../examples/bayes-therapy.pl) | Ranks therapies using Bayesian disease likelihoods. | [`output/bayes-therapy.pl`](../examples/output/bayes-therapy.pl) |
 | [`beam-deflection.pl`](../examples/beam-deflection.pl) | Computes cantilever beam deflection. | [`output/beam-deflection.pl`](../examples/output/beam-deflection.pl) |
+| [`binomial-vandermonde.pl`](../examples/binomial-vandermonde.pl) | Computes binomial coefficients and checks Vandermonde's identity. | [`output/binomial-vandermonde.pl`](../examples/output/binomial-vandermonde.pl) |
 | [`blocks-world-planning.pl`](../examples/blocks-world-planning.pl) | Searches a finite blocks-world plan. | [`output/blocks-world-planning.pl`](../examples/output/blocks-world-planning.pl) |
 | [`bmi.pl`](../examples/bmi.pl) | Normalizes BMI inputs and classifies weight. | [`output/bmi.pl`](../examples/output/bmi.pl) |
 | [`braking-safety-worlds.pl`](../examples/braking-safety-worlds.pl) | Classifies braking safety under alternative worlds. | [`output/braking-safety-worlds.pl`](../examples/output/braking-safety-worlds.pl) |
@@ -328,6 +329,7 @@ Each example has a checked golden output in `examples/output`.
 | [`cache-performance.pl`](../examples/cache-performance.pl) | Summarizes cache latency performance. | [`output/cache-performance.pl`](../examples/output/cache-performance.pl) |
 | [`canary-release.pl`](../examples/canary-release.pl) | Decides canary rollout or rollback. | [`output/canary-release.pl`](../examples/output/canary-release.pl) |
 | [`cat-koko.pl`](../examples/cat-koko.pl) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.pl`](../examples/output/cat-koko.pl) |
+| [`catalan-convolution.pl`](../examples/catalan-convolution.pl) | Computes Catalan numbers by memoized convolution. | [`output/catalan-convolution.pl`](../examples/output/catalan-convolution.pl) |
 | [`chart-parser.pl`](../examples/chart-parser.pl) | Parses small sentences with a memoized chart parser. | [`output/chart-parser.pl`](../examples/output/chart-parser.pl) |
 | [`clinical-trial-screening.pl`](../examples/clinical-trial-screening.pl) | Screens candidates for a trial. | [`output/clinical-trial-screening.pl`](../examples/output/clinical-trial-screening.pl) |
 | [`collatz-1000.pl`](../examples/collatz-1000.pl) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.pl`](../examples/output/collatz-1000.pl) |
@@ -337,6 +339,7 @@ Each example has a checked golden output in `examples/output`.
 | [`composition-of-injective-functions-is-injective.pl`](../examples/composition-of-injective-functions-is-injective.pl) | Encodes composition and injectivity of finite functions. | [`output/composition-of-injective-functions-is-injective.pl`](../examples/output/composition-of-injective-functions-is-injective.pl) |
 | [`context-association.pl`](../examples/context-association.pl) | Associates named contexts with their contents. | [`output/context-association.pl`](../examples/output/context-association.pl) |
 | [`context-schema-audit.pl`](../examples/context-schema-audit.pl) | Audits mixed-arity context members with `holds/3`. | [`output/context-schema-audit.pl`](../examples/output/context-schema-audit.pl) |
+| [`continued-fraction-sqrt2.pl`](../examples/continued-fraction-sqrt2.pl) | Computes sqrt(2) continued-fraction convergents and Pell errors. | [`output/continued-fraction-sqrt2.pl`](../examples/output/continued-fraction-sqrt2.pl) |
 | [`control-system.pl`](../examples/control-system.pl) | Evaluates control-system measurements and targets. | [`output/control-system.pl`](../examples/output/control-system.pl) |
 | [`critical-path-schedule.pl`](../examples/critical-path-schedule.pl) | Computes earliest starts and the critical path for a project network. | [`output/critical-path-schedule.pl`](../examples/output/critical-path-schedule.pl) |
 | [`cyclic-path.pl`](../examples/cyclic-path.pl) | Computes paths in a cyclic graph. | [`output/cyclic-path.pl`](../examples/output/cyclic-path.pl) |
@@ -393,6 +396,7 @@ Each example has a checked golden output in `examples/output`.
 | [`heron-theorem.pl`](../examples/heron-theorem.pl) | Computes triangle area by Heron's theorem. | [`output/heron-theorem.pl`](../examples/output/heron-theorem.pl) |
 | [`ideal-gas-law.pl`](../examples/ideal-gas-law.pl) | Applies the ideal gas law. | [`output/ideal-gas-law.pl`](../examples/output/ideal-gas-law.pl) |
 | [`illegitimate-reasoning.pl`](../examples/illegitimate-reasoning.pl) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.pl`](../examples/output/illegitimate-reasoning.pl) |
+| [`integer-partitions.pl`](../examples/integer-partitions.pl) | Counts integer partitions with memoized dynamic programming. | [`output/integer-partitions.pl`](../examples/output/integer-partitions.pl) |
 | [`job-shop-scheduling.pl`](../examples/job-shop-scheduling.pl) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.pl`](../examples/output/job-shop-scheduling.pl) |
 | [`knapsack-optimization.pl`](../examples/knapsack-optimization.pl) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.pl`](../examples/output/knapsack-optimization.pl) |
 | [`knowledge-engineering-alignment-flow.pl`](../examples/knowledge-engineering-alignment-flow.pl) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.pl`](../examples/output/knowledge-engineering-alignment-flow.pl) |
@@ -401,8 +405,10 @@ Each example has a checked golden output in `examples/output`.
 | [`list-collection.pl`](../examples/list-collection.pl) | Demonstrates list and collection built-ins. | [`output/list-collection.pl`](../examples/output/list-collection.pl) |
 | [`lldm.pl`](../examples/lldm.pl) | Calculates leg-length discrepancy measurements. | [`output/lldm.pl`](../examples/output/lldm.pl) |
 | [`manufacturing-quality-control.pl`](../examples/manufacturing-quality-control.pl) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.pl`](../examples/output/manufacturing-quality-control.pl) |
+| [`matrix-chain-order.pl`](../examples/matrix-chain-order.pl) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.pl`](../examples/output/matrix-chain-order.pl) |
 | [`microgrid-dispatch.pl`](../examples/microgrid-dispatch.pl) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.pl`](../examples/output/microgrid-dispatch.pl) |
 | [`missionaries-cannibals.pl`](../examples/missionaries-cannibals.pl) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.pl`](../examples/output/missionaries-cannibals.pl) |
+| [`modular-exponentiation.pl`](../examples/modular-exponentiation.pl) | Computes modular powers by repeated squaring. | [`output/modular-exponentiation.pl`](../examples/output/modular-exponentiation.pl) |
 | [`monkey-bananas.pl`](../examples/monkey-bananas.pl) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.pl`](../examples/output/monkey-bananas.pl) |
 | [`n-queens-8.pl`](../examples/n-queens-8.pl) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.pl`](../examples/output/n-queens-8.pl) |
 | [`network-sla.pl`](../examples/network-sla.pl) | Checks network path SLA compliance. | [`output/network-sla.pl`](../examples/output/network-sla.pl) |
@@ -416,6 +422,7 @@ Each example has a checked golden output in `examples/output`.
 | [`path-discovery.pl`](../examples/path-discovery.pl) | Discovers bounded air-route paths. | [`output/path-discovery.pl`](../examples/output/path-discovery.pl) |
 | [`peano-arithmetic.pl`](../examples/peano-arithmetic.pl) | Computes Peano addition, multiplication, and factorial. | [`output/peano-arithmetic.pl`](../examples/output/peano-arithmetic.pl) |
 | [`peasant.pl`](../examples/peasant.pl) | Performs peasant multiplication and exponentiation. | [`output/peasant.pl`](../examples/output/peasant.pl) |
+| [`pell-equation.pl`](../examples/pell-equation.pl) | Generates Pell-equation solutions by recurrence. | [`output/pell-equation.pl`](../examples/output/pell-equation.pl) |
 | [`pendulum-period.pl`](../examples/pendulum-period.pl) | Computes simple pendulum periods. | [`output/pendulum-period.pl`](../examples/output/pendulum-period.pl) |
 | [`polynomial.pl`](../examples/polynomial.pl) | Finds complex integer polynomial roots. | [`output/polynomial.pl`](../examples/output/polynomial.pl) |
 | [`proof-contrapositive.pl`](../examples/proof-contrapositive.pl) | Models proof by contrapositive. | [`output/proof-contrapositive.pl`](../examples/output/proof-contrapositive.pl) |
@@ -433,9 +440,11 @@ Each example has a checked golden output in `examples/output`.
 | [`socrates.pl`](../examples/socrates.pl) | Derives that Socrates is mortal. | [`output/socrates.pl`](../examples/output/socrates.pl) |
 | [`stable-marriage.pl`](../examples/stable-marriage.pl) | Finds stable matchings by excluding blocking pairs. | [`output/stable-marriage.pl`](../examples/output/stable-marriage.pl) |
 | [`statistics-summary.pl`](../examples/statistics-summary.pl) | Computes population statistics for a sample. | [`output/statistics-summary.pl`](../examples/output/statistics-summary.pl) |
+| [`stirling-bell-numbers.pl`](../examples/stirling-bell-numbers.pl) | Computes Stirling numbers and Bell numbers. | [`output/stirling-bell-numbers.pl`](../examples/output/stirling-bell-numbers.pl) |
 | [`sudoku-4x4.pl`](../examples/sudoku-4x4.pl) | Solves a compact 4x4 Sudoku by finite constraint search. | [`output/sudoku-4x4.pl`](../examples/output/sudoku-4x4.pl) |
 | [`superdense-coding.pl`](../examples/superdense-coding.pl) | Models superdense-coding bit transmission. | [`output/superdense-coding.pl`](../examples/output/superdense-coding.pl) |
 | [`term-tools.pl`](../examples/term-tools.pl) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.pl`](../examples/output/term-tools.pl) |
+| [`totient-summatory.pl`](../examples/totient-summatory.pl) | Computes Euler totients and their summatory function. | [`output/totient-summatory.pl`](../examples/output/totient-summatory.pl) |
 | [`trust-flow-provenance-threshold.pl`](../examples/trust-flow-provenance-threshold.pl) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.pl`](../examples/output/trust-flow-provenance-threshold.pl) |
 | [`turing.pl`](../examples/turing.pl) | Simulates a binary-increment Turing machine. | [`output/turing.pl`](../examples/output/turing.pl) |
 | [`vector-similarity.pl`](../examples/vector-similarity.pl) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.pl`](../examples/output/vector-similarity.pl) |
@@ -444,8 +453,6 @@ Each example has a checked golden output in `examples/output`.
 | [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
 | [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |
 | [`zebra.pl`](../examples/zebra.pl) | Solves the zebra logic puzzle. | [`output/zebra.pl`](../examples/output/zebra.pl) |
-
-
 
 ## Golden outputs, tests, and conformance
 

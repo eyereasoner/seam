@@ -528,9 +528,19 @@ function whiteBoxCases() {
       name: 'challenging examples keep dynamic-programming predicates memoized',
       run: () => {
         const checks = [
+          ['binomial-vandermonde.pl', 'choose_step', 5, true],
+          ['catalan-convolution.pl', 'catalan', 2, false],
           ['chart-parser.pl', 'span', 4, true],
+          ['continued-fraction-sqrt2.pl', 'conv', 3, true],
           ['critical-path-schedule.pl', 'earliest_start', 2, false],
           ['critical-path-schedule.pl', 'finish_time', 2, false],
+          ['integer-partitions.pl', 'partitions', 3, true],
+          ['matrix-chain-order.pl', 'cost', 3, false],
+          ['modular-exponentiation.pl', 'pow_mod', 4, true],
+          ['pell-equation.pl', 'pell', 3, true],
+          ['stirling-bell-numbers.pl', 'stirling2', 3, true],
+          ['totient-summatory.pl', 'gcd', 3, true],
+          ['totient-summatory.pl', 'totient', 2, false],
           ['weighted-interval-scheduling.pl', 'best_from', 2, true],
         ];
         for (const [filename, name, arity, recursive] of checks) {

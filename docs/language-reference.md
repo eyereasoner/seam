@@ -534,7 +534,7 @@ materialize(status, 2).
 materialize(reason, 2).
 ```
 
-`materialize/2` affects host output selection only; it does not change the logical meaning of the program.
+`materialize/2` affects host output selection only; it does not change the logical meaning of the program. Materialized output facts are not asserted as new source facts for subsequent output goals. A host MAY solve several materialized predicates in one solver run, and memoized predicate answers MAY be reused within that run, but this reuse is controlled by `memoize/2`, not by materialization.
 
 ## 12. Eyelang Sockets
 
