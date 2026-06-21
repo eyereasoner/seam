@@ -477,10 +477,10 @@ function whiteBoxCases() {
       },
     },
     {
-      name: 'parser preserves dotted atom constants for web-style names',
+      name: 'parser preserves dotted atom constants for web-style terms',
       run: () => {
-        const clauses = parseProgramText('p(web(be.ugent, jos), org.schema).\n');
-        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(web(be.ugent, jos), org.schema)', 'head');
+        const clauses = parseProgramText('p(web(be.ugent, josd), org.schema).\n');
+        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(web(be.ugent, josd), org.schema)', 'head');
       },
     },
     {

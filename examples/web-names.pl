@@ -1,4 +1,4 @@
-% Compact web-style names without full URIs or global prefix tables.
+% Compact web-style terms without full URIs or global prefix tables.
 %
 % RDF-style URIs are globally meaningful but long, while QNames such as
 % schema:Person depend on an external prefix declaration.  This example uses an
@@ -7,8 +7,8 @@
 % is the local name inside that space.
 %
 % The important property is that the complete term is self-contained.  The local
-% name jos can safely occur in two spaces: web(be.ugent, jos) and
-% web(com.example, jos) are different Herbrand terms, so there is no hidden
+% name josd can safely occur in two spaces: web(be.ugent, josd) and
+% web(com.example, josd) are different Herbrand terms, so there is no hidden
 % prefix context and no accidental collision.  Tooling can still expand selected
 % web/2 terms to full URI strings when a base is known.
 
@@ -24,22 +24,22 @@ space_base(eyereasoner.github, "https://github.com/eyereasoner/").
 space_base(org.schema, "https://schema.org/").
 
 % A tiny graph using globally scoped web names as ordinary eyelang terms.
-triple(web(be.ugent, jos), web(org.schema, name), "Jos De Roo").
-triple(web(be.ugent, jos), web(org.schema, email), "josderoo@gmail.com").
-triple(web(be.ugent, jos), web(org.schema, affiliation), web(be.ugent, idlab)).
+triple(web(be.ugent, josd), web(org.schema, name), "Jos De Roo").
+triple(web(be.ugent, josd), web(org.schema, email), "josderoo@gmail.com").
+triple(web(be.ugent, josd), web(org.schema, affiliation), web(be.ugent, idlab)).
 triple(web(be.ugent, idlab), web(org.schema, parentOrganization), web(be.ugent, ugent)).
 
 triple(web(eyereasoner.github, eyelang), web(org.schema, name), "eyelang").
 triple(web(eyereasoner.github, eyelang), web(org.schema, codeRepository), "https://github.com/eyereasoner/eyelang").
-triple(web(eyereasoner.github, eyelang), web(org.schema, maintainer), web(be.ugent, jos)).
+triple(web(eyereasoner.github, eyelang), web(org.schema, maintainer), web(be.ugent, josd)).
 
 % Same local spelling, different global identity.
-triple(web(com.example, jos), web(org.schema, name), "Another Jos in another space").
+triple(web(com.example, josd), web(org.schema, name), "Another JosD in another space").
 
 % Keep URI expansion explicit and optional: reasoning uses web/2 terms, while
 % web_uri/2 is only a presentation bridge for selected names.
-published_name(web(be.ugent, jos)).
-published_name(web(com.example, jos)).
+published_name(web(be.ugent, josd)).
+published_name(web(com.example, josd)).
 published_name(web(be.ugent, idlab)).
 published_name(web(be.ugent, ugent)).
 published_name(web(eyereasoner.github, eyelang)).
@@ -66,7 +66,7 @@ affiliated_with(Person, Org) :-
 
 % A project contact is derived by joining the project's maintainer with the
 % maintainer's email.  The join works because both facts use the same complete
-% web(be.ugent, jos) term.
+% web(be.ugent, josd) term.
 project_contact(Project, Person, Email) :-
     triple(Project, web(org.schema, maintainer), Person),
     triple(Person, web(org.schema, email), Email).
