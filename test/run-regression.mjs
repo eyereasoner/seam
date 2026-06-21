@@ -477,10 +477,18 @@ function whiteBoxCases() {
       },
     },
     {
-      name: 'parser preserves dotted atom constants for web-style terms',
+      name: 'parser rejects unquoted dotted atoms to stay ISO-compatible',
       run: () => {
-        const clauses = parseProgramText('p(web(be.ugent, josd), org.schema).\n');
-        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(web(be.ugent, josd), org.schema)', 'head');
+        let threw = false;
+        try { parseProgramText('p(web(be.ugent, josd)).\n'); } catch (_) { threw = true; }
+        assertEqual(threw, true, 'unquoted dotted atoms must be quoted');
+      },
+    },
+    {
+      name: 'parser preserves quoted dotted atoms for web-style terms',
+      run: () => {
+        const clauses = parseProgramText("p(web('be.ugent', josd), 'org.schema').\n");
+        assertEqual(termToString(clauses[0].head, new Env(), true), "p(web('be.ugent', josd), 'org.schema')", 'head');
       },
     },
     {

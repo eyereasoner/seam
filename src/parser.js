@@ -23,9 +23,6 @@ function isNameContinueCode(code) {
   return code === 95 || isAsciiLetterCode(code) || isDigitCode(code);
 }
 
-function isDottedAtomContinue(source, pos) {
-  return source[pos] === '.' && isPlainAtomStartCode((source[pos + 1] ?? '').charCodeAt(0));
-}
 
 function isVariableStart(text) {
   const code = text.charCodeAt(0);
@@ -155,18 +152,7 @@ class Parser {
     if (isPlainAtomStartCode(ch.charCodeAt(0))) {
       const start = this.pos;
       this.take();
-      while (true) {
-        if (isNameContinueCode(this.peek().charCodeAt(0))) {
-          this.take();
-          continue;
-        }
-        if (isDottedAtomContinue(this.source, this.pos)) {
-          this.take();
-          this.take();
-          continue;
-        }
-        break;
-      }
+      while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
       return { type: TOK.ATOM, text: this.source.slice(start, this.pos), line };
     }
 
@@ -331,7 +317,7 @@ const SIMPLE_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const FAST_BINARY_FACT = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const FAST_BINARY_RULE = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\s*:-\s*([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const SIMPLE_VARIABLE = /^[_A-Z][A-Za-z0-9_]*$/;
-const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*(?:\.[a-z][A-Za-z0-9_]*)*$/;
+const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*$/;
 const GRAPHIC_ATOM = /^[#$&*+\-\/<=>?@^~\\]+$/;
 
 function parseClausesFastNoSource(source) {

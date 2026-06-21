@@ -451,7 +451,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`turing.pl`](../examples/turing.pl) | Simulates a binary-increment Turing machine. | [`output/turing.pl`](../examples/output/turing.pl) |
 | [`vector-similarity.pl`](../examples/vector-similarity.pl) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.pl`](../examples/output/vector-similarity.pl) |
 | [`vulnerability-impact.pl`](../examples/vulnerability-impact.pl) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.pl`](../examples/output/vulnerability-impact.pl) |
-| [`web-names.pl`](../examples/web-names.pl) | Uses compact `web(Space, Local)` terms as readable global names and expands selected names to URIs. | [`output/web-names.pl`](../examples/output/web-names.pl) |
+| [`web-names.pl`](../examples/web-names.pl) | Uses compact ISO-compatible `web(Space, Local)` terms as readable global identifiers and expands selected terms to URIs. | [`output/web-names.pl`](../examples/output/web-names.pl) |
 | [`weighted-interval-scheduling.pl`](../examples/weighted-interval-scheduling.pl) | Selects the best non-overlapping weighted intervals with memoized dynamic programming. | [`output/weighted-interval-scheduling.pl`](../examples/output/weighted-interval-scheduling.pl) |
 | [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
 | [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |

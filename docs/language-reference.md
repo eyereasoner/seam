@@ -119,7 +119,7 @@ The punctuation tokens are:
 (  )  [  ]  ,  |  .  :-
 ```
 
-A colon outside `:-` is not part of the language. Namespace-like names SHOULD be written as plain atom constants such as `person_type`, `odrl_permission`, or dotted atom constants such as `org.schema`.
+A colon outside `:-` is not part of the language. Namespace-like names SHOULD be written as ISO-compatible atom constants such as `person_type`, `odrl_permission`, or quoted atoms such as `'org.schema'`.
 
 ### 3.4 Variables
 
@@ -138,15 +138,15 @@ Each `_` anonymous variable occurrence is fresh.
 
 ### 3.5 Atom constants
 
-A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. For compact globally scoped names, eyelang also permits dot-separated plain atom segments, such as `be.ugent`, `org.schema`, or `eyereasoner.github`. A dot ends a clause only when it is not followed by another lowercase-starting segment. Names such as `a-b` or `http://example` MUST still be quoted if they are meant as one atom constant:
+A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. A dot is not part of a plain atom in the ISO-compatible subset; dotted web spaces such as `'be.ugent'` or `'org.schema'` MUST be quoted if they are meant as one atom constant. Names such as `a-b` or `http://example` MUST also be quoted if they are meant as one atom constant:
 
 ```prolog
 pat
 type
 case_123
-be.ugent
-org.schema
-eyereasoner.github
+'be.ugent'
+'org.schema'
+'eyereasoner.github'
 'a-b'
 'http://example'
 ```

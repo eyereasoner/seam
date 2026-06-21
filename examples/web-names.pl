@@ -2,13 +2,13 @@
 %
 % RDF-style URIs are globally meaningful but long, while QNames such as
 % schema:Person depend on an external prefix declaration.  This example uses an
-% eyelang-native alternative: web(Space, Local).  The first argument is a dotted
-% atom that names a vocabulary, organization, or authority; the second argument
-% is the local name inside that space.
+% eyelang-native alternative: web(Space, Local).  The first argument is an
+% ISO-compatible quoted atom naming a vocabulary, organization, or authority;
+% the second argument is the local name inside that space.
 %
 % The important property is that the complete term is self-contained.  The local
-% name josd can safely occur in two spaces: web(be.ugent, josd) and
-% web(com.example, josd) are different Herbrand terms, so there is no hidden
+% name josd can safely occur in two spaces: web('be.ugent', josd) and
+% web('com.example', josd) are different Herbrand terms, so there is no hidden
 % prefix context and no accidental collision.  Tooling can still expand selected
 % web/2 terms to full URI strings when a base is known.
 
@@ -18,32 +18,32 @@ materialize(project_contact, 3).
 materialize(same_local_name, 3).
 
 % Optional URI bases for spaces that we want to publish or display.
-space_base(be.ugent, "https://data.ugent.be/id/").
-space_base(com.example, "https://example.com/id/").
-space_base(eyereasoner.github, "https://github.com/eyereasoner/").
-space_base(org.schema, "https://schema.org/").
+space_base('be.ugent', "https://data.ugent.be/id/").
+space_base('com.example', "https://example.com/id/").
+space_base('eyereasoner.github', "https://github.com/eyereasoner/").
+space_base('org.schema', "https://schema.org/").
 
-% A tiny graph using globally scoped web names as ordinary eyelang terms.
-triple(web(be.ugent, josd), web(org.schema, name), "Jos De Roo").
-triple(web(be.ugent, josd), web(org.schema, email), "josderoo@gmail.com").
-triple(web(be.ugent, josd), web(org.schema, affiliation), web(be.ugent, idlab)).
-triple(web(be.ugent, idlab), web(org.schema, parentOrganization), web(be.ugent, ugent)).
+% A tiny graph using globally scoped web terms as ordinary eyelang terms.
+triple(web('be.ugent', josd), web('org.schema', name), "Jos De Roo").
+triple(web('be.ugent', josd), web('org.schema', email), "josderoo@gmail.com").
+triple(web('be.ugent', josd), web('org.schema', affiliation), web('be.ugent', idlab)).
+triple(web('be.ugent', idlab), web('org.schema', parentOrganization), web('be.ugent', ugent)).
 
-triple(web(eyereasoner.github, eyelang), web(org.schema, name), "eyelang").
-triple(web(eyereasoner.github, eyelang), web(org.schema, codeRepository), "https://github.com/eyereasoner/eyelang").
-triple(web(eyereasoner.github, eyelang), web(org.schema, maintainer), web(be.ugent, josd)).
+triple(web('eyereasoner.github', eyelang), web('org.schema', name), "eyelang").
+triple(web('eyereasoner.github', eyelang), web('org.schema', codeRepository), "https://github.com/eyereasoner/eyelang").
+triple(web('eyereasoner.github', eyelang), web('org.schema', maintainer), web('be.ugent', josd)).
 
 % Same local spelling, different global identity.
-triple(web(com.example, josd), web(org.schema, name), "Another JosD in another space").
+triple(web('com.example', josd), web('org.schema', name), "Another JosD in another space").
 
 % Keep URI expansion explicit and optional: reasoning uses web/2 terms, while
 % web_uri/2 is only a presentation bridge for selected names.
-published_name(web(be.ugent, josd)).
-published_name(web(com.example, josd)).
-published_name(web(be.ugent, idlab)).
-published_name(web(be.ugent, ugent)).
-published_name(web(eyereasoner.github, eyelang)).
-published_name(web(org.schema, maintainer)).
+published_name(web('be.ugent', josd)).
+published_name(web('com.example', josd)).
+published_name(web('be.ugent', idlab)).
+published_name(web('be.ugent', ugent)).
+published_name(web('eyereasoner.github', eyelang)).
+published_name(web('org.schema', maintainer)).
 
 web_uri(web(Space, Local), URI) :-
     published_name(web(Space, Local)),
@@ -53,28 +53,28 @@ web_uri(web(Space, Local), URI) :-
 
 % Organization membership follows parentOrganization links transitively.
 parent_organization(Unit, Org) :-
-    triple(Unit, web(org.schema, parentOrganization), Org).
+    triple(Unit, web('org.schema', parentOrganization), Org).
 parent_organization(Unit, Org) :-
-    triple(Unit, web(org.schema, parentOrganization), Mid),
+    triple(Unit, web('org.schema', parentOrganization), Mid),
     parent_organization(Mid, Org).
 
 affiliated_with(Person, Org) :-
-    triple(Person, web(org.schema, affiliation), Org).
+    triple(Person, web('org.schema', affiliation), Org).
 affiliated_with(Person, Org) :-
-    triple(Person, web(org.schema, affiliation), Unit),
+    triple(Person, web('org.schema', affiliation), Unit),
     parent_organization(Unit, Org).
 
 % A project contact is derived by joining the project's maintainer with the
 % maintainer's email.  The join works because both facts use the same complete
-% web(be.ugent, josd) term.
+% web('be.ugent', josd) term.
 project_contact(Project, Person, Email) :-
-    triple(Project, web(org.schema, maintainer), Person),
-    triple(Person, web(org.schema, email), Email).
+    triple(Project, web('org.schema', maintainer), Person),
+    triple(Person, web('org.schema', email), Email).
 
 % Demonstrate that local names are not global names.  This reports the deliberate
 % local-name collision without treating the two people as equal.
 local_name(Entity, Local) :-
-    triple(Entity, web(org.schema, name), _),
+    triple(Entity, web('org.schema', name), _),
     eq(Entity, web(_, Local)).
 
 same_local_name(A, B, Local) :-
