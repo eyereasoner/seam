@@ -371,7 +371,7 @@ p(?x) :- q(?x).
 q(?x) :- not(p(?x)).
 ```
 
-The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
+The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. This diagnostic is computed lazily when one of those properties or helper methods is first read, or eagerly when parsing with `{ analyzeNegation: true }` or `{ strictNegation: true }`. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
 
 ## 9. Standard built-in predicates
 

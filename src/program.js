@@ -14,6 +14,7 @@ export class Program {
       clause.index = index;
       this.indexClause(clause);
     }
+    this._negationAnalysis = null;
     this.applyDeclarations(options);
   }
   static parse(source, options = {}) {
@@ -101,7 +102,7 @@ export class Program {
       }
     }
     if (options.markRecursive !== false) this.markRecursivePredicates();
-    this.analyzeNegationStratification();
+    if (options.analyzeNegation === true || options.strictNegation === true) this.analyzeNegationStratification();
     if (options.strictNegation === true) this.assertStratifiedNegation();
   }
   markRecursivePredicates() {
@@ -192,19 +193,34 @@ export class Program {
     const strata = computeNegationStrata(groups, edges, indexByKey);
     for (const group of groups) group.negationStratum = strata.get(groupKeys.get(group)) ?? null;
 
-    this.negationDependencies = edges;
-    this.negationStratificationErrors = violations;
-    this.stratifiedNegation = violations.length === 0;
+    this._negationAnalysis = {
+      dependencies: edges,
+      errors: violations,
+      stratified: violations.length === 0,
+    };
     return violations;
   }
+  ensureNegationStratification() {
+    if (!this._negationAnalysis) this.analyzeNegationStratification();
+    return this._negationAnalysis;
+  }
+  get negationDependencies() {
+    return this.ensureNegationStratification().dependencies;
+  }
+  get negationStratificationErrors() {
+    return this.ensureNegationStratification().errors;
+  }
+  get stratifiedNegation() {
+    return this.ensureNegationStratification().stratified;
+  }
   assertStratifiedNegation() {
-    const violations = this.negationStratificationErrors ?? this.analyzeNegationStratification();
+    const violations = this.ensureNegationStratification().errors;
     if (violations.length === 0) return true;
     const details = violations.map((edge) => `${edge.from} depends negatively on ${edge.to}`).join('; ');
     throw new Error(`unstratified negation: ${details}`);
   }
   isStratifiedNegation() {
-    return this.stratifiedNegation !== false;
+    return this.ensureNegationStratification().stratified;
   }
 
   hasMaterializeDeclarations() {

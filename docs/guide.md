@@ -577,7 +577,7 @@ semidet(edge, 2).
 
 For large programs, keep helper predicates selective, bind arguments early, document intended calling patterns with `mode/3` when helpful, and declare focused output predicates with `materialize/2` when default output would otherwise solve broad helper goals.
 
-When using `not/1` over user-defined predicates, keep the dependency graph stratified: negative dependencies should not participate in recursion. The JavaScript API exposes `program.stratifiedNegation`, `program.negationStratificationErrors`, and `program.assertStratifiedNegation()` so host tools can warn or reject programs that rely on unstratified negation.
+When using `not/1` over user-defined predicates, keep the dependency graph stratified: negative dependencies should not participate in recursion. The JavaScript API exposes `program.stratifiedNegation`, `program.negationStratificationErrors`, and `program.assertStratifiedNegation()` so host tools can warn or reject programs that rely on unstratified negation. The diagnostic is lazy by default; use `{ analyzeNegation: true }` to compute it during parsing or `{ strictNegation: true }` to compute and reject unstratified programs.
 
 ## Implementation limits
 

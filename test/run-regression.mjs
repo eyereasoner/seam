@@ -397,6 +397,23 @@ function apiCases() {
       },
     },
     {
+      name: 'program keeps negation diagnostics lazy by default',
+      run: () => {
+        const program = Program.parse('p(a).\nq(?x) :- not(p(?x)).\n');
+        assertEqual(program._negationAnalysis, null, 'analysis starts lazy');
+        assertEqual(program.negationDependencies.length, 1, 'dependency count');
+        assertEqual(program._negationAnalysis !== null, true, 'analysis computed on demand');
+      },
+    },
+    {
+      name: 'analyzeNegation option computes diagnostics eagerly',
+      run: () => {
+        const program = Program.parse('p(a).\nq(?x) :- not(p(?x)).\n', { analyzeNegation: true });
+        assertEqual(program._negationAnalysis !== null, true, 'analysis computed eagerly');
+        assertEqual(program.stratifiedNegation, true, 'stratified negation');
+      },
+    },
+    {
       name: 'program reports stratified negation metadata',
       run: () => {
         const program = Program.parse(`

@@ -12,6 +12,7 @@ export interface EyelangRunOptions {
   sourceMetadata?: boolean;
   markRecursive?: boolean;
   strictNegation?: boolean;
+  analyzeNegation?: boolean;
   [key: string]: unknown;
 }
 
