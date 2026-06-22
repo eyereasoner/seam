@@ -21,7 +21,7 @@ export const variable = (name) => new Term(VAR, name);
 export const atom = (name) => new Term(ATOM, name);
 export const stringTerm = (value) => new Term(STRING, value);
 export const numberTerm = (value) => new Term(NUMBER, value);
-export const compound = (name, args = []) => new Term(COMPOUND, name, args);
+export const compound = (name, args = []) => args.length === 0 ? atom(name) : new Term(COMPOUND, name, args);
 export const emptyList = () => atom('[]');
 export const cons = (head, tail) => compound('.', [head, tail]);
 
@@ -113,17 +113,20 @@ export function unify(left, right, env) {
 }
 
 export function cloneTerm(term) {
+  if (term.type === COMPOUND && term.arity === 0) return atom(term.name);
   return new Term(term.type, term.name, term.args.map(cloneTerm));
 }
 
 export function freshTerm(term, suffix) {
   if (term.type === VAR) return variable(`${term.name}#${suffix}`);
+  if (term.type === COMPOUND && term.arity === 0) return atom(term.name);
   return new Term(term.type, term.name, term.args.map((arg) => freshTerm(arg, suffix)));
 }
 
 export function copyResolved(term, env) {
   const resolved = deref(term, env);
   if (resolved.type === VAR) return variable(resolved.name);
+  if (resolved.type === COMPOUND && resolved.arity === 0) return atom(resolved.name);
   return new Term(resolved.type, resolved.name, resolved.args.map((arg) => copyResolved(arg, env)));
 }
 

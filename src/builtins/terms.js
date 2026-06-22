@@ -20,7 +20,7 @@ function argReady(goal, env) {
 
 function compoundNameArgumentsReady(goal, env) {
   const term = deref(goal.args[0], env);
-  if (term.type === 'compound') return true;
+  if (term.type === 'compound' || term.type === 'atom') return true;
   return term.type === 'var' && lexicalValue(goal.args[1], env) !== null && properListItems(goal.args[2], env) !== null;
 }
 
@@ -45,9 +45,10 @@ function* argBuiltin({ goal, env }) {
 
 function* compoundNameArguments({ goal, env }) {
   const term = deref(goal.args[0], env);
-  if (term.type === 'compound') {
+  if (term.type === 'compound' || term.type === 'atom') {
     const next = env.clone();
-    if (unify(goal.args[1], atom(term.name), next) && unify(goal.args[2], listFromItems(term.args), next)) yield next;
+    const args = term.type === 'compound' ? term.args : [];
+    if (unify(goal.args[1], atom(term.name), next) && unify(goal.args[2], listFromItems(args), next)) yield next;
     return;
   }
   if (term.type !== 'var') return;

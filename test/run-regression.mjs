@@ -338,6 +338,18 @@ function apiCases() {
     },
 
     {
+      name: 'compound factory canonicalizes zero arity to atoms',
+      run: () => {
+        const nil = compound('nil', []);
+        assertEqual(nil.type, 'atom', 'type');
+        assertEqual(nil.name, 'nil', 'name');
+        assertEqual(nil.arity, 0, 'arity');
+        assertEqual(termToString(nil, new Env(), true), 'nil', 'readback');
+        assertEqual(unify(nil, atom('nil'), new Env()), true, 'unifies with atom');
+      },
+    },
+
+    {
       name: 'portable hash helpers match standard vectors',
       run: () => {
         assertEqual(hashHex('md5', 'abc'), '900150983cd24fb0d6963f7d28e17f72', 'md5');

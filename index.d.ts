@@ -128,6 +128,7 @@ export function variable(name: string): Term;
 export function atom(name: string): Term;
 export function stringTerm(value: string): Term;
 export function numberTerm(value: string | number): Term;
+/** Construct a compound term; an empty argument list is canonicalized to atom(name). */
 export function compound(name: string, args?: EyelangTerm[]): Term;
 export function emptyList(): Term;
 export function cons(head: EyelangTerm, tail: EyelangTerm): Term;

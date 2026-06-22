@@ -222,7 +222,7 @@ Arity-zero data is written as an atom constant, not as a zero-arity compound:
 value(example, nil).
 ```
 
-The syntax `nil()` is intentionally rejected so eyelang source and read-back output use one representation for arity-zero data.
+The syntax `nil()` is intentionally rejected so eyelang source and read-back output use one representation for arity-zero data. Host APIs SHOULD follow the same rule: constructing a term with an atom name and an empty argument list is canonicalized to the atom constant itself.
 
 ## 5. Terms
 
@@ -473,7 +473,7 @@ Context terms are data representations of atomic formulas and comma conjunctions
 | `holds(?context, ?name, ?args)` | Enumerates context members of any arity, exposing each member as atom constant `?name` plus a proper argument list `?args`. |
 | `functor(?term, ?name, ?arity)` | Decomposes a non-variable term into its name and arity. |
 | `arg(?index, ?term, ?arg)` | Extracts the 1-based argument of a compound term. |
-| `compound_name_arguments(?term, ?name, ?args)` | Decomposes a compound term or constructs one from an atom name and proper argument list. |
+| `compound_name_arguments(?term, ?name, ?args)` | Decomposes a compound term, treats an atom as a zero-argument term, or constructs a term from an atom name and proper argument list. Empty `?args` constructs an atom. |
 
 Example:
 
@@ -483,6 +483,7 @@ holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ?name, ?args).
 functor(route(alice, bob, 7), route, 3).
 arg(2, route(alice, bob, 7), bob).
 compound_name_arguments(?term, route, [alice, bob, 7]).
+compound_name_arguments(nil, nil, []).
 ```
 
 The first goal can yield `holds((name(alice, "Alice"), knows(alice, bob)), name(alice, "Alice")).` The second can yield `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ready, []).`, `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), name, [alice, "Alice"]).`, and `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), route, [alice, bob, 7]).`
