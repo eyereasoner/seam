@@ -1,1 +1,1 @@
-aggregate_min(S, item(Name, S), score(Name, S), BestS, Best)
+aggregate_min(?s, item(?name, ?s), score(?name, ?s), ?bests, ?best)

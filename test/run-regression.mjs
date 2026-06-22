@@ -65,7 +65,7 @@ function regressionCases() {
     {
       name: '--proof rule fact explanation output',
       run: () => runWhy({
-        program: 'type(socrates, man).\ntype(X, mortal) :- type(X, man).\n',
+        program: 'type(socrates, man).\ntype(?x, mortal) :- type(?x, man).\n',
         goalText: 'type(socrates, mortal)',
         expected: `type(socrates, mortal).
 why(
@@ -73,7 +73,7 @@ why(
   proof(
     goal(type(socrates, mortal)),
     by(rule("__FILE__", clause(2))),
-    bindings([binding("X", socrates)]),
+    bindings([binding("?x", socrates)]),
     uses([
       proof(
         goal(type(socrates, man)),
@@ -89,7 +89,7 @@ why(
     {
       name: '--proof numeric builtin explanation output',
       run: () => runWhy({
-        program: 'p(X) :- between(536, 536, X).\n',
+        program: 'p(?x) :- between(536, 536, ?x).\n',
         goalText: 'p(536)',
         expected: `p(536).
 why(
@@ -97,7 +97,7 @@ why(
   proof(
     goal(p(536)),
     by(rule("__FILE__", clause(1))),
-    bindings([binding("X", 536)]),
+    bindings([binding("?x", 536)]),
     uses([
       proof(
         goal(between(536, 536, 536)),
@@ -113,7 +113,7 @@ why(
     {
       name: '--proof list builtin explanation output',
       run: () => runWhy({
-        program: 'p(X) :- member(X, [a]).\n',
+        program: 'p(?x) :- member(?x, [a]).\n',
         goalText: 'p(a)',
         expected: `p(a).
 why(
@@ -121,7 +121,7 @@ why(
   proof(
     goal(p(a)),
     by(rule("__FILE__", clause(1))),
-    bindings([binding("X", a)]),
+    bindings([binding("?x", a)]),
     uses([
       proof(
         goal(member(a, [a])),
@@ -138,7 +138,7 @@ why(
       name: 'explanation backtracks across earlier subgoal alternatives',
       run: () => {
         const result = runWhyLoose({
-          program: 'p(ok) :- q(X), r(X).\nq(a).\nq(b).\nr(b).\n',
+          program: 'p(ok) :- q(?x), r(?x).\nq(a).\nq(b).\nr(b).\n',
           goalText: 'p(ok)',
         });
         assertIncludes(result.stdout, 'goal(q(b)),\n        by(fact("', 'stdout');
@@ -162,7 +162,7 @@ why(
       name: 'EYELANG_LOCAL_TIME fixes local_time builtin',
       run: () => {
         const result = runCli(['-'], {
-          input: 'materialize(local_time_answer, 1).\nlocal_time_answer(D) :- local_time(D).\n',
+          input: 'materialize(local_time_answer, 1).\nlocal_time_answer(?d) :- local_time(?d).\n',
           env: { EYELANG_LOCAL_TIME: '2024-01-02' },
         });
         assertEqual(result.status, 0, 'exit status');
@@ -175,7 +175,7 @@ why(
       run: () => {
         const result = runCli([]);
         assertEqual(result.status, 0, 'exit status');
-        assertIncludes(result.stdout, 'Usage:\n  eyelang [options] [file-or-url.pl|- ...]', 'stdout');
+        assertIncludes(result.stdout, 'Usage:\n  eyelang [options] [file-or-url.eye|- ...]', 'stdout');
         assertIncludes(result.stdout, '-p, --proof', 'stdout');
         assertIncludes(result.stdout, '-s, --stats', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
@@ -206,7 +206,7 @@ why(
     {
       name: 'stdin input is accepted',
       run: () => {
-        const result = runCli(['-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
+        const result = runCli(['-'], { input: 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
@@ -216,7 +216,7 @@ why(
     {
       name: '--proof enables materialization explanations',
       run: () => {
-        const result = runCli(['--proof', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
+        const result = runCli(['--proof', '-'], { input: 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertIncludes(result.stdout, 'q(a, b).\nwhy(', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
@@ -225,7 +225,7 @@ why(
     {
       name: '-p enables materialization explanations',
       run: () => {
-        const result = runCli(['-p', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
+        const result = runCli(['-p', '-'], { input: 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertIncludes(result.stdout, 'q(a, b).\nwhy(', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
@@ -236,7 +236,7 @@ why(
     {
       name: '--stats prints solver statistics to stderr',
       run: () => {
-        const result = runCli(['--stats', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
+        const result = runCli(['--stats', '-'], { input: 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
         assertIncludes(result.stderr, 'eyelang stats:\n', 'stderr');
@@ -246,7 +246,7 @@ why(
     {
       name: '-s prints solver statistics to stderr',
       run: () => {
-        const result = runCli(['-s', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
+        const result = runCli(['-s', '-'], { input: 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
         assertIncludes(result.stderr, 'eyelang stats:\n', 'stderr');
@@ -259,7 +259,7 @@ why(
       name: 'double dash permits option-shaped file names',
       run: () => {
         const file = path.join(tmp, '-h');
-        fs.writeFileSync(file, 'p(a, b).\nq(X, Y) :- p(X, Y).\n');
+        fs.writeFileSync(file, 'p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n');
         const result = runCli(['--', file]);
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
@@ -303,6 +303,10 @@ function documentationSyncCases() {
       run: () => assertArrayEqual(findBrokenDocLinks(), [], 'broken documentation links'),
     },
     {
+      name: 'documentation uses eyelang source style',
+      run: () => assertArrayEqual(documentationSourceStyleIssues(), [], 'documentation source style'),
+    },
+    {
       name: 'documented npm scripts exist in package.json',
       run: () => assertArrayEqual(missingDocumentedPackageScripts(), [], 'missing documented npm scripts'),
     },
@@ -328,7 +332,7 @@ function apiCases() {
     {
       name: 'run materialization through public API without proof by default',
       run: () => {
-        const result = run('p(a, b).\nq(X, Y) :- p(X, Y).\n');
+        const result = run('p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
       },
     },
@@ -347,7 +351,7 @@ function apiCases() {
     {
       name: 'run materialization can enable proof explanations',
       run: () => {
-        const result = run('p(a, b).\nq(X, Y) :- p(X, Y).\n', { proof: true });
+        const result = run('p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n', { proof: true });
         assertIncludes(result.stdout, 'q(a, b).\nwhy(', 'stdout');
       },
     },
@@ -355,7 +359,7 @@ function apiCases() {
     {
       name: 'run accepts Program instances',
       run: () => {
-        const program = Program.parse('p(a, b).\nq(X, Y) :- p(X, Y).\n');
+        const program = Program.parse('p(a, b).\nq(?x, ?y) :- p(?x, ?y).\n');
         const result = run(program);
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
       },
@@ -363,8 +367,8 @@ function apiCases() {
     {
       name: 'run keeps recursive materializations independent in one solver',
       run: () => {
-        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'alignment-demo.pl'), 'utf8');
-        const program = Program.parseSources([{ text, filename: 'alignment-demo.pl' }]);
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'alignment-demo.eye'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'alignment-demo.eye' }]);
         const result = run(program);
         assertIncludes(result.stdout, 'broaderTransitive(anpr_passenger_car, ref_car).\n', 'stdout');
         assertIncludes(result.stdout, 'narrowerOrEqualOf(anpr_passenger_car, ref_car).\n', 'stdout');
@@ -373,7 +377,7 @@ function apiCases() {
     {
       name: 'makeProgram creates indexed programs',
       run: () => {
-        const program = makeProgram('edge(a, b).\npath(X, Y) :- edge(X, Y).\n');
+        const program = makeProgram('edge(a, b).\npath(?x, ?y) :- edge(?x, ?y).\n');
         const group = program.findGroup('path', 2);
         assertEqual(Boolean(group), true, 'path/2 group exists');
         assertEqual(group.groupName ?? group.name, 'path', 'group name');
@@ -385,7 +389,7 @@ function apiCases() {
       run: () => {
         const program = Program.parse('p(a).\np(b).\n');
         const solver = new Solver(program);
-        const goal = parseGoalText('p(X)');
+        const goal = parseGoalText('p(?x)');
         const answers = [...solver.solve([goal], new Env(), 0)].map((env) => termToString(goal, env, true));
         assertEqual(answers.join('\n'), 'p(a)\np(b)', 'answers');
       },
@@ -395,7 +399,7 @@ function apiCases() {
       run: () => {
         const program = Program.parse('p(a).\np(b).\np(c).\n');
         const solver = new Solver(program, { solutionLimit: 2 });
-        const goal = parseGoalText('p(X)');
+        const goal = parseGoalText('p(?x)');
         const answers = [...solver.solve([goal], new Env(), 0)].map((env) => termToString(goal, env, true));
         assertEqual(answers.join('\n'), 'p(a)\np(b)', 'answers');
       },
@@ -408,9 +412,9 @@ function apiCases() {
           const next = env.clone();
           if (unify(goal.args[0], atom('world'), next)) yield next;
         });
-        const program = Program.parse('answer(X) :- hello(X).\n');
+        const program = Program.parse('answer(?x) :- hello(?x).\n');
         const solver = new Solver(program, { registry });
-        const goal = parseGoalText('answer(X)');
+        const goal = parseGoalText('answer(?x)');
         const answers = [...solver.solve([goal], new Env(), 0)].map((env) => termToString(goal, env, true));
         assertEqual(answers.join('\n'), 'answer(world)', 'answers');
       },
@@ -436,17 +440,17 @@ function whiteBoxCases() {
       name: 'unification binds variables in Env',
       run: () => {
         const env = new Env();
-        assertEqual(unify(variable('X'), atom('socrates'), env), true, 'unify result');
-        assertEqual(termToString(variable('X'), env, true), 'socrates', 'binding');
+        assertEqual(unify(variable('?x'), atom('socrates'), env), true, 'unify result');
+        assertEqual(termToString(variable('?x'), env, true), 'socrates', 'binding');
       },
     },
     {
       name: 'copyResolved and termIsGround follow bindings',
       run: () => {
         const env = new Env();
-        const term = compound('p', [variable('X'), atom('b')]);
+        const term = compound('p', [variable('?x'), atom('b')]);
         assertEqual(termIsGround(term, env), false, 'not ground before binding');
-        assertEqual(unify(variable('X'), atom('a'), env), true, 'bind X');
+        assertEqual(unify(variable('?x'), atom('a'), env), true, 'bind ?x');
         const resolved = copyResolved(term, env);
         assertEqual(termToString(resolved, new Env(), true), 'p(a, b)', 'resolved term');
         assertEqual(termIsGround(resolved), true, 'ground after copy');
@@ -472,8 +476,42 @@ function whiteBoxCases() {
     {
       name: 'parser preserves list syntax readback',
       run: () => {
-        const goal = parseGoalText('member(X, [a, b])');
-        assertEqual(termToString(goal, new Env(), true), 'member(X, [a, b])', 'goal');
+        const goal = parseGoalText('member(?x, [a, b])');
+        assertEqual(termToString(goal, new Env(), true), 'member(?x, [a, b])', 'goal');
+      },
+    },
+    {
+      name: 'parser accepts question-mark variables',
+      run: () => {
+        const goal = parseGoalText('member(?x, [a, b])');
+        assertEqual(termToString(goal, new Env(), true), 'member(?x, [a, b])', 'goal');
+      },
+    },
+    {
+      name: 'parser treats question-mark underscore as anonymous',
+      run: () => {
+        const clauses = parseProgramText('p(?_, ?_).\n');
+        const left = clauses[0].head.args[0].name;
+        const right = clauses[0].head.args[1].name;
+        assertEqual(left.startsWith('__anon'), true, 'left anonymous');
+        assertEqual(right.startsWith('__anon'), true, 'right anonymous');
+        assertEqual(left === right, false, 'fresh anonymous variables');
+      },
+    },
+    {
+      name: 'parser rejects old uppercase variable spelling',
+      run: () => {
+        let threw = false;
+        try { parseProgramText('p(X).\n'); } catch (_) { threw = true; }
+        assertEqual(threw, true, 'uppercase variable syntax rejected');
+      },
+    },
+    {
+      name: 'parser rejects bare underscore variable spelling',
+      run: () => {
+        let threw = false;
+        try { parseProgramText('p(_).\n'); } catch (_) { threw = true; }
+        assertEqual(threw, true, 'bare underscore syntax rejected');
       },
     },
     {
@@ -503,9 +541,9 @@ function whiteBoxCases() {
     {
       name: 'variantTerms recognizes alpha-equivalent goals',
       run: () => {
-        const left = parseGoalText('edge(X, Y)');
-        const right = parseGoalText('edge(A, B)');
-        const nonVariant = parseGoalText('edge(A, A)');
+        const left = parseGoalText('edge(?x, ?y)');
+        const right = parseGoalText('edge(?a, ?b)');
+        const nonVariant = parseGoalText('edge(?a, ?a)');
         assertEqual(variantTerms(left, new Env(), right, new Env()), true, 'variant');
         assertEqual(variantTerms(left, new Env(), nonVariant, new Env()), false, 'non-variant');
       },
@@ -521,18 +559,18 @@ function whiteBoxCases() {
     {
       name: 'parseProgramText returns clause objects',
       run: () => {
-        const clauses = parseProgramText('p(a).\nq(X) :- p(X).\n');
+        const clauses = parseProgramText('p(a).\nq(?x) :- p(?x).\n');
         assertEqual(clauses.length, 2, 'clause count');
-        assertEqual(termToString(clauses[1].head, new Env(), true), 'q(X)', 'rule head');
+        assertEqual(termToString(clauses[1].head, new Env(), true), 'q(?x)', 'rule head');
         assertEqual(clauses[1].body.length, 1, 'body length');
       },
     },
     {
       name: 'clause candidate selection uses scalar indexes with fallback',
       run: () => {
-        const program = Program.parse('edge(a, b).\nedge(c, d).\nedge(X, z).\n');
+        const program = Program.parse('edge(a, b).\nedge(c, d).\nedge(?x, z).\n');
         const group = program.findGroup('edge', 2);
-        const goal = parseGoalText('edge(a, Y)');
+        const goal = parseGoalText('edge(a, ?y)');
         const candidates = selectClauseCandidates(group, goal, new Env());
         assertEqual(candidates.primary.length, 1, 'primary bucket length');
         assertEqual(candidates.fallback.length, 1, 'fallback length');
@@ -540,53 +578,71 @@ function whiteBoxCases() {
       },
     },
     {
-      name: 'challenging examples keep dynamic-programming predicates memoized',
+      name: 'table declaration marks predicate group tabled',
+      run: () => {
+        const program = Program.parse('table(path, 2).\nedge(a, b).\npath(?x, ?y) :- edge(?x, ?y).\n');
+        const group = program.findGroup('path', 2);
+        assertEqual(Boolean(group), true, 'path/2 group exists');
+        assertEqual(group.tabled, true, 'path/2 tabled through table/2');
+      },
+    },
+    {
+      name: 'memoize fact does not table predicates',
+      run: () => {
+        const program = Program.parse('memoize(path, 2).\nedge(a, b).\npath(?x, ?y) :- edge(?x, ?y).\n');
+        const group = program.findGroup('path', 2);
+        assertEqual(Boolean(group), true, 'path/2 group exists');
+        assertEqual(group.tabled, false, 'memoize/2 is not a table declaration');
+      },
+    },
+    {
+      name: 'challenging examples keep dynamic-programming predicates tabled',
       run: () => {
         const checks = [
-          ['binomial-vandermonde.pl', 'choose_step', 5, true],
-          ['catalan-convolution.pl', 'catalan', 2, false],
-          ['chart-parser.pl', 'span', 4, true],
-          ['continued-fraction-sqrt2.pl', 'conv', 3, true],
-          ['critical-path-schedule.pl', 'earliest_start', 2, false],
-          ['critical-path-schedule.pl', 'finish_time', 2, false],
-          ['integer-partitions.pl', 'partitions', 3, true],
-          ['matrix-chain-order.pl', 'cost', 3, false],
-          ['modular-exponentiation.pl', 'pow_mod', 4, true],
-          ['pell-equation.pl', 'pell', 3, true],
-          ['stirling-bell-numbers.pl', 'stirling2', 3, true],
-          ['totient-summatory.pl', 'gcd', 3, true],
-          ['totient-summatory.pl', 'totient', 2, false],
-          ['weighted-interval-scheduling.pl', 'best_from', 2, true],
+          ['binomial-vandermonde.eye', 'choose_step', 5, true],
+          ['catalan-convolution.eye', 'catalan', 2, false],
+          ['chart-parser.eye', 'span', 4, true],
+          ['continued-fraction-sqrt2.eye', 'conv', 3, true],
+          ['critical-path-schedule.eye', 'earliest_start', 2, false],
+          ['critical-path-schedule.eye', 'finish_time', 2, false],
+          ['integer-partitions.eye', 'partitions', 3, true],
+          ['matrix-chain-order.eye', 'cost', 3, false],
+          ['modular-exponentiation.eye', 'pow_mod', 4, true],
+          ['pell-equation.eye', 'pell', 3, true],
+          ['stirling-bell-numbers.eye', 'stirling2', 3, true],
+          ['totient-summatory.eye', 'gcd', 3, true],
+          ['totient-summatory.eye', 'totient', 2, false],
+          ['weighted-interval-scheduling.eye', 'best_from', 2, true],
         ];
         for (const [filename, name, arity, recursive] of checks) {
           const text = fs.readFileSync(path.join(packageRoot, 'examples', filename), 'utf8');
           const program = Program.parseSources([{ text, filename }]);
           const group = program.findGroup(name, arity);
           assertEqual(Boolean(group), true, `${filename} ${name}/${arity} group exists`);
-          assertEqual(group.memoized, true, `${filename} ${name}/${arity} memoized`);
+          assertEqual(group.tabled, true, `${filename} ${name}/${arity} tabled`);
           assertEqual(group.recursive, recursive, `${filename} ${name}/${arity} recursive`);
         }
       },
     },
     {
-      name: 'n-queens example keeps diagonal checks memoized',
+      name: 'n-queens example keeps diagonal checks tabled',
       run: () => {
-        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'n-queens-8.pl'), 'utf8');
-        const program = Program.parseSources([{ text, filename: 'n-queens-8.pl' }]);
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'n-queens-8.eye'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'n-queens-8.eye' }]);
         const group = program.findGroup('no_diagonal_attack', 3);
         assertEqual(Boolean(group), true, 'no_diagonal_attack/3 group exists');
-        assertEqual(group.memoized, true, 'no_diagonal_attack/3 memoized');
+        assertEqual(group.tabled, true, 'no_diagonal_attack/3 tabled');
         assertEqual(group.recursive, true, 'no_diagonal_attack/3 recursive');
       },
     },
     {
-      name: 'collatz example keeps recursive trajectory predicate memoized',
+      name: 'collatz example keeps recursive trajectory predicate tabled',
       run: () => {
-        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'collatz-1000.pl'), 'utf8');
-        const program = Program.parseSources([{ text, filename: 'collatz-1000.pl' }]);
+        const text = fs.readFileSync(path.join(packageRoot, 'examples', 'collatz-1000.eye'), 'utf8');
+        const program = Program.parseSources([{ text, filename: 'collatz-1000.eye' }]);
         const group = program.findGroup('collatz', 2);
         assertEqual(Boolean(group), true, 'collatz/2 group exists');
-        assertEqual(group.memoized, true, 'collatz/2 memoized');
+        assertEqual(group.tabled, true, 'collatz/2 tabled');
         assertEqual(group.recursive, true, 'collatz/2 recursive');
       },
     },
@@ -594,7 +650,7 @@ function whiteBoxCases() {
       name: 'collatz example remains stack-safe for browser-sized stacks',
       run: () => {
         // Use a deliberately tiny stack to catch browser-worker recursion regressions.
-        const result = spawnSync(process.execPath, ['--stack-size=100', bin, 'examples/collatz-1000.pl'], {
+        const result = spawnSync(process.execPath, ['--stack-size=100', bin, 'examples/collatz-1000.eye'], {
           cwd: packageRoot,
           encoding: 'utf8',
         });
@@ -621,7 +677,7 @@ function sectionLabel(name) {
 }
 
 function runWhy({ program, goalText, expected }) {
-  const programFile = path.join(tmp, `${++tmpCounter}.pl`);
+  const programFile = path.join(tmp, `${++tmpCounter}.eye`);
   fs.writeFileSync(programFile, program);
   const goal = parseGoalText(goalText);
   fs.appendFileSync(programFile, `\nmaterialize(${goal.name}, ${goal.arity}).\n`);
@@ -640,7 +696,7 @@ function runWhy({ program, goalText, expected }) {
 }
 
 function runWhyLoose({ program, goalText }) {
-  const programFile = path.join(tmp, `${++tmpCounter}.pl`);
+  const programFile = path.join(tmp, `${++tmpCounter}.eye`);
   fs.writeFileSync(programFile, program);
   const goal = parseGoalText(goalText);
   fs.appendFileSync(programFile, `\nmaterialize(${goal.name}, ${goal.arity}).\n`);
@@ -654,8 +710,8 @@ function runWhyLoose({ program, goalText }) {
 
 function listExampleNames() {
   return fs.readdirSync(path.join(packageRoot, 'examples'))
-    .filter((name) => name.endsWith('.pl'))
-    .map((name) => name.slice(0, -3))
+    .filter((name) => name.endsWith('.eye'))
+    .map((name) => name.slice(0, -4))
     .sort();
 }
 
@@ -664,17 +720,17 @@ function guideExampleCatalogIssues() {
   const expected = listExampleNames();
   const guide = fs.readFileSync(path.join(packageRoot, 'docs', 'guide.md'), 'utf8');
   const section = between(guide, '## Example catalog', '## Golden outputs, tests, and conformance');
-  const rows = [...section.matchAll(/^\| \[`([A-Za-z0-9_-]+)\.pl`\]\(\.\.\/examples\/\1\.pl\) \|[^|]+\| \[`output\/\1\.pl`\]\(\.\.\/examples\/output\/\1\.pl\) \|$/gm)]
+  const rows = [...section.matchAll(/^\| \[`([A-Za-z0-9_-]+)\.eye`\]\(\.\.\/examples\/\1\.eye\) \|[^|]+\| \[`output\/\1\.eye`\]\(\.\.\/examples\/output\/\1\.eye\) \|$/gm)]
     .map((match) => match[1]);
-  const sourceNames = [...section.matchAll(/\.\.\/examples\/([A-Za-z0-9_-]+)\.pl/g)].map((match) => match[1]).sort();
-  const outputNames = [...section.matchAll(/\.\.\/examples\/output\/([A-Za-z0-9_-]+)\.pl/g)].map((match) => match[1]).sort();
+  const sourceNames = [...section.matchAll(/\.\.\/examples\/([A-Za-z0-9_-]+)\.eye/g)].map((match) => match[1]).sort();
+  const outputNames = [...section.matchAll(/\.\.\/examples\/output\/([A-Za-z0-9_-]+)\.eye/g)].map((match) => match[1]).sort();
   if (rows.length !== expected.length) issues.push(`expected ${expected.length} complete example rows, found ${rows.length}`);
   issues.push(...arrayDiffMessages(rows.sort(), expected, 'complete example rows'));
   issues.push(...arrayDiffMessages(sourceNames, expected, 'source links'));
   issues.push(...arrayDiffMessages(outputNames, expected, 'output links'));
   for (const name of expected) {
-    const outputPath = path.join(packageRoot, 'examples', 'output', `${name}.pl`);
-    if (!fs.existsSync(outputPath)) issues.push(`missing examples/output/${name}.pl`);
+    const outputPath = path.join(packageRoot, 'examples', 'output', `${name}.eye`);
+    if (!fs.existsSync(outputPath)) issues.push(`missing examples/output/${name}.eye`);
   }
   return issues.sort();
 }
@@ -687,8 +743,8 @@ function playgroundExampleIssues() {
   if (match == null) return ['playground EXAMPLES array not found'];
   const examples = JSON.parse(match[1]).sort();
   issues.push(...arrayDiffMessages(examples, expected, 'playground EXAMPLES'));
-  if (!html.includes('new URL(`./examples/${name}.pl`, location.href)')) {
-    issues.push('playground must load selected examples from relative ./examples/*.pl URLs');
+  if (!html.includes('new URL(`./examples/${name}.eye`, location.href)')) {
+    issues.push('playground must load selected examples from relative ./examples/*.eye URLs');
   }
   if (!html.includes("fetch(exampleUrl, { cache: 'no-store' })")) {
     issues.push('playground must fetch selected example source from its relative URL');
@@ -849,6 +905,33 @@ function misleadingDependencyInstallDocs() {
     }
   }
   return [...new Set(misleading)].sort();
+}
+
+function documentationSourceStyleIssues() {
+  const issues = [];
+  const docsRoot = path.join(packageRoot, 'docs');
+  const docs = [
+    path.join(docsRoot, 'guide.md'),
+    path.join(docsRoot, 'language-reference.md'),
+  ];
+  for (const file of docs) {
+    const text = fs.readFileSync(file, 'utf8');
+    if (text.includes('```prolog')) {
+      issues.push(`${path.relative(packageRoot, file)}: use eyelang code fences instead of prolog fences`);
+    }
+  }
+
+  const reference = fs.readFileSync(path.join(docsRoot, 'language-reference.md'), 'utf8');
+  const builtins = between(reference, '## 9. Standard built-in predicates', '## 10. Implementation-specific built-ins');
+  const staleMetaVariables = /`[^`]*(?<!\?)(?:\b(?:A|B|C|D|N|T|Low|High|Start|Needle|Context|Search|Generator|Test|Goal)\b)[^`]*`/;
+  for (const [index, line] of builtins.split('\n').entries()) {
+    if (!line.trim().startsWith('|')) continue;
+    if (line.includes('EYELANG_LOCAL_TIME=')) continue;
+    if (staleMetaVariables.test(line)) {
+      issues.push(`docs/language-reference.md section 9 line ${index + 1}: stale Prolog-style metavariable in built-in description: ${line.trim()}`);
+    }
+  }
+  return issues.sort();
 }
 
 function findBrokenDocLinks() {

@@ -39,7 +39,7 @@ export interface EyelangPredicateGroup {
   clauses: EyelangClause[];
   argIndexes: unknown[];
   pairIndexes: unknown[];
-  memoized: boolean;
+  tabled: boolean;
   recursive: boolean;
 }
 

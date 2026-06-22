@@ -1,1 +1,1 @@
-sumall(S, score(_Item, S), Sum)
+sumall(?s, score(?_item, ?s), ?sum)

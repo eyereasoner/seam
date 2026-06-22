@@ -22,13 +22,13 @@ export function runConformance(reporter = new TestReporter(), requestedFilter = 
 function listCaseFiles(filter = null) {
   const casesDir = path.join(root, 'conformance', 'cases');
   return fs.readdirSync(casesDir)
-    .filter((name) => name.endsWith('.pl'))
-    .filter((name) => filter == null || name.includes(filter) || name.slice(0, -3) === filter)
+    .filter((name) => name.endsWith('.eye'))
+    .filter((name) => filter == null || name.includes(filter) || name.slice(0, -4) === filter)
     .sort();
 }
 
 function runCaseFile(reporter, file) {
-  const name = file.slice(0, -3);
+  const name = file.slice(0, -4);
   reporter.test(name, () => runCase(name, file));
 }
 
@@ -36,7 +36,7 @@ function runCase(name, file) {
   const casesDir = path.join(root, 'conformance', 'cases');
   const expectedDir = path.join(root, 'conformance', 'expected');
   const programFile = path.join(casesDir, file);
-  const expected = path.join(expectedDir, `${name}.pl`);
+  const expected = path.join(expectedDir, `${name}.eye`);
   const text = fs.readFileSync(programFile, 'utf8');
   const program = Program.parseSources([{ text, filename: file }], { sourceMetadata: false, markRecursive: false });
   const actual = run(program).stdout;

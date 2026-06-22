@@ -121,7 +121,7 @@ export class Solver {
         const group = this.program.findGroup(goal.name, goal.arity);
         if (!group) break;
 
-        if (group.memoized) {
+        if (group.tabled) {
           const key = memoKey(goal, env);
           if (key.hasBound) {
             const mapKey = `${goal.name}/${goal.arity}:${key.text}`;
@@ -162,7 +162,7 @@ export class Solver {
     if (goal.type !== COMPOUND) return;
     const group = this.program.findGroup(goal.name, goal.arity);
     if (!group) return;
-    if (group.memoized) {
+    if (group.tabled) {
       yield* this.solveMemoizedGoal(group, goal, rest, env, depth);
       return;
     }

@@ -24,9 +24,10 @@ function isNameContinueCode(code) {
 }
 
 
-function isVariableStart(text) {
-  const code = text.charCodeAt(0);
-  return code === 95 || (code >= 65 && code <= 90);
+function isQuestionVariableStart(source, pos) {
+  if (source[pos] !== '?') return false;
+  const code = (source[pos + 1] ?? '').charCodeAt(0);
+  return code === 95 || isAsciiLetterCode(code);
 }
 
 function isPlainAtomStartCode(code) {
@@ -140,12 +141,13 @@ class Parser {
       return { type: TOK.NUMBER, text: this.source.slice(start, this.pos), line };
     }
 
-    if (isVariableStart(ch)) {
+    if (isQuestionVariableStart(this.source, this.pos)) {
       const start = this.pos;
+      this.take(); // ?
       this.take();
       while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
       let text = this.source.slice(start, this.pos);
-      if (text === '_') text = `__anon${this.anonymous++}`;
+      if (text === '?_') text = `__anon${this.anonymous++}`;
       return { type: TOK.VAR, text, line };
     }
 
@@ -316,7 +318,7 @@ function isSimpleName(text) {
 const SIMPLE_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const FAST_BINARY_FACT = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const FAST_BINARY_RULE = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\s*:-\s*([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
-const SIMPLE_VARIABLE = /^[_A-Z][A-Za-z0-9_]*$/;
+const SIMPLE_VARIABLE = /^\?[A-Za-z_][A-Za-z0-9_]*$/;
 const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*$/;
 const GRAPHIC_ATOM = /^[#$&*+\-\/<=>?@^~\\]+$/;
 
@@ -340,7 +342,7 @@ function parseClausesFastNoSource(source) {
   const scalarOrVariableFast = (text) => {
     if (!text || !isFastScalarToken(text)) throw new Error('bad simple term');
     const first = text.charCodeAt(0);
-    if (text === '_') return variable(`__anon${anonymous++}`);
+    if (text === '?_') return variable(`__anon${anonymous++}`);
     if (SIMPLE_VARIABLE.test(text)) {
       const existing = variableCache.get(text);
       if (existing) return existing;

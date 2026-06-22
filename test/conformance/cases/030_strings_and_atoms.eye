@@ -1,0 +1,4 @@
+% Reference 9.6: atom and string built-ins.
+answer(str_concat, ?x) :- str_concat("eye", "lang", ?x).
+answer(contains, true) :- contains("eyelang", "yel").
+materialize(answer, 2).

@@ -4,8 +4,8 @@ This directory contains the executable conformance cases for the Eyelang languag
 
 The suite is intentionally file-based so another implementation can run the same programs and compare exact standard output. A case consists of:
 
-- `conformance/cases/<name>.pl` — input program;
-- `conformance/expected/<name>.pl` — exact expected standard output, stored as eyelang-readable facts.
+- `conformance/cases/<name>.eye` — input program;
+- `conformance/expected/<name>.eye` — exact expected standard output, stored as eyelang-readable facts.
 
 The current runner compares standard output from normal execution. Proof explanations are opt-in in the CLI and are not part of these conformance goldens. Standard error, performance, and resource limits are outside this suite.
 

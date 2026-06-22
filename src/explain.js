@@ -69,7 +69,7 @@ function* proveGoalAll(program, goal, env, depth, maxDepth, registry, active) {
 
   const group = program.findGroup(goal.name, goal.arity);
   if (!group) return;
-  if (!group.memoized && activeVariant(goal, env, active)) return;
+  if (!group.tabled && activeVariant(goal, env, active)) return;
 
   const candidates = selectClauseCandidates(group, goal, env);
   for (const pass of [candidates.primary, candidates.fallback]) {

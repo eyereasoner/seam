@@ -4,7 +4,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20761726-blue.svg)](https://doi.org/10.5281/zenodo.20761726)
 
 Eyelang is a small logic programming language for rules, goals, answers, and proofs.
-Its source syntax is a deliberately small subset of ordinary Prolog term and Horn-clause syntax.
+Its source syntax is Prolog-like Horn-clause syntax with a few deliberate eyelang choices, such as `?x` variables for N3/SPARQL-style readability and explicit `table(path, 2).` declarations for tabled predicates.
 It grew out of logic-language experiments in the EYE/N3 reasoning tradition, but is packaged here as its own project.
 
 ## Install and run
@@ -12,8 +12,8 @@ It grew out of logic-language experiments in the EYE/N3 reasoning tradition, but
 Eyelang has no runtime npm dependencies and no build step. From a source checkout, run the CLI directly with Node.js 18 or newer:
 
 ```bash
-node bin/eyelang.js examples/ancestor.pl
-node bin/eyelang.js --proof examples/socrates.pl
+node bin/eyelang.js examples/ancestor.eye
+node bin/eyelang.js --proof examples/socrates.eye
 printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
 ```
 
@@ -21,7 +21,7 @@ For one-off local CLI use from the checkout, npm can run the package bin without
 
 ```bash
 npm exec -- eyelang --version
-npm exec -- eyelang examples/ancestor.pl
+npm exec -- eyelang examples/ancestor.eye
 ```
 
 To install the checkout's `eyelang` command on your `PATH`, use npm's package link:

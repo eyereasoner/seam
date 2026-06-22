@@ -39,7 +39,7 @@ export class Program {
       clauses: [],
       argIndexes: Array.from({ length: arity }, () => ({ buckets: new Map(), fallback: [] })),
       pairIndexes: [],
-      memoized: false,
+      tabled: false,
       recursive: false,
     };
     if (arity > 2) {
@@ -74,9 +74,9 @@ export class Program {
       const [name, arity] = h.args;
       if (name.type !== ATOM || arity.type !== 'number') continue;
       const key = `${name.name}/${Number(arity.name)}`;
-      if (h.name === 'memoize') {
+      if (h.name === 'table') {
         const group = this.groups.get(key);
-        if (group) group.memoized = true;
+        if (group) group.tabled = true;
       } else if (h.name === 'materialize') {
         this.hasMaterialize = true;
         this.materializedGroups.add(key);
