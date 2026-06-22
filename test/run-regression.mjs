@@ -178,7 +178,10 @@ why(
         assertIncludes(result.stdout, 'Usage:\n  eyelang [options] [file-or-url.eye|- ...]', 'stdout');
         assertIncludes(result.stdout, '-p, --proof', 'stdout');
         assertIncludes(result.stdout, '-s, --stats', 'stdout');
+        assertIncludes(result.stdout, '-v, --version', 'stdout');
         assertIncludes(result.stdout, '-w, --warnings', 'stdout');
+        assertIncludes(result.stdout, '-v, --version         Show the package version and exit.\n  -w, --warnings        Print non-fatal portability warnings to stderr.', 'stdout');
+        assertIncludes(result.stdout, 'Read an Eyelang program', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
@@ -186,6 +189,15 @@ why(
       name: 'version comes from package.json',
       run: () => {
         const result = runCli(['--version']);
+        assertEqual(result.status, 0, 'exit status');
+        assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
+        assertEqual(result.stderr, '', 'stderr');
+      },
+    },
+    {
+      name: '-v shows package version',
+      run: () => {
+        const result = runCli(['-v']);
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
         assertEqual(result.stderr, '', 'stderr');

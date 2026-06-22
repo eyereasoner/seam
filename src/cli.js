@@ -141,8 +141,8 @@ Usage:
   eyelang [options] [file-or-url.eye|- ...]
 
 Input:
-  file-or-url.eye        Read a Eyelang program from a local file or http(s) URL.
-  -                     Read a Eyelang program from standard input.
+  file-or-url.eye       Read an Eyelang program from a local file or http(s) URL.
+  -                     Read an Eyelang program from standard input.
 
 Options:
   -h, --help            Show this help text and exit.
