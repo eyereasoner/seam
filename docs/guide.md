@@ -458,7 +458,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`turing.eye`](../examples/turing.eye) | Simulates a binary-increment Turing machine. | [`output/turing.eye`](../examples/output/turing.eye) |
 | [`vector-similarity.eye`](../examples/vector-similarity.eye) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.eye`](../examples/output/vector-similarity.eye) |
 | [`vulnerability-impact.eye`](../examples/vulnerability-impact.eye) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.eye`](../examples/output/vulnerability-impact.eye) |
-| [`web-names.eye`](../examples/web-names.eye) | Uses compact Prolog-like `web(?space, ?local)` terms as readable global identifiers and expands selected terms to URIs. | [`output/web-names.eye`](../examples/output/web-names.eye) |
+| [`web-names.eye`](../examples/web-names.eye) | Uses angle-bracket IRI atoms as first-class web names and joins them across a tiny graph. | [`output/web-names.eye`](../examples/output/web-names.eye) |
 | [`weighted-interval-scheduling.eye`](../examples/weighted-interval-scheduling.eye) | Selects the best non-overlapping weighted intervals with tabled dynamic programming. | [`output/weighted-interval-scheduling.eye`](../examples/output/weighted-interval-scheduling.eye) |
 | [`witch.eye`](../examples/witch.eye) | Derives the classic “burn the witch” rule chain. | [`output/witch.eye`](../examples/output/witch.eye) |
 | [`wolf-goat-cabbage.eye`](../examples/wolf-goat-cabbage.eye) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.eye`](../examples/output/wolf-goat-cabbage.eye) |

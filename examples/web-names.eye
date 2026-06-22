@@ -1,83 +1,39 @@
-% Compact web-style terms without full URIs or global prefix tables.
+% Web names as first-class Eyelang atoms.
 %
-% RDF-style URIs are globally meaningful but long, while QNames such as
-% schema:Person depend on an external prefix declaration.  This example uses an
-% eyelang-native alternative: web(Space, Local).  The first argument is an
-% ISO-compatible quoted atom naming a vocabulary, organization, or authority;
-% the second argument is the local name inside that space.
-%
-% The important property is that the complete term is self-contained.  The local
-% name josd can safely occur in two spaces: web('be.ugent', josd) and
-% web('com.example', josd) are different Herbrand terms, so there is no hidden
-% prefix context and no accidental collision.  Tooling can still expand selected
-% web/2 terms to full URI strings when a base is known.
+% Angle-bracket IRI atoms are ordinary atoms with globally meaningful names.
+% They are self-contained, require no prefix declarations, and can be joined
+% directly across rules just like any other atom.
 
-materialize(web_uri, 2).
 materialize(affiliated_with, 2).
 materialize(project_contact, 3).
-materialize(same_local_name, 3).
 
-% Optional URI bases for spaces that we want to publish or display.
-space_base('be.ugent', "https://data.ugent.be/id/").
-space_base('com.example', "https://example.com/id/").
-space_base('eyereasoner.github', "https://github.com/eyereasoner/").
-space_base('org.schema', "https://schema.org/").
+table(parent_organization, 2).
 
-% A tiny graph using globally scoped web terms as ordinary eyelang terms.
-triple(web('be.ugent', josd), web('org.schema', name), "Jos De Roo").
-triple(web('be.ugent', josd), web('org.schema', email), "josderoo@gmail.com").
-triple(web('be.ugent', josd), web('org.schema', affiliation), web('be.ugent', idlab)).
-triple(web('be.ugent', idlab), web('org.schema', parentOrganization), web('be.ugent', ugent)).
+% A tiny graph using absolute IRI atoms directly.
+triple(<https://data.ugent.be/id/josd>, <https://schema.org/name>, "Jos De Roo").
+triple(<https://data.ugent.be/id/josd>, <https://schema.org/email>, "josderoo@gmail.com").
+triple(<https://data.ugent.be/id/josd>, <https://schema.org/affiliation>, <https://data.ugent.be/id/idlab>).
+triple(<https://data.ugent.be/id/idlab>, <https://schema.org/parentOrganization>, <https://data.ugent.be/id/ugent>).
 
-triple(web('eyereasoner.github', eyelang), web('org.schema', name), "eyelang").
-triple(web('eyereasoner.github', eyelang), web('org.schema', codeRepository), "https://github.com/eyereasoner/eyelang").
-triple(web('eyereasoner.github', eyelang), web('org.schema', maintainer), web('be.ugent', josd)).
-
-% Same local spelling, different global identity.
-triple(web('com.example', josd), web('org.schema', name), "Another JosD in another space").
-
-% Keep URI expansion explicit and optional: reasoning uses web/2 terms, while
-% web_uri/2 is only a presentation bridge for selected names.
-published_name(web('be.ugent', josd)).
-published_name(web('com.example', josd)).
-published_name(web('be.ugent', idlab)).
-published_name(web('be.ugent', ugent)).
-published_name(web('eyereasoner.github', eyelang)).
-published_name(web('org.schema', maintainer)).
-
-web_uri(web(?space, ?local), ?uri) :-
-    published_name(web(?space, ?local)),
-    space_base(?space, ?base),
-    atom_string(?local, ?localtext),
-    str_concat(?base, ?localtext, ?uri).
+triple(<https://github.com/eyereasoner/eyelang>, <https://schema.org/name>, "eyelang").
+triple(<https://github.com/eyereasoner/eyelang>, <https://schema.org/codeRepository>, <https://github.com/eyereasoner/eyelang>).
+triple(<https://github.com/eyereasoner/eyelang>, <https://schema.org/maintainer>, <https://data.ugent.be/id/josd>).
 
 % Organization membership follows parentOrganization links transitively.
 parent_organization(?unit, ?org) :-
-    triple(?unit, web('org.schema', parentOrganization), ?org).
+    triple(?unit, <https://schema.org/parentOrganization>, ?org).
 parent_organization(?unit, ?org) :-
-    triple(?unit, web('org.schema', parentOrganization), ?mid),
+    triple(?unit, <https://schema.org/parentOrganization>, ?mid),
     parent_organization(?mid, ?org).
 
 affiliated_with(?person, ?org) :-
-    triple(?person, web('org.schema', affiliation), ?org).
+    triple(?person, <https://schema.org/affiliation>, ?org).
 affiliated_with(?person, ?org) :-
-    triple(?person, web('org.schema', affiliation), ?unit),
+    triple(?person, <https://schema.org/affiliation>, ?unit),
     parent_organization(?unit, ?org).
 
 % A project contact is derived by joining the project's maintainer with the
-% maintainer's email.  The join works because both facts use the same complete
-% web('be.ugent', josd) term.
+% maintainer's email.  The join works because both facts use the same IRI atom.
 project_contact(?project, ?person, ?email) :-
-    triple(?project, web('org.schema', maintainer), ?person),
-    triple(?person, web('org.schema', email), ?email).
-
-% Demonstrate that local names are not global names.  This reports the deliberate
-% local-name collision without treating the two people as equal.
-local_name(?entity, ?local) :-
-    triple(?entity, web('org.schema', name), ?_),
-    eq(?entity, web(?_, ?local)).
-
-same_local_name(?a, ?b, ?local) :-
-    local_name(?a, ?local),
-    local_name(?b, ?local),
-    lt(?a, ?b).
+    triple(?project, <https://schema.org/maintainer>, ?person),
+    triple(?person, <https://schema.org/email>, ?email).
