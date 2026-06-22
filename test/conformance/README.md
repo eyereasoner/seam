@@ -20,7 +20,7 @@ Expected-warning cases consist of:
 - `conformance/expected-warnings/<name>.eye` — exact expected standard output;
 - `conformance/expected-warnings/<name>.txt` — exact expected standard error.
 
-Case names may be nested in category directories such as `atoms/`, `variables/`, `negation/`, or `syntax/`. Expected files mirror the same relative path.
+Case names may be nested in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, or `syntax/`. Expected files mirror the same relative path.
 
 ## Running the suite
 

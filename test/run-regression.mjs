@@ -371,7 +371,7 @@ function documentationSyncCases() {
       run: () => {
         const report = buildConformanceReport();
         assertArrayEqual(report.issues, [], 'conformance report issues');
-        assertEqual(report.total.total >= 150, true, 'conformance case count');
+        assertEqual(report.total.total >= 250, true, 'conformance case count');
         assertEqual(report.total.positive + report.total.errors + report.total.warnings, report.total.total, 'conformance total');
         const text = formatConformanceReport(report);
         assertIncludes(text, '| variables |', 'report');
