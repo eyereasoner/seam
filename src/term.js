@@ -135,6 +135,14 @@ export function termIsGround(term, env = new Env()) {
 
 const graphicAtomChars = new Set('#$&*+-/<=>?@^~\\'.split(''));
 
+function isAbsoluteIriText(text) {
+  return /^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>"'{}|\\^`]*$/.test(text);
+}
+
+function writeAngleIri(name) {
+  return `<${name}>`;
+}
+
 function atomNeedsQuotes(name) {
   if (!name) return true;
   if (name === '[]') return false;
@@ -156,6 +164,7 @@ function quoteAtom(name) {
 }
 
 function writeAtom(name) {
+  if (isAbsoluteIriText(name)) return writeAngleIri(name);
   return atomNeedsQuotes(name) ? quoteAtom(name) : name;
 }
 

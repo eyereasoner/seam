@@ -7,6 +7,22 @@ const TOK = {
   LPAREN: '(', RPAREN: ')', LBRACKET: '[', RBRACKET: ']', COMMA: ',', BAR: '|', DOT: '.', IF: ':-'
 };
 
+function isAbsoluteIriText(text) {
+  return /^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>"'{}|\\^`]*$/.test(text);
+}
+
+function hasAngleIriToken(source, pos) {
+  if (source[pos] !== '<') return false;
+  let text = '';
+  for (let i = pos + 1; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === '>') return text.length > 0 && isAbsoluteIriText(text);
+    if (ch === '\n' || ch === '\r' || /\s/.test(ch) || ch === '<') return false;
+    text += ch;
+  }
+  return false;
+}
+
 function isWhitespaceCode(code) {
   return code === 32 || code === 9 || code === 10 || code === 13 || code === 12 || code === 11;
 }
@@ -96,6 +112,18 @@ class Parser {
       return { type: TOK.IF, text: ':-', line };
     }
     if (ch === ':') throw new Error('colon names are not supported; use name or prefix_name');
+
+    if (hasAngleIriToken(this.source, this.pos)) {
+      this.take(); // <
+      let text = '';
+      while (true) {
+        if (!this.peek()) throw new Error(`parse line ${line}: unterminated IRI`);
+        const value = this.take();
+        if (value === '>') break;
+        text += value;
+      }
+      return { type: TOK.ATOM, text, line };
+    }
 
     if (ch === '"' || ch === "'") {
       const quote = this.take();

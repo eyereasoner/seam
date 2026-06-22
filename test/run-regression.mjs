@@ -530,6 +530,27 @@ function whiteBoxCases() {
       },
     },
     {
+      name: 'parser accepts angle-bracket absolute IRI atoms',
+      run: () => {
+        const clauses = parseProgramText('p(<https://example.org/alice>, <urn:example:bob>).\n');
+        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(<https://example.org/alice>, <urn:example:bob>)', 'head');
+      },
+    },
+    {
+      name: 'readback prints absolute IRI atoms with angle brackets',
+      run: () => {
+        const clauses = parseProgramText("p('https://example.org/alice').\n");
+        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(<https://example.org/alice>)', 'head');
+      },
+    },
+    {
+      name: 'angle IRI syntax does not steal graphic atom syntax',
+      run: () => {
+        const clauses = parseProgramText('p(<=>).\n');
+        assertEqual(termToString(clauses[0].head, new Env(), true), 'p(<=>)', 'head');
+      },
+    },
+    {
       name: 'list construction round-trips through properListItems',
       run: () => {
         const list = listFromItems([atom('a'), numberTerm(2), stringTerm('c')]);

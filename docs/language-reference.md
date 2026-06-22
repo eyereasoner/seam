@@ -138,7 +138,7 @@ Each `?_` anonymous variable occurrence is fresh. A bare `_` is not a variable i
 
 ### 3.5 Atom constants
 
-A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. A dot is not part of a plain atom; dotted web spaces such as `'be.ugent'` or `'org.schema'` MUST be quoted if they are meant as one atom constant. Names such as `a-b` or `http://example` MUST also be quoted if they are meant as one atom constant:
+A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. A dot is not part of a plain atom; dotted web spaces such as `'be.ugent'` or `'org.schema'` MUST be quoted if they are meant as one atom constant. Names such as `a-b` MUST also be quoted if they are meant as one atom constant:
 
 ```eyelang
 pat
@@ -148,8 +148,17 @@ case_123
 'org.schema'
 'eyereasoner.github'
 'a-b'
-'http://example'
 ```
+
+Absolute IRI atom constants MAY also be written between angle brackets. The content must be an absolute IRI-like lexical value with a scheme such as `https:` or `urn:`. Eyelang stores the content as the atom value and prints absolute IRI atoms with angle brackets on read-back:
+
+```eyelang
+<https://example.org/alice>
+<urn:example:bob>
+triple(<https://example.org/alice>, <https://schema.org/name>, "Alice").
+```
+
+Quoted absolute IRI atoms remain valid input, but read-back normalizes them to angle-bracket syntax. For example, `'https://example.org/alice'` prints as `<https://example.org/alice>`.
 
 A quoted atom constant is enclosed in single quotes. A single quote inside a quoted atom constant is represented by doubling it:
 
@@ -164,6 +173,8 @@ A graphic atom constant is one or more graphic characters from this set:
 ```text
 #$&*+-/<=>?@^~\
 ```
+
+Angle-bracket IRI syntax is recognized only for absolute IRI-like contents. Graphic atoms such as `<=>`, `<`, and `>=` remain graphic atoms.
 
 ### 3.6 Strings
 
@@ -659,7 +670,7 @@ eyelang source is intended to be familiar to Prolog readers, but eyelang is not 
 - no variables in functor or predicate position;
 - no occurs check in unification.
 
-Programs intended to be portable to eyelang SHOULD use `?` variables, avoid ISO-specific syntax, and keep terms explicit. Atom names that are not plain lowercase-starting names or graphic atom tokens SHOULD be written as quoted atoms, for example `'a-b'`.
+Programs intended to be portable to eyelang SHOULD use `?` variables, avoid ISO-specific syntax, and keep terms explicit. Atom names that are not plain lowercase-starting names, graphic atom tokens, or angle-bracket absolute IRI atoms SHOULD be written as quoted atoms, for example `'a-b'`.
 
 ## 16. Examples
 

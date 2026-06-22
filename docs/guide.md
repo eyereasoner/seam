@@ -2,7 +2,7 @@
 
 This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is Prolog-like but deliberately its own compact language for rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node bin/eyelang.js` when working directly from a source checkout.
 
-Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
+Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Absolute IRI atoms can be written explicitly with angle brackets, for example `<https://schema.org/name>`, when a program needs web identifiers without prefix declarations. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
 
 
 For the normative language definition, including lexical syntax, terms, clauses, goals, built-ins, `table/2`, `materialize/2`, and conformance boundaries, read the [Eyelang language reference](language-reference.md).
