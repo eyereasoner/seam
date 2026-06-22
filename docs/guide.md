@@ -577,6 +577,8 @@ semidet(edge, 2).
 
 For large programs, keep helper predicates selective, bind arguments early, document intended calling patterns with `mode/3` when helpful, and declare focused output predicates with `materialize/2` when default output would otherwise solve broad helper goals.
 
+When using `not/1` over user-defined predicates, keep the dependency graph stratified: negative dependencies should not participate in recursion. The JavaScript API exposes `program.stratifiedNegation`, `program.negationStratificationErrors`, and `program.assertStratifiedNegation()` so host tools can warn or reject programs that rely on unstratified negation.
+
 ## Implementation limits
 
 Eyelang is intentionally smaller than ISO Prolog. It has no operators, zero-arity compound syntax, cut, modules, dynamic database updates, DCGs, or complete ISO library. Arity-zero data is always written and read back as an atom, such as `nil`, never `nil()`. Negation is negation-as-failure through `not/1`. Search is goal-directed and expected to be finite for the selected output goals. Output explanations are non-normative proof printouts and do not change answer semantics. 

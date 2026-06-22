@@ -397,6 +397,49 @@ function apiCases() {
       },
     },
     {
+      name: 'program reports stratified negation metadata',
+      run: () => {
+        const program = Program.parse(`
+materialize(open, 1).
+candidate(a).
+blocked(b).
+closed(?x) :- blocked(?x).
+open(?x) :- candidate(?x), not(closed(?x)).
+`);
+        assertEqual(program.isStratifiedNegation(), true, 'stratified negation');
+        assertEqual(program.negationStratificationErrors.length, 0, 'stratification errors');
+        assertEqual(program.findGroup('closed', 1).negationStratum, 0, 'closed stratum');
+        assertEqual(program.findGroup('open', 1).negationStratum, 1, 'open stratum');
+      },
+    },
+    {
+      name: 'program detects unstratified negation cycles',
+      run: () => {
+        const program = Program.parse('p(?x) :- q(?x).\nq(?x) :- not(p(?x)).\n');
+        assertEqual(program.isStratifiedNegation(), false, 'unstratified negation');
+        assertEqual(program.negationStratificationErrors.length, 1, 'stratification error count');
+        assertEqual(program.negationStratificationErrors[0].from, 'q/1', 'error source');
+        assertEqual(program.negationStratificationErrors[0].to, 'p/1', 'error target');
+        let threw = false;
+        try { program.assertStratifiedNegation(); } catch (err) {
+          threw = true;
+          assertIncludes(err.message, 'unstratified negation', 'error message');
+        }
+        assertEqual(threw, true, 'assertion throws');
+      },
+    },
+    {
+      name: 'strictNegation option rejects unstratified programs',
+      run: () => {
+        let threw = false;
+        try { Program.parse('p(?x) :- not(p(?x)).\n', { strictNegation: true }); } catch (err) {
+          threw = true;
+          assertIncludes(err.message, 'p/1 depends negatively on p/1', 'error message');
+        }
+        assertEqual(threw, true, 'strict negation throws');
+      },
+    },
+    {
       name: 'program and solver public classes',
       run: () => {
         const program = Program.parse('p(a).\np(b).\n');

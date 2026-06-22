@@ -353,6 +353,26 @@ Arithmetic and string built-ins do not introduce a separate semantic universe. T
 
 Negation-as-failure `not(?goal)` is especially operational: it succeeds when the current goal-directed search finds no solution for `?goal`. It is not classical negation and should not be read as adding negative facts to the Herbrand model. Programs using negation SHOULD keep the negated goal sufficiently ground and finite.
 
+### 8.5 Stratified negation
+
+Portable programs using user-defined predicates under `not/1` SHOULD be **stratified**. A program is stratified when no predicate depends negatively on itself, either directly or through a cycle of other predicate dependencies. In a stratified program, predicates can be assigned strata so that positive dependencies stay in the same or a lower stratum and negative dependencies point strictly to a lower stratum.
+
+For example, this is stratified because `open/1` depends negatively on `closed/1`, but `closed/1` does not depend back on `open/1`:
+
+```eyelang
+closed(?x) :- blocked(?x).
+open(?x) :- candidate(?x), not(closed(?x)).
+```
+
+This is not stratified because `p/1` and `q/1` form a cycle that contains a negative dependency:
+
+```eyelang
+p(?x) :- q(?x).
+q(?x) :- not(p(?x)).
+```
+
+The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
+
 ## 9. Standard built-in predicates
 
 This section specifies the **standard built-ins** of the Eyelang language. An implementation that claims support for this standard built-in profile MUST implement the predicates in this section with the meanings described here.
@@ -494,7 +514,7 @@ The first goal can yield `holds((name(alice, "Alice"), knows(alice, bob)), name(
 
 | Built-in | Meaning |
 |---|---|
-| `not(?goal)` | Negation as failure. Succeeds when `?goal` has no solution. |
+| `not(?goal)` | Negation as failure. Succeeds when `?goal` has no solution. Portable user-defined negation should be stratified. |
 | `once(?goal)` | Succeeds with at most the first solution of `?goal`. |
 | `forall(?generator, ?test)` | Succeeds when every solution of `?generator` also satisfies `?test`; succeeds vacuously when `?generator` has no solutions. |
 

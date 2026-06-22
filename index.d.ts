@@ -11,6 +11,7 @@ export interface EyelangRunOptions {
   registry?: BuiltinRegistry;
   sourceMetadata?: boolean;
   markRecursive?: boolean;
+  strictNegation?: boolean;
   [key: string]: unknown;
 }
 
@@ -43,6 +44,7 @@ export interface EyelangPredicateGroup {
   mode: string[] | null;
   determinism: 'det' | 'semidet' | null;
   recursive: boolean;
+  negationStratum: number | null;
 }
 
 export type EyelangTerm = Term | { type: string; name: string; args?: EyelangTerm[]; arity?: number };
@@ -70,6 +72,9 @@ export class Program {
   groups: Map<string, EyelangPredicateGroup>;
   materializedGroups: Set<string>;
   hasMaterialize: boolean;
+  negationDependencies: Array<{ from: string; to: string; negative: boolean }>;
+  negationStratificationErrors: Array<{ from: string; to: string }>;
+  stratifiedNegation: boolean;
   static parse(source: string, options?: EyelangRunOptions): Program;
   static parseSources(sources?: Array<string | EyelangSourcePart>, options?: EyelangRunOptions): Program;
   makeGroup(name: string, arity: number): EyelangPredicateGroup;
@@ -77,6 +82,9 @@ export class Program {
   findGroup(name: string, arity: number): EyelangPredicateGroup | null;
   applyDeclarations(options?: EyelangRunOptions): void;
   markRecursivePredicates(): void;
+  analyzeNegationStratification(): Array<{ from: string; to: string }>;
+  assertStratifiedNegation(): true;
+  isStratifiedNegation(): boolean;
   hasMaterializeDeclarations(): boolean;
   groupIsMaterialized(group: EyelangPredicateGroup): boolean;
   groupHasRule(group: EyelangPredicateGroup): boolean;

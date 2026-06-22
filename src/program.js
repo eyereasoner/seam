@@ -43,6 +43,7 @@ export class Program {
       mode: null,
       determinism: null,
       recursive: false,
+      negationStratum: null,
     };
     if (arity > 2) {
       for (let left = 0; left < arity; left++) {
@@ -100,6 +101,8 @@ export class Program {
       }
     }
     if (options.markRecursive !== false) this.markRecursivePredicates();
+    this.analyzeNegationStratification();
+    if (options.strictNegation === true) this.assertStratifiedNegation();
   }
   markRecursivePredicates() {
     // Recursion is a group-level diagnostic hint. It is computed from predicate
@@ -136,6 +139,74 @@ export class Program {
       group.recursive = recursive;
     }
   }
+
+  analyzeNegationStratification() {
+    // Stratified negation is a portability diagnostic. A program is stratified
+    // when no predicate depends negatively on itself, directly or indirectly.
+    const groups = [...this.groups.values()];
+    const groupKeys = new Map(groups.map((group) => [group, `${group.name}/${group.arity}`]));
+    const groupByKey = new Map(groups.map((group) => [`${group.name}/${group.arity}`, group]));
+    const indexByKey = new Map(groups.map((group, i) => [`${group.name}/${group.arity}`, i]));
+    const edges = [];
+
+    for (const group of groups) {
+      const from = groupKeys.get(group);
+      for (const clause of group.clauses) {
+        for (const goal of clause.body) {
+          for (const dep of collectGoalDependencies(goal, false)) {
+            if (!groupByKey.has(dep.key)) continue;
+            edges.push({ from, to: dep.key, negative: dep.negative });
+          }
+        }
+      }
+    }
+
+    const adjacency = groups.map(() => []);
+    for (const edge of edges) {
+      const from = indexByKey.get(edge.from);
+      const to = indexByKey.get(edge.to);
+      if (from == null || to == null) continue;
+      adjacency[from].push(to);
+    }
+
+    const sccs = stronglyConnectedComponents(adjacency);
+    const componentByIndex = new Map();
+    for (let component = 0; component < sccs.length; component++) {
+      for (const index of sccs[component]) componentByIndex.set(index, component);
+    }
+
+    const violations = [];
+    const seen = new Set();
+    for (const edge of edges) {
+      if (!edge.negative) continue;
+      const from = indexByKey.get(edge.from);
+      const to = indexByKey.get(edge.to);
+      if (from == null || to == null) continue;
+      if (componentByIndex.get(from) !== componentByIndex.get(to)) continue;
+      const key = `${edge.from}->${edge.to}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      violations.push({ from: edge.from, to: edge.to });
+    }
+
+    const strata = computeNegationStrata(groups, edges, indexByKey);
+    for (const group of groups) group.negationStratum = strata.get(groupKeys.get(group)) ?? null;
+
+    this.negationDependencies = edges;
+    this.negationStratificationErrors = violations;
+    this.stratifiedNegation = violations.length === 0;
+    return violations;
+  }
+  assertStratifiedNegation() {
+    const violations = this.negationStratificationErrors ?? this.analyzeNegationStratification();
+    if (violations.length === 0) return true;
+    const details = violations.map((edge) => `${edge.from} depends negatively on ${edge.to}`).join('; ');
+    throw new Error(`unstratified negation: ${details}`);
+  }
+  isStratifiedNegation() {
+    return this.stratifiedNegation !== false;
+  }
+
   hasMaterializeDeclarations() {
     return this.hasMaterialize;
   }
@@ -176,6 +247,92 @@ export class Program {
   }
 }
 
+
+
+function collectGoalDependencies(goal, negated) {
+  if (goal.type !== COMPOUND) return [];
+  if (goal.name === ',' && goal.arity === 2) {
+    return [
+      ...collectGoalDependencies(goal.args[0], negated),
+      ...collectGoalDependencies(goal.args[1], negated),
+    ];
+  }
+  if (goal.name === 'not' && goal.arity === 1) {
+    return collectGoalDependencies(goal.args[0], !negated);
+  }
+  if (goal.name === 'once' && goal.arity === 1) {
+    return collectGoalDependencies(goal.args[0], negated);
+  }
+  if (goal.name === 'forall' && goal.arity === 2) {
+    return [
+      ...collectGoalDependencies(goal.args[0], negated),
+      ...collectGoalDependencies(goal.args[1], negated),
+    ];
+  }
+  return [{ key: `${goal.name}/${goal.arity}`, negative: negated }];
+}
+
+function stronglyConnectedComponents(adjacency) {
+  let index = 0;
+  const stack = [];
+  const onStack = new Set();
+  const indexes = new Map();
+  const lowlinks = new Map();
+  const components = [];
+
+  function visit(v) {
+    indexes.set(v, index);
+    lowlinks.set(v, index);
+    index++;
+    stack.push(v);
+    onStack.add(v);
+
+    for (const w of adjacency[v]) {
+      if (!indexes.has(w)) {
+        visit(w);
+        lowlinks.set(v, Math.min(lowlinks.get(v), lowlinks.get(w)));
+      } else if (onStack.has(w)) {
+        lowlinks.set(v, Math.min(lowlinks.get(v), indexes.get(w)));
+      }
+    }
+
+    if (lowlinks.get(v) === indexes.get(v)) {
+      const component = [];
+      while (true) {
+        const w = stack.pop();
+        onStack.delete(w);
+        component.push(w);
+        if (w === v) break;
+      }
+      components.push(component);
+    }
+  }
+
+  for (let v = 0; v < adjacency.length; v++) {
+    if (!indexes.has(v)) visit(v);
+  }
+  return components;
+}
+
+function computeNegationStrata(groups, edges, indexByKey) {
+  const strata = new Map(groups.map((group) => [`${group.name}/${group.arity}`, 0]));
+  if (groups.length === 0) return strata;
+
+  for (let pass = 0; pass < groups.length; pass++) {
+    let changed = false;
+    for (const edge of edges) {
+      if (!indexByKey.has(edge.from) || !indexByKey.has(edge.to)) continue;
+      const fromStratum = strata.get(edge.from) ?? 0;
+      const required = (strata.get(edge.to) ?? 0) + (edge.negative ? 1 : 0);
+      if (fromStratum < required) {
+        strata.set(edge.from, required);
+        changed = true;
+      }
+    }
+    if (!changed) return strata;
+  }
+  return new Map(groups.map((group) => [`${group.name}/${group.arity}`, null]));
+}
 
 function declarationIndicator(name, arity) {
   if (name?.type !== ATOM || arity?.type !== 'number') return null;
