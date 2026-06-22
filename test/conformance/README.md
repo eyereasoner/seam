@@ -36,6 +36,12 @@ Run only the conformance suite:
 node test/run-conformance.mjs
 ```
 
+Summarize conformance coverage by category:
+
+```sh
+npm run conformance:report
+```
+
 Run matching conformance cases by passing a filename or directory fragment:
 
 ```sh

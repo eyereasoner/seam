@@ -62,6 +62,7 @@ python3 -m http.server
 ```bash
 npm test
 npm run test:conformance
+npm run conformance:report
 npm run test:examples
 npm run test:regression
 ```

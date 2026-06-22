@@ -35,6 +35,7 @@ import {
 import { parseGoalText } from '../src/parser.js';
 import { selectClauseCandidates } from '../src/program.js';
 import { TestReporter, isMainModule } from './test-style.mjs';
+import { buildConformanceReport, formatConformanceReport } from './run-conformance-report.mjs';
 import { hashHex } from '../src/hash.js';
 
 const testRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
@@ -364,6 +365,18 @@ function documentationSyncCases() {
     {
       name: 'documented npm scripts exist in package.json',
       run: () => assertArrayEqual(missingDocumentedPackageScripts(), [], 'missing documented npm scripts'),
+    },
+    {
+      name: 'conformance report summarizes public corpus',
+      run: () => {
+        const report = buildConformanceReport();
+        assertArrayEqual(report.issues, [], 'conformance report issues');
+        assertEqual(report.total.total >= 150, true, 'conformance case count');
+        assertEqual(report.total.positive + report.total.errors + report.total.warnings, report.total.total, 'conformance total');
+        const text = formatConformanceReport(report);
+        assertIncludes(text, '| variables |', 'report');
+        assertIncludes(text, '| **Total** |', 'report');
+      },
     },
     {
       name: 'source-checkout setup docs match package bin',

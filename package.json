@@ -44,6 +44,7 @@
     "test:examples": "node test/run-examples.mjs",
     "test:regression": "node test/run-regression.mjs",
     "preversion": "npm test",
-    "postversion": "git push origin HEAD --follow-tags"
+    "postversion": "git push origin HEAD --follow-tags",
+    "conformance:report": "node test/run-conformance-report.mjs"
   }
 }
