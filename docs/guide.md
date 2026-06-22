@@ -568,8 +568,14 @@ Ground facts use a fast path that avoids freshening and copying a rule body. Rec
 table(path, 2).
 ```
 
+Predicates can also carry advisory mode and determinism declarations for documentation and host tooling:
 
-For large programs, keep helper predicates selective, bind arguments early, and declare focused output predicates with `materialize/2` when default output would otherwise solve broad helper goals.
+```eyelang
+mode(path, 2, [in, out]).
+semidet(edge, 2).
+```
+
+For large programs, keep helper predicates selective, bind arguments early, document intended calling patterns with `mode/3` when helpful, and declare focused output predicates with `materialize/2` when default output would otherwise solve broad helper goals.
 
 ## Implementation limits
 

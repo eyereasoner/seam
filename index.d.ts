@@ -40,6 +40,8 @@ export interface EyelangPredicateGroup {
   argIndexes: unknown[];
   pairIndexes: unknown[];
   tabled: boolean;
+  mode: string[] | null;
+  determinism: 'det' | 'semidet' | null;
   recursive: boolean;
 }
 

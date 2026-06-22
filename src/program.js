@@ -1,6 +1,6 @@
 // Program representation and clause indexing.
 // Indexes are deliberately conservative: they speed up common scalar arguments but never replace unification as the final check.
-import { ATOM, COMPOUND, Env, compound, deref, flattenConjunction, isScalar, termToString } from './term.js';
+import { ATOM, COMPOUND, Env, compound, deref, flattenConjunction, isScalar, properListItems, termToString } from './term.js';
 import { parseClauses } from './parser.js';
 
 export class Program {
@@ -40,6 +40,8 @@ export class Program {
       argIndexes: Array.from({ length: arity }, () => ({ buckets: new Map(), fallback: [] })),
       pairIndexes: [],
       tabled: false,
+      mode: null,
+      determinism: null,
       recursive: false,
     };
     if (arity > 2) {
@@ -70,16 +72,31 @@ export class Program {
   applyDeclarations(options = {}) {
     for (const clause of this.clauses) {
       const h = clause.head;
-      if (clause.body.length !== 0 || h.type !== COMPOUND || h.arity !== 2) continue;
-      const [name, arity] = h.args;
-      if (name.type !== ATOM || arity.type !== 'number') continue;
-      const key = `${name.name}/${Number(arity.name)}`;
-      if (h.name === 'table') {
-        const group = this.groups.get(key);
-        if (group) group.tabled = true;
-      } else if (h.name === 'materialize') {
-        this.hasMaterialize = true;
-        this.materializedGroups.add(key);
+      if (clause.body.length !== 0 || h.type !== COMPOUND) continue;
+
+      if (h.arity === 2) {
+        const indicator = declarationIndicator(h.args[0], h.args[1]);
+        if (!indicator) continue;
+        const group = this.groups.get(indicator.key);
+        if (h.name === 'table') {
+          if (group) group.tabled = true;
+        } else if (h.name === 'materialize') {
+          this.hasMaterialize = true;
+          this.materializedGroups.add(indicator.key);
+        } else if ((h.name === 'det' || h.name === 'semidet') && group) {
+          group.determinism = h.name;
+        }
+        continue;
+      }
+
+      if (h.name === 'mode' && h.arity === 3) {
+        const indicator = declarationIndicator(h.args[0], h.args[1]);
+        if (!indicator) continue;
+        const modes = declarationModes(h.args[2]);
+        if (modes && modes.length === indicator.arity) {
+          const group = this.groups.get(indicator.key);
+          if (group) group.mode = modes;
+        }
       }
     }
     if (options.markRecursive !== false) this.markRecursivePredicates();
@@ -157,6 +174,26 @@ export class Program {
     }
     return goals;
   }
+}
+
+
+function declarationIndicator(name, arity) {
+  if (name?.type !== ATOM || arity?.type !== 'number') return null;
+  if (!/^\d+$/.test(arity.name)) return null;
+  const arityNumber = Number(arity.name);
+  return { name: name.name, arity: arityNumber, key: `${name.name}/${arityNumber}` };
+}
+
+function declarationModes(term) {
+  const items = properListItems(term, new Env());
+  if (!items) return null;
+  const modes = [];
+  for (const item of items) {
+    if (item.type !== ATOM) return null;
+    if (!['in', 'out', 'any'].includes(item.name)) return null;
+    modes.push(item.name);
+  }
+  return modes;
 }
 
 function indexOne(index, arg, clause) {

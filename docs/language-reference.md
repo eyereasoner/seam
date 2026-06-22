@@ -550,6 +550,33 @@ materialize(reason, 2).
 
 `materialize/2` affects host output selection only; it does not change the logical meaning of the program. Materialized output facts are not asserted as new source facts for subsequent output goals. A host MAY solve several materialized predicates in one solver run, and tabled predicate answers MAY be reused within that run, but this reuse is controlled by `table/2`, not by materialization.
 
+### 11.3 Advisory modes and determinism
+
+```eyelang
+mode(path, 2, [in, out]).
+det(root, 1).
+semidet(edge, 2).
+```
+
+`mode/3`, `det/2`, and `semidet/2` are advisory declarations. They describe a predicate group's intended calling pattern and determinism, but they do not change proof search or answer output. Because they are ordinary facts, programs may also query them.
+
+For `mode(?name, ?arity, ?modes)`, the first argument MUST be an atom constant naming the predicate, the second argument MUST be a non-negative integer arity, and the third argument MUST be a proper list whose length is equal to the arity. Portable mode atoms are:
+
+- `in`: the argument is expected to be supplied by the caller;
+- `out`: the argument is expected to be produced by the predicate;
+- `any`: no portable mode commitment is made for that argument.
+
+`det(?name, ?arity)` declares that a predicate is intended to produce exactly one answer for calls in its documented modes. `semidet(?name, ?arity)` declares that a predicate is intended to produce zero or one answer. This specification does not require runtime enforcement; hosts MAY use these declarations for linting, documentation, indexing decisions, or editor support.
+
+Example:
+
+```eyelang
+mode(member, 2, [out, in]).
+semidet(member, 2).
+```
+
+The example documents the common checking/generation mode where the list is supplied and the member is enumerated. A future linting host could warn if a program calls `member/2` outside that intended mode, but a conforming solver still treats `mode/3` and `semidet/2` as ordinary facts plus metadata.
+
 ## 12. Eyelang Sockets
 
 A **eyelang Socket** is a declared semantic opening in a eyelang program where facts, rules, tools, datasets, or agents can plug in knowledge through an explicit contract while preserving eyelang-readable reasoning and explanations.
@@ -648,6 +675,7 @@ A conforming eyelang implementation supports the standard language described abo
 - the standard built-ins listed in section 9;
 - `table/2` declarations;
 - `materialize/2` declarations;
+- advisory `mode/3`, `det/2`, and `semidet/2` declarations;
 - default derived output;
 - explanation output when the host exposes proof output.
 

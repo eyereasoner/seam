@@ -617,6 +617,25 @@ function whiteBoxCases() {
       },
     },
     {
+      name: 'mode and determinism declarations annotate predicate groups',
+      run: () => {
+        const program = Program.parse('mode(path, 2, [in, out]).\ndet(path, 2).\nedge(a, b).\npath(?x, ?y) :- edge(?x, ?y).\n');
+        const group = program.findGroup('path', 2);
+        assertEqual(Boolean(group), true, 'path/2 group exists');
+        assertEqual(group.mode.join(','), 'in,out', 'path/2 mode');
+        assertEqual(group.determinism, 'det', 'path/2 determinism');
+      },
+    },
+    {
+      name: 'semidet declaration annotates predicate groups',
+      run: () => {
+        const program = Program.parse('semidet(edge, 2).\nedge(a, b).\n');
+        const group = program.findGroup('edge', 2);
+        assertEqual(Boolean(group), true, 'edge/2 group exists');
+        assertEqual(group.determinism, 'semidet', 'edge/2 determinism');
+      },
+    },
+    {
       name: 'challenging examples keep dynamic-programming predicates tabled',
       run: () => {
         const checks = [
