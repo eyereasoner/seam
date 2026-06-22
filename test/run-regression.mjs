@@ -178,6 +178,7 @@ why(
         assertIncludes(result.stdout, 'Usage:\n  eyelang [options] [file-or-url.eye|- ...]', 'stdout');
         assertIncludes(result.stdout, '-p, --proof', 'stdout');
         assertIncludes(result.stdout, '-s, --stats', 'stdout');
+        assertIncludes(result.stdout, '-w, --warnings', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
@@ -253,8 +254,50 @@ why(
         assertIncludes(result.stderr, '  solve_goals_calls:', 'stderr');
       },
     },
-
-
+    {
+      name: '--warnings prints unstratified negation diagnostics without failing',
+      run: () => {
+        const input = [
+          'materialize(answer, 1).',
+          'p(a) :- not(q(a)).',
+          'q(a) :- not(p(a)).',
+          'answer(ok).',
+          '',
+        ].join('\n');
+        const result = runCli(['--warnings', '-'], { input });
+        assertEqual(result.status, 0, 'exit status');
+        assertEqual(result.stdout, '', 'stdout');
+        assertIncludes(result.stderr, 'eyelang warning: unstratified negation\n', 'stderr');
+        assertIncludes(result.stderr, 'p/1 depends negatively on q/1', 'stderr');
+        assertIncludes(result.stderr, 'q/1 depends negatively on p/1', 'stderr');
+      },
+    },
+    {
+      name: '-w prints unstratified negation diagnostics without failing',
+      run: () => {
+        const input = [
+          'materialize(answer, 1).',
+          'p(a) :- not(q(a)).',
+          'q(a) :- not(p(a)).',
+          'answer(ok).',
+          '',
+        ].join('\n');
+        const result = runCli(['-w', '-'], { input });
+        assertEqual(result.status, 0, 'exit status');
+        assertEqual(result.stdout, '', 'stdout');
+        assertIncludes(result.stderr, 'eyelang warning: unstratified negation\n', 'stderr');
+      },
+    },
+    {
+      name: '--warnings stays quiet for stratified negation',
+      run: () => {
+        const input = 'materialize(answer, 1).\np(a).\nanswer(ok) :- not(q(a)).\n';
+        const result = runCli(['--warnings', '-'], { input });
+        assertEqual(result.status, 0, 'exit status');
+        assertEqual(result.stdout, 'answer(ok).\n', 'stdout');
+        assertEqual(result.stderr, '', 'stderr');
+      },
+    },
     {
       name: 'double dash permits option-shaped file names',
       run: () => {

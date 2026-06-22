@@ -371,7 +371,7 @@ p(?x) :- q(?x).
 q(?x) :- not(p(?x)).
 ```
 
-The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. This diagnostic is computed lazily when one of those properties or helper methods is first read, or eagerly when parsing with `{ analyzeNegation: true }` or `{ strictNegation: true }`. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
+The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. This diagnostic is computed lazily when one of those properties or helper methods is first read, or eagerly when parsing with `{ analyzeNegation: true }` or `{ strictNegation: true }`. The CLI option `-w` / `--warnings` requests this diagnostic and prints non-fatal warnings to stderr. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
 
 ## 9. Standard built-in predicates
 
@@ -665,7 +665,7 @@ This gives a clear division of labor: AI can help generate, translate, and conne
 
 ## 13. Output and read-back profile
 
-Normal answer output prints one resolved answer term followed by a period. Strings are double-quoted; atom constants are quoted when needed; lists use list syntax; compound terms use functor notation. Host interfaces MAY provide an option such as `--proof` to add `why/2` explanation facts; this option MUST NOT change the answers found.
+Normal answer output prints one resolved answer term followed by a period. Strings are double-quoted; atom constants are quoted when needed; lists use list syntax; compound terms use functor notation. Host interfaces MAY provide an option such as `--proof` to add `why/2` explanation facts; this option MUST NOT change the answers found. Host interfaces MAY also provide a non-fatal warning option such as `--warnings` for portability diagnostics such as unstratified negation; this option MUST NOT change the answers found.
 
 Output SHOULD be accepted as eyelang input when it contains only supported term syntax. Explanations are ordinary eyelang facts, so answer output can be read back and processed by eyelang.
 

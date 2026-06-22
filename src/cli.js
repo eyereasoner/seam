@@ -18,6 +18,7 @@ export async function main(argv) {
     proof: false,
     stats: false,
     version: false,
+    warnings: false,
   };
 
   let endOptions = false;
@@ -36,6 +37,8 @@ export async function main(argv) {
       options.proof = true;
     } else if (!endOptions && (arg === '--stats' || arg === '-s')) {
       options.stats = true;
+    } else if (!endOptions && (arg === '--warnings' || arg === '-w')) {
+      options.warnings = true;
     } else if (!endOptions && arg.startsWith('-') && arg !== '-') {
       throw new Error(`unknown option: ${arg}`);
     } else {
@@ -71,6 +74,8 @@ export async function main(argv) {
 
   const engine = await loadEngine();
   const program = engine.Program.parseSources(sourceParts, { sourceMetadata: options.proof, markRecursive: options.proof });
+
+  if (options.warnings) printWarnings(program);
 
   await runDefault(engine, program, options);
 }
@@ -144,6 +149,7 @@ Options:
   -p, --proof           Enable proof explanations.
   -s, --stats           Print solver statistics to stderr after execution.
   -v, --version         Show the package version and exit.
+  -w, --warnings        Print non-fatal portability warnings to stderr.
   --                    Stop option parsing; following arguments are treated as files.
 `);
 }
@@ -158,6 +164,16 @@ function readStdin() {
     process.stdin.on('end', () => resolve(data));
     process.stdin.on('error', reject);
   });
+}
+
+function printWarnings(program) {
+  const errors = program.negationStratificationErrors;
+  if (errors.length === 0) return;
+
+  process.stderr.write('eyelang warning: unstratified negation\n');
+  for (const edge of errors) {
+    process.stderr.write(`  ${edge.from} depends negatively on ${edge.to}\n`);
+  }
 }
 
 function printStats(stats) {

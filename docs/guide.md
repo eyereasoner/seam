@@ -243,6 +243,12 @@ Add `-s` or `--stats` when you want lightweight solver counters on stderr withou
 eyelang -s examples/observability-log-correlation.eye
 ```
 
+Add `-w` or `--warnings` when you want non-fatal portability diagnostics, such as unstratified `not/1` dependencies, printed to stderr while normal answer output still goes to stdout:
+
+```sh
+eyelang --warnings policy.eye
+```
+
 The playground has matching `--stats` and `--proof` checkboxes, so browser runs can show the same counters or explanations like the CLI.
 
 
@@ -552,7 +558,7 @@ The projects are therefore complementary rather than replacements for each other
 
 ## Performance notes
 
-Use `-s` or `--stats` for a quick sanity check while optimizing solver changes. It prints counters such as `solve_goals_calls`, `unify_calls`, `deterministic_rule_expansions`, `candidate_lists_selected`, `clause_candidates_considered`, `clauses_tried`, `max_depth`, and `max_solver_call_depth` to stderr, leaving normal output stable for golden-file tests. The `max_solver_call_depth` counter is especially useful for browser regressions, where the VM call stack can be tighter than a command-line run.
+Use `-s` or `--stats` for a quick sanity check while optimizing solver changes. It prints counters such as `solve_goals_calls`, `unify_calls`, `deterministic_rule_expansions`, `candidate_lists_selected`, `clause_candidates_considered`, `clauses_tried`, `max_depth`, and `max_solver_call_depth` to stderr, leaving normal output stable for golden-file tests. The `max_solver_call_depth` counter is especially useful for browser regressions, where the VM call stack can be tighter than a command-line run. Use `-w` or `--warnings` separately when you want portability diagnostics without enabling stricter parsing.
 
 eyelang hashes predicate groups by name and arity, then indexes clauses by scalar argument values. It also builds two-argument composite indexes for scalar pairs and probes those composite indexes without per-lookup heap allocation. This helps both large generated programs with many predicates and selective queries such as:
 
@@ -577,7 +583,7 @@ semidet(edge, 2).
 
 For large programs, keep helper predicates selective, bind arguments early, document intended calling patterns with `mode/3` when helpful, and declare focused output predicates with `materialize/2` when default output would otherwise solve broad helper goals.
 
-When using `not/1` over user-defined predicates, keep the dependency graph stratified: negative dependencies should not participate in recursion. The JavaScript API exposes `program.stratifiedNegation`, `program.negationStratificationErrors`, and `program.assertStratifiedNegation()` so host tools can warn or reject programs that rely on unstratified negation. The diagnostic is lazy by default; use `{ analyzeNegation: true }` to compute it during parsing or `{ strictNegation: true }` to compute and reject unstratified programs.
+When using `not/1` over user-defined predicates, keep the dependency graph stratified: negative dependencies should not participate in recursion. The CLI option `-w` / `--warnings` prints non-fatal stratification warnings to stderr. The JavaScript API exposes `program.stratifiedNegation`, `program.negationStratificationErrors`, and `program.assertStratifiedNegation()` so host tools can warn or reject programs that rely on unstratified negation. The diagnostic is lazy by default; use `{ analyzeNegation: true }` to compute it during parsing or `{ strictNegation: true }` to compute and reject unstratified programs.
 
 ## Implementation limits
 

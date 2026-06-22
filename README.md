@@ -14,6 +14,7 @@ Eyelang has no runtime npm dependencies and no build step. From a source checkou
 ```bash
 node bin/eyelang.js examples/ancestor.eye
 node bin/eyelang.js --proof examples/socrates.eye
+node bin/eyelang.js --warnings examples/policy.eye
 printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
 ```
 
