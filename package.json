@@ -1,6 +1,6 @@
 {
   "name": "eyelang",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "A small Prolog-like logic programming language for rules, goals, answers, and proofs.",
   "type": "module",
   "main": "./index.js",
