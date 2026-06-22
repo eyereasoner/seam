@@ -702,7 +702,7 @@ A conforming eyelang implementation supports the standard language described abo
 
 Browser execution, package layout, CLI URL loading, and any implementation-specific built-ins described in host documentation are outside this conformance surface unless separately standardized.
 
-Conformance cases live in the repository under `test/conformance/`. They are run by `npm test` before the example suite, and can be run alone with `node test/run-conformance.mjs`. Each case has an input program under `conformance/cases/` and an exact expected standard-output file under `conformance/expected/`; both use `.eye` so expected output remains eyelang-readable.
+Conformance cases live in the repository under `test/conformance/`. They are run by `npm test` before the example suite, and can be run alone with `node test/run-conformance.mjs`. Positive cases have input programs under `conformance/cases/` and exact expected standard-output files under `conformance/expected/`; both use `.eye` so expected output remains eyelang-readable. Expected-error cases live under `conformance/errors/` with exact messages under `conformance/expected-errors/`. Expected-warning cases live under `conformance/warnings/` with exact `--warnings` stdout and stderr files under `conformance/expected-warnings/`.
 
 ## 15. Relationship to ISO Prolog
 

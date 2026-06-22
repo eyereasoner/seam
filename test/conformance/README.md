@@ -2,12 +2,25 @@
 
 This directory contains the executable conformance cases for the Eyelang language and reference engine. The normative language description is in the [Eyelang language reference](../../../docs/language-reference.md).
 
-The suite is intentionally file-based so another implementation can run the same programs and compare exact standard output. A case consists of:
+The suite is intentionally file-based so another implementation can run the same programs and compare exact standard output, expected errors, and expected warnings. The conformance corpus is part of the public language contract, not just an implementation smoke test.
+
+A normal positive case consists of:
 
 - `conformance/cases/<name>.eye` — input program;
 - `conformance/expected/<name>.eye` — exact expected standard output, stored as eyelang-readable facts.
 
-The current runner compares standard output from normal execution. Proof explanations are opt-in in the CLI and are not part of these conformance goldens. Standard error, performance, and resource limits are outside this suite.
+Expected-error cases consist of:
+
+- `conformance/errors/<name>.eye` — input program that must fail during parsing or execution;
+- `conformance/expected-errors/<name>.txt` — exact expected error message followed by a newline.
+
+Expected-warning cases consist of:
+
+- `conformance/warnings/<name>.eye` — input program run through the CLI with `--warnings`;
+- `conformance/expected-warnings/<name>.eye` — exact expected standard output;
+- `conformance/expected-warnings/<name>.txt` — exact expected standard error.
+
+Case names may be nested in category directories such as `atoms/`, `variables/`, `negation/`, or `syntax/`. Expected files mirror the same relative path.
 
 ## Running the suite
 
@@ -23,21 +36,23 @@ Run only the conformance suite:
 node test/run-conformance.mjs
 ```
 
-Run matching conformance cases by passing a filename fragment:
+Run matching conformance cases by passing a filename or directory fragment:
 
 ```sh
 node test/run-conformance.mjs reusable
 node test/run-conformance.mjs 092_scalar_string_conversions
+node test/run-conformance.mjs variables/
+node test/run-conformance.mjs error/variables
 ```
 
-The runner executes materialized programs in-process through the public JavaScript API so small conformance cases avoid measuring Node startup overhead.
+The runner executes normal materialized programs in-process through the public JavaScript API so small conformance cases avoid measuring Node startup overhead. Warning cases intentionally use the CLI because warning output is a host-interface contract.
 
 ## Scope
 
-The conformance corpus is a single eyelang suite. It covers the standard language described by the language reference: lexical syntax, facts, definite clauses, first-order terms, lists, conjunction, structured unification, left-to-right goal-directed proof search, materialized output, read-back printing, standard built-ins, declarations, and standard host behavior.
+The conformance corpus is a single eyelang suite. It covers the standard language described by the language reference: lexical syntax, facts, definite clauses, first-order terms, lists, conjunction, structured unification, left-to-right goal-directed proof search, materialized output, read-back printing, standard built-ins, declarations, warnings, errors, and standard host behavior.
 
 The suite deliberately does not separate `core` and `extension` profiles. Reusable built-ins such as arithmetic, strings, lists, aggregation, context terms, term inspection, and search control are part of the standard eyelang conformance surface. Implementation-specific built-ins may still exist in downstream hosts, but they should have their own tests outside this corpus unless they are standardized.
 
 ## Updating expected output
 
-There is no committed auto-accept mode. To update an expected file, run the matching case with the conformance runner, inspect the result, and replace the corresponding file under `conformance/expected/` deliberately.
+There is no committed auto-accept mode. To update an expected file, run the matching case with the conformance runner, inspect the result, and replace the corresponding file under `conformance/expected/`, `conformance/expected-errors/`, or `conformance/expected-warnings/` deliberately.
