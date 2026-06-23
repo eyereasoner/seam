@@ -333,6 +333,18 @@ Equivalently, the least Herbrand model is obtained by repeatedly applying the im
 
 Variables do not range over external objects, records, pointers, or host-language values. In the logical reading, variables range over Herbrand terms. A rule is implicitly universally quantified over its variables. A selected goal is existential in the usual logic-programming sense: eyelang searches for substitutions of its variables by Herbrand terms that make the goal true with respect to the program.
 
+eyelang has no blank nodes and no existential variables in rule heads. Existential-style consequences SHOULD be represented by explicit Herbrand witness terms written directly in rule heads:
+
+```eyelang
+has_parent(?child, parent_of(?child)) :-
+  person(?child).
+
+registration(?student, ?course, registration_of(?student, ?course)) :-
+  takes(?student, ?course).
+```
+
+These rules may derive `parent_of(alice)` or `registration_of(alice, logic)` as ordinary visible Herbrand terms. The witness is deterministic: the same functor and inputs produce the same term, while different inputs produce different terms by normal syntactic identity. This is the practical executable form of existential-style consequences in Eyelang; it does not introduce hidden blank nodes or special quantifier syntax.
+
 ### 8.2 Equality, identity, and unification
 
 Because the domain is Herbrand, equality in the pure language is syntactic identity of terms after substitution. Two distinct atom constants are distinct. Two compound terms are equal only when they have the same functor, the same arity, and pairwise equal arguments. Lists follow the same rule through their `[]` and `./2` representation.

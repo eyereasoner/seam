@@ -373,7 +373,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`equivalence-classes-overlap-implies-same-class.eye`](../examples/equivalence-classes-overlap-implies-same-class.eye) | Packages the shared-member proof pattern for equivalence classes. | [`output/equivalence-classes-overlap-implies-same-class.eye`](../examples/output/equivalence-classes-overlap-implies-same-class.eye) |
 | [`eulerian-path.eye`](../examples/eulerian-path.eye) | Finds an Eulerian path using each edge once. | [`output/eulerian-path.eye`](../examples/output/eulerian-path.eye) |
 | [`ev-range-worlds.eye`](../examples/ev-range-worlds.eye) | Estimates electric-vehicle trip feasibility. | [`output/ev-range-worlds.eye`](../examples/output/ev-range-worlds.eye) |
-| [`existential-rule.eye`](../examples/existential-rule.eye) | Represents existential witnesses with explicit Skolem-style terms. | [`output/existential-rule.eye`](../examples/output/existential-rule.eye) |
+| [`existential-rule.eye`](../examples/existential-rule.eye) | Represents existential-style witnesses with explicit Herbrand terms. | [`output/existential-rule.eye`](../examples/output/existential-rule.eye) |
 | [`exoplanet-validation-worlds.eye`](../examples/exoplanet-validation-worlds.eye) | Validates exoplanet candidates across worlds. | [`output/exoplanet-validation-worlds.eye`](../examples/output/exoplanet-validation-worlds.eye) |
 | [`expression-eval.eye`](../examples/expression-eval.eye) | Evaluates a small arithmetic expression tree. | [`output/expression-eval.eye`](../examples/output/expression-eval.eye) |
 | [`family-cousins.eye`](../examples/family-cousins.eye) | Derives cousin and family labels. | [`output/family-cousins.eye`](../examples/output/family-cousins.eye) |
@@ -444,6 +444,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`service-impact.eye`](../examples/service-impact.eye) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.eye`](../examples/output/service-impact.eye) |
 | [`sieve.eye`](../examples/sieve.eye) | Enumerates primes with a sieve-style program. | [`output/sieve.eye`](../examples/output/sieve.eye) |
 | [`skolem-functions.eye`](../examples/skolem-functions.eye) | Generates deterministic functional terms. | [`output/skolem-functions.eye`](../examples/output/skolem-functions.eye) |
+| [`herbrand-witnesses.eye`](../examples/herbrand-witnesses.eye) | Represents existential-style consequences as stable Herbrand witness terms. | [`output/herbrand-witnesses.eye`](../examples/output/herbrand-witnesses.eye) |
 | [`socket-age.eye`](../examples/socket-age.eye) | Shows socket-declared age reasoning inputs and plugs. | [`output/socket-age.eye`](../examples/output/socket-age.eye) |
 | [`socket-family.eye`](../examples/socket-family.eye) | Shows socket-declared family-source inputs and ancestry rules. | [`output/socket-family.eye`](../examples/output/socket-family.eye) |
 | [`socrates.eye`](../examples/socrates.eye) | Derives that Socrates is mortal. | [`output/socrates.eye`](../examples/output/socrates.eye) |

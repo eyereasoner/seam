@@ -61,6 +61,7 @@ function* compoundNameArguments({ goal, env }) {
   if (unify(goal.args[0], built, next)) yield next;
 }
 
+
 function scalarNameTerm(term) {
   if (term.type === 'atom') return atom(term.name);
   if (term.type === 'number') return numberTerm(term.name);

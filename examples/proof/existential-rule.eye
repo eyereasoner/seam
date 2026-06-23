@@ -1,38 +1,30 @@
-is(socrates, sk_0).
+is(socrates, human_witness(socrates)).
 why(
-  is(socrates, sk_0),
+  is(socrates, human_witness(socrates)),
   proof(
-    goal(is(socrates, sk_0)),
-    by(rule("existential-rule.eye", clause(6))),
-    bindings([binding("?person", socrates), binding("?witness", sk_0)]),
+    goal(is(socrates, human_witness(socrates))),
+    by(rule("existential-rule.eye", clause(4))),
+    bindings([binding("?person", socrates)]),
     uses([
       proof(
         goal(type(socrates, human)),
         by(fact("existential-rule.eye", clause(2)))
-      ),
-      proof(
-        goal(witness(socrates, sk_0)),
-        by(fact("existential-rule.eye", clause(4)))
       )
     ])
   )
 ).
 
-is(plato, sk_1).
+is(plato, human_witness(plato)).
 why(
-  is(plato, sk_1),
+  is(plato, human_witness(plato)),
   proof(
-    goal(is(plato, sk_1)),
-    by(rule("existential-rule.eye", clause(6))),
-    bindings([binding("?person", plato), binding("?witness", sk_1)]),
+    goal(is(plato, human_witness(plato))),
+    by(rule("existential-rule.eye", clause(4))),
+    bindings([binding("?person", plato)]),
     uses([
       proof(
         goal(type(plato, human)),
         by(fact("existential-rule.eye", clause(3)))
-      ),
-      proof(
-        goal(witness(plato, sk_1)),
-        by(fact("existential-rule.eye", clause(5)))
       )
     ])
   )

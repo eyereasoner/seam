@@ -4,7 +4,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20761726-blue.svg)](https://doi.org/10.5281/zenodo.20761726)
 
 Eyelang is a small logic programming language for rules, goals, answers, and proofs.
-Its source syntax is Prolog-like Horn-clause syntax with deliberate eyelang choices, including `?x` variables for N3/SPARQL-style readability, explicit `table(path, 2).` declarations for tabled predicates, advisory `mode/3` declarations for host tooling, and stratified-negation diagnostics for portable `not/1` usage.
+Its source syntax is Prolog-like Horn-clause syntax with deliberate eyelang choices, including `?x` variables for N3/SPARQL-style readability, explicit `table(path, 2).` declarations for tabled predicates, advisory `mode/3` declarations for host tooling, explicit Herbrand witness terms for executable existential-style consequences, and stratified-negation diagnostics for portable `not/1` usage.
 It grew out of logic-language experiments in the EYE/N3 reasoning tradition, but is packaged here as its own project.
 
 ## Install and run
