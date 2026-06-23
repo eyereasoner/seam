@@ -4,6 +4,8 @@ This directory contains the executable conformance cases for the Eyelang languag
 
 The suite is intentionally file-based so another implementation can run the same programs and compare exact standard output, expected errors, expected warnings, and expected proof output. The conformance corpus is part of the public language contract, not just an implementation smoke test.
 
+All conformance files live under topic directories such as `arithmetic/`, `lists/`, `syntax/`, or `variables/`; new top-level numbered files should not be added. The report uses those directories as coverage categories.
+
 A normal positive case consists of:
 
 - `conformance/cases/<name>.eye` — input program;
