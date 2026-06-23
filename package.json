@@ -1,6 +1,6 @@
 {
   "name": "eyelang",
-  "version": "1.7.5",
+  "version": "1.7.3",
   "description": "A small Prolog-like logic programming language for rules, goals, answers, and proofs.",
   "type": "module",
   "main": "./index.js",
@@ -30,6 +30,7 @@
     "playground.html",
     "bin",
     "src",
+    "conformance-report.md",
     "docs",
     "examples",
     "test"
@@ -43,7 +44,7 @@
     "test:conformance": "node test/run-conformance.mjs",
     "test:examples": "node test/run-examples.mjs",
     "test:regression": "node test/run-regression.mjs",
-    "preversion": "npm test",
+    "preversion": "npm test && npm run conformance:report -- conformance-report.md",
     "postversion": "git push origin HEAD --follow-tags",
     "conformance:report": "node test/run-conformance-report.mjs"
   }

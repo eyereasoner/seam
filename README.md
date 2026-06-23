@@ -63,6 +63,7 @@ python3 -m http.server
 npm test
 npm run test:conformance
 npm run conformance:report
+# release preparation writes conformance-report.md via the preversion script
 npm run test:examples
 npm run test:regression
 ```

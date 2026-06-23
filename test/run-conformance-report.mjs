@@ -7,12 +7,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
+const packageRoot = path.resolve(root, '..');
 const conformanceRoot = path.join(root, 'conformance');
 
 const KINDS = [
   { kind: 'cases', expectedKind: 'expected', expectedExt: '.eye', column: 'positive' },
   { kind: 'errors', expectedKind: 'expected-errors', expectedExt: '.txt', column: 'errors' },
   { kind: 'warnings', expectedKind: 'expected-warnings', expectedExt: '.eye', column: 'warnings' },
+  { kind: 'proofs', expectedKind: 'expected-proofs', expectedExt: '.eye', column: 'proofs' },
 ];
 
 export function buildConformanceReport() {
@@ -45,8 +47,9 @@ export function buildConformanceReport() {
     positive: acc.positive + row.positive,
     errors: acc.errors + row.errors,
     warnings: acc.warnings + row.warnings,
+    proofs: acc.proofs + row.proofs,
     total: acc.total + row.total,
-  }), { positive: 0, errors: 0, warnings: 0, total: 0 });
+  }), { positive: 0, errors: 0, warnings: 0, proofs: 0, total: 0 });
 
   return { rows, total, issues: issues.sort() };
 }
@@ -57,14 +60,14 @@ export function formatConformanceReport(report = buildConformanceReport()) {
     '',
     'This report summarizes the file-based conformance corpus under `test/conformance/`.',
     '',
-    '| Category | Positive | Errors | Warnings | Total |',
-    '|---|---:|---:|---:|---:|',
+    '| Category | Positive | Errors | Warnings | Proofs | Total |',
+    '|---|---:|---:|---:|---:|---:|',
   ];
 
   for (const row of report.rows) {
-    lines.push(`| ${row.category} | ${row.positive} | ${row.errors} | ${row.warnings} | ${row.total} |`);
+    lines.push(`| ${row.category} | ${row.positive} | ${row.errors} | ${row.warnings} | ${row.proofs} | ${row.total} |`);
   }
-  lines.push(`| **Total** | **${report.total.positive}** | **${report.total.errors}** | **${report.total.warnings}** | **${report.total.total}** |`);
+  lines.push(`| **Total** | **${report.total.positive}** | **${report.total.errors}** | **${report.total.warnings}** | **${report.total.proofs}** | **${report.total.total}** |`);
 
   if (report.issues.length > 0) {
     lines.push('', '## Corpus issues', '');
@@ -95,7 +98,7 @@ function categoryOf(file) {
 function ensureCategory(categories, category) {
   let counts = categories.get(category);
   if (!counts) {
-    counts = { positive: 0, errors: 0, warnings: 0, total: 0 };
+    counts = { positive: 0, errors: 0, warnings: 0, proofs: 0, total: 0 };
     categories.set(category, counts);
   }
   return counts;
@@ -103,6 +106,15 @@ function ensureCategory(categories, category) {
 
 if (process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const report = buildConformanceReport();
-  process.stdout.write(formatConformanceReport(report));
+  const text = formatConformanceReport(report);
+  const outputPath = process.argv[2] ?? null;
+  if (outputPath == null) {
+    process.stdout.write(text);
+  } else {
+    const resolved = path.resolve(packageRoot, outputPath);
+    fs.mkdirSync(path.dirname(resolved), { recursive: true });
+    fs.writeFileSync(resolved, text);
+    process.stdout.write(`wrote ${path.relative(packageRoot, resolved)}\n`);
+  }
   if (report.issues.length > 0) process.exit(1);
 }

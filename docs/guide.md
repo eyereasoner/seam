@@ -503,7 +503,9 @@ Summarize the conformance corpus by category:
 npm run conformance:report
 ```
 
-The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based eyelang corpus. Positive cases pair `cases/<name>.eye` with exact expected stdout under `expected/<name>.eye`; negative cases pair `errors/<name>.eye` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.eye` with exact `--warnings` stdout and stderr files under `expected-warnings/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, and standard warnings. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
+Release preparation runs the same report and writes [`conformance-report.md`](../conformance-report.md), so each published package carries a current conformance summary.
+
+The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based eyelang corpus. Positive cases pair `cases/<name>.eye` with exact expected stdout under `expected/<name>.eye`; negative cases pair `errors/<name>.eye` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.eye` with exact `--warnings` stdout and stderr files under `expected-warnings/`; proof cases pair `proofs/<name>.eye` with exact `--proof` output under `expected-proofs/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, standard warnings, and the machine-readable `why/2` proof-output contract. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
 
 ## Development and release
 
@@ -531,7 +533,8 @@ For a release:
 2. update `README.md` and the language reference;
 3. regenerate golden outputs if behavior changed;
 4. run `npm run test:eyelang`;
-5. publish the repository with the browser playground assets if publishing the playground. The playground includes controls equivalent to CLI `--stats` and `--proof`.
+5. run `npm run conformance:report -- conformance-report.md`;
+6. publish the repository with the browser playground assets if publishing the playground. The playground includes controls equivalent to CLI `--stats` and `--proof`.
 
 ## Relationship to Eyeling
 

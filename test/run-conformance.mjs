@@ -20,6 +20,7 @@ export function runConformance(reporter = new TestReporter(), requestedFilter = 
   for (const file of listCaseFiles('cases', filter)) runCaseFile(reporter, file);
   for (const file of listCaseFiles('errors', filter)) runErrorFile(reporter, file);
   for (const file of listCaseFiles('warnings', filter)) runWarningFile(reporter, file);
+  for (const file of listCaseFiles('proofs', filter)) runProofFile(reporter, file);
   reporter.sectionTotal(`conformance ${label}`);
 }
 
@@ -68,6 +69,11 @@ function runErrorFile(reporter, file) {
 function runWarningFile(reporter, file) {
   const name = file.slice(0, -4);
   reporter.test(`warning/${name}`, () => runWarningCase(name, file));
+}
+
+function runProofFile(reporter, file) {
+  const name = file.slice(0, -4);
+  reporter.test(`proof/${name}`, () => runProofCase(name, file));
 }
 
 function runCase(name, file) {
@@ -120,6 +126,29 @@ function runWarningCase(name, file) {
 
   compareExpectedFile(expectedStdout, result.stdout, name, 'warning stdout');
   compareExpectedFile(expectedStderr, result.stderr, name, 'warning stderr');
+}
+
+function runProofCase(name, file) {
+  const proofsDir = path.join(root, 'conformance', 'proofs');
+  const expectedDir = path.join(root, 'conformance', 'expected-proofs');
+  const programFile = path.join(proofsDir, file);
+  const expected = path.join(expectedDir, `${name}.eye`);
+  const text = fs.readFileSync(programFile, 'utf8');
+  const result = spawnSync(process.execPath, [cliBin, '--proof', '-'], {
+    cwd: packageRoot,
+    input: text,
+    encoding: 'utf8',
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`proof case ${name} exited with ${result.status}\n${result.stderr}`.trimEnd());
+  }
+  if (result.stderr !== '') {
+    throw new Error(`proof case ${name} wrote unexpected stderr\n${result.stderr}`.trimEnd());
+  }
+
+  compareExpectedFile(expected, result.stdout, name, 'proof output');
+  Program.parse(result.stdout);
 }
 
 function compareExpectedFile(expected, actual, name, kind) {

@@ -372,10 +372,20 @@ function documentationSyncCases() {
         const report = buildConformanceReport();
         assertArrayEqual(report.issues, [], 'conformance report issues');
         assertEqual(report.total.total >= 250, true, 'conformance case count');
-        assertEqual(report.total.positive + report.total.errors + report.total.warnings, report.total.total, 'conformance total');
+        assertEqual(report.total.positive + report.total.errors + report.total.warnings + report.total.proofs, report.total.total, 'conformance total');
         const text = formatConformanceReport(report);
         assertIncludes(text, '| variables |', 'report');
+        assertIncludes(text, '| Proofs |', 'report');
         assertIncludes(text, '| **Total** |', 'report');
+      },
+    },
+
+    {
+      name: 'committed conformance report is current',
+      run: () => {
+        const reportFile = path.join(packageRoot, 'conformance-report.md');
+        assertEqual(fs.existsSync(reportFile), true, 'conformance-report.md exists');
+        assertEqual(fs.readFileSync(reportFile, 'utf8'), formatConformanceReport(buildConformanceReport()), 'conformance-report.md');
       },
     },
     {
