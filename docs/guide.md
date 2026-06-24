@@ -335,6 +335,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`canary-release.eye`](../examples/canary-release.eye) | Decides canary rollout or rollback. | [`output/canary-release.eye`](../examples/output/canary-release.eye) |
 | [`cat-koko.eye`](../examples/cat-koko.eye) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.eye`](../examples/output/cat-koko.eye) |
 | [`catalan-convolution.eye`](../examples/catalan-convolution.eye) | Computes Catalan numbers by tabled convolution. | [`output/catalan-convolution.eye`](../examples/output/catalan-convolution.eye) |
+| [`cdcl-sat-solver.eye`](../examples/cdcl-sat-solver.eye) | Simulates one CDCL conflict-analysis step with a learned clause and backjumped model. | [`output/cdcl-sat-solver.eye`](../examples/output/cdcl-sat-solver.eye) |
 | [`chart-parser.eye`](../examples/chart-parser.eye) | Parses small sentences with a tabled chart parser. | [`output/chart-parser.eye`](../examples/output/chart-parser.eye) |
 | [`clinical-trial-screening.eye`](../examples/clinical-trial-screening.eye) | Screens candidates for a trial. | [`output/clinical-trial-screening.eye`](../examples/output/clinical-trial-screening.eye) |
 | [`collatz-1000.eye`](../examples/collatz-1000.eye) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.eye`](../examples/output/collatz-1000.eye) |
@@ -370,6 +371,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`drone-corridor-planner.eye`](../examples/drone-corridor-planner.eye) | Plans bounded drone corridor routes. | [`output/drone-corridor-planner.eye`](../examples/output/drone-corridor-planner.eye) |
 | [`easter-computus.eye`](../examples/easter-computus.eye) | Computes Gregorian Easter dates. | [`output/easter-computus.eye`](../examples/output/easter-computus.eye) |
 | [`electrical-rc-filter.eye`](../examples/electrical-rc-filter.eye) | Sizes an RC low-pass filter. | [`output/electrical-rc-filter.eye`](../examples/output/electrical-rc-filter.eye) |
+| [`equality-saturation.eye`](../examples/equality-saturation.eye) | Performs bounded equality saturation and extracts the cheapest equivalent expression. | [`output/equality-saturation.eye`](../examples/output/equality-saturation.eye) |
 | [`epidemic-policy.eye`](../examples/epidemic-policy.eye) | Chooses policies from risk and social cost. | [`output/epidemic-policy.eye`](../examples/output/epidemic-policy.eye) |
 | [`equivalence-classes-overlap-implies-same-class.eye`](../examples/equivalence-classes-overlap-implies-same-class.eye) | Packages the shared-member proof pattern for equivalence classes. | [`output/equivalence-classes-overlap-implies-same-class.eye`](../examples/output/equivalence-classes-overlap-implies-same-class.eye) |
 | [`eulerian-path.eye`](../examples/eulerian-path.eye) | Finds an Eulerian path using each edge once. | [`output/eulerian-path.eye`](../examples/output/eulerian-path.eye) |
@@ -407,6 +409,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`intuitionistic-logic-kripke.eye`](../examples/intuitionistic-logic-kripke.eye) | Emulates intuitionistic Kripke forcing and constructive implication. | [`output/intuitionistic-logic-kripke.eye`](../examples/output/intuitionistic-logic-kripke.eye) |
 | [`job-shop-scheduling.eye`](../examples/job-shop-scheduling.eye) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.eye`](../examples/output/job-shop-scheduling.eye) |
 | [`knapsack-optimization.eye`](../examples/knapsack-optimization.eye) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.eye`](../examples/output/knapsack-optimization.eye) |
+| [`knuth-bendix-completion.eye`](../examples/knuth-bendix-completion.eye) | Checks bounded Knuth-Bendix-style critical pairs for joinability. | [`output/knuth-bendix-completion.eye`](../examples/output/knuth-bendix-completion.eye) |
 | [`knowledge-engineering-alignment-flow.eye`](../examples/knowledge-engineering-alignment-flow.eye) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.eye`](../examples/output/knowledge-engineering-alignment-flow.eye) |
 | [`language.eye`](../examples/language.eye) | Shows the modern Eyelang surface syntax in one compact recursive graph example. | [`output/language.eye`](../examples/output/language.eye) |
 | [`law-of-cosines.eye`](../examples/law-of-cosines.eye) | Computes a triangle side by cosine law. | [`output/law-of-cosines.eye`](../examples/output/law-of-cosines.eye) |
@@ -434,6 +437,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`odrl-dpv-risk-ranked.eye`](../examples/odrl-dpv-risk-ranked.eye) | Ranks data-policy risks and mitigations. | [`output/odrl-dpv-risk-ranked.eye`](../examples/output/odrl-dpv-risk-ranked.eye) |
 | [`orbital-transfer-design.eye`](../examples/orbital-transfer-design.eye) | Designs a Hohmann orbital transfer. | [`output/orbital-transfer-design.eye`](../examples/output/orbital-transfer-design.eye) |
 | [`path-discovery.eye`](../examples/path-discovery.eye) | Discovers bounded air-route paths. | [`output/path-discovery.eye`](../examples/output/path-discovery.eye) |
+| [`partial-evaluator.eye`](../examples/partial-evaluator.eye) | Specializes tiny expression programs by folding static inputs into residual code. | [`output/partial-evaluator.eye`](../examples/output/partial-evaluator.eye) |
 | [`peano-arithmetic.eye`](../examples/peano-arithmetic.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-arithmetic.eye`](../examples/output/peano-arithmetic.eye) |
 | [`peano-calculus.eye`](../examples/peano-calculus.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-calculus.eye`](../examples/output/peano-calculus.eye) |
 | [`peasant.eye`](../examples/peasant.eye) | Performs peasant multiplication and exponentiation. | [`output/peasant.eye`](../examples/output/peasant.eye) |
@@ -445,6 +449,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`proof-contrapositive.eye`](../examples/proof-contrapositive.eye) | Models proof by contrapositive. | [`output/proof-contrapositive.eye`](../examples/output/proof-contrapositive.eye) |
 | [`quadratic-formula.eye`](../examples/quadratic-formula.eye) | Solves sample quadratic equations. | [`output/quadratic-formula.eye`](../examples/output/quadratic-formula.eye) |
 | [`radioactive-decay.eye`](../examples/radioactive-decay.eye) | Computes radioactive decay over time. | [`output/radioactive-decay.eye`](../examples/output/radioactive-decay.eye) |
+| [`register-allocation.eye`](../examples/register-allocation.eye) | Allocates temporaries to two registers with spilling by bounded graph-coloring search. | [`output/register-allocation.eye`](../examples/output/register-allocation.eye) |
 | [`reusable-builtins.eye`](../examples/reusable-builtins.eye) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.eye`](../examples/output/reusable-builtins.eye) |
 | [`riemann-hypothesis.eye`](../examples/riemann-hypothesis.eye) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.eye`](../examples/output/riemann-hypothesis.eye) |
 | [`route-planning.eye`](../examples/route-planning.eye) | Finds routes and records them as explicit route terms. | [`output/route-planning.eye`](../examples/output/route-planning.eye) |
