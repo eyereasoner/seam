@@ -18,4 +18,4 @@ animal(?x) :- human(?x).
 type(joe, human) :- human(joe).
 type(joe, animal) :- animal(joe).
 subclassOf(human, animal) :- animal(human).
-succeeds(animalExample, true) :- animal(?_).
+succeeds(animalExample, true) :- animal(?).

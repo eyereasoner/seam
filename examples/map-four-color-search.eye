@@ -50,7 +50,7 @@ valid_color(?place, ?color, ?assigned) :-
   not((member([?neighbor, ?color], ?assigned), member(?neighbor, ?neighbors))).
 
 place_pairs([], []).
-place_pairs([?place|?rest], [[?place, ?_]|?pairs]) :-
+place_pairs([?place|?rest], [[?place, ?]|?pairs]) :-
   place_pairs(?rest, ?pairs).
 
 color_places([]).

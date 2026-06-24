@@ -1,6 +1,6 @@
-% Each `?_` occurrence is anonymous and independent.
+% Each `?` occurrence is anonymous and independent.
 materialize(answer, 1).
 pair(a, b).
 pair(c, d).
-answer(left(?x)) :- pair(?x, ?_).
-answer(right(?y)) :- pair(?_, ?y).
+answer(left(?x)) :- pair(?x, ?).
+answer(right(?y)) :- pair(?, ?y).

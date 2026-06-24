@@ -1,2 +1,2 @@
 materialize(answer, 1).
-answer(length_improper_fails) :- length([a | b], ?_).
+answer(length_improper_fails) :- length([a | b], ?).

@@ -41,7 +41,7 @@ candidate(pathRelay, [depotA, relay, labD]).
 candidate(pathDirectC, [depotA, labD]).
 candidate(pathViaC, [depotA, depotC, depotB, labD]).
 
-route_cost([?_], 0.0, 0.0, 0).
+route_cost([?], 0.0, 0.0, 0).
 route_cost([?from, ?to|?rest], ?raw, ?risk, ?edges) :-
   route_segment(?from, ?to, ?stepraw, ?steprisk),
   route_cost([?to|?rest], ?restraw, ?restrisk, ?restedges),

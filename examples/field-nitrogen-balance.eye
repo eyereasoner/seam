@@ -21,41 +21,41 @@ field(clay_surplus, 70, 90, 0.08, 120).
 % total_n/2 and available_n/2 build the nutrient budget; surplus/deficit and
 % leaching rules then explain the resulting field status.
 total_n(?f, ?total) :-
-  field(?f, ?soil, ?fert, ?_, ?_),
+  field(?f, ?soil, ?fert, ?, ?),
   add(?soil, ?fert, ?total).
 
 available_n(?f, ?avail) :-
   total_n(?f, ?total),
-  field(?f, ?_, ?_, ?loss, ?_),
+  field(?f, ?, ?, ?loss, ?),
   sub(1.0, ?loss, ?retained),
   mul(?total, ?retained, ?avail).
 
 % surplus_n/2 and deficit_n/2 split the signed balance into reportable quantities.
 surplus_n(?f, ?surplus) :-
   available_n(?f, ?avail),
-  field(?f, ?_, ?_, ?_, ?demand),
+  field(?f, ?, ?, ?, ?demand),
   gt(?avail, ?demand),
   sub(?avail, ?demand, ?surplus).
 
 surplus_n(?f, 0.0) :-
   available_n(?f, ?avail),
-  field(?f, ?_, ?_, ?_, ?demand),
+  field(?f, ?, ?, ?, ?demand),
   le(?avail, ?demand).
 
 deficit_n(?f, ?deficit) :-
   available_n(?f, ?avail),
-  field(?f, ?_, ?_, ?_, ?demand),
+  field(?f, ?, ?, ?, ?demand),
   lt(?avail, ?demand),
   sub(?demand, ?avail, ?deficit).
 
 deficit_n(?f, 0.0) :-
   available_n(?f, ?avail),
-  field(?f, ?_, ?_, ?_, ?demand),
+  field(?f, ?, ?, ?, ?demand),
   ge(?avail, ?demand).
 
 leaching_index(?f, ?index) :-
   surplus_n(?f, ?surplus),
-  field(?f, ?_, ?_, ?loss, ?_),
+  field(?f, ?, ?, ?loss, ?),
   mul(?surplus, ?loss, ?index).
 
 status(?f, under_supplied) :- deficit_n(?f, ?d), gt(?d, 10.0).

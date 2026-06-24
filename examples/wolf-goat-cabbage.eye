@@ -46,8 +46,8 @@ safe([?man, ?wolf, ?goat, ?cabbage]) :-
   one_eq(?man, ?goat, ?wolf),
   one_eq(?man, ?goat, ?cabbage).
 
-one_eq(?x, ?x, ?_).
-one_eq(?x, ?_, ?x).
+one_eq(?x, ?x, ?).
+one_eq(?x, ?, ?x).
 
 solution(puzzle, ?moves) :-
   solution(?moves).

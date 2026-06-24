@@ -123,7 +123,7 @@ A colon outside `:-` is not part of the language. Namespace-like names SHOULD be
 
 ### 3.4 Variables
 
-A variable starts with `?` followed by an ASCII letter or underscore and then zero or more ASCII letters, digits, or underscores. This N3/SPARQL-style spelling is the only source-level variable spelling in eyelang.
+A variable is either the bare anonymous variable `?`, or starts with `?` followed by an ASCII letter or underscore and then zero or more ASCII letters, digits, or underscores. This N3/SPARQL-style spelling is the only source-level variable spelling in eyelang.
 
 Examples:
 
@@ -131,10 +131,10 @@ Examples:
 ?x
 ?person
 ?_thing
-?_
+?
 ```
 
-Each `?_` anonymous variable occurrence is fresh. A bare `_` is not a variable in eyelang source.
+Each bare `?` anonymous variable occurrence is fresh. A bare `_` is not a variable in eyelang source.
 
 ### 3.5 Atom constants
 
@@ -171,7 +171,7 @@ A quoted atom constant is enclosed in single quotes. A single quote inside a quo
 A graphic atom constant is one or more graphic characters from this set:
 
 ```text
-#$&*+-/<=>?@^~\
+#$&*+-/<=>@^~\
 ```
 
 Angle-bracket IRI syntax is recognized only for absolute IRI-like contents. Graphic atoms such as `<=>`, `<`, and `>=` remain graphic atoms.

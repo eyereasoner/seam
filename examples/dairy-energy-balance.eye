@@ -17,15 +17,15 @@ cow(grazing, 540, 18, 5.8, 21).
 
 % Maintenance scales with body weight; milk requirement scales with daily milk.
 maintenance(?c, ?m) :-
-  cow(?c, ?weight, ?_, ?_, ?_),
+  cow(?c, ?weight, ?, ?, ?),
   mul(?weight, 0.08, ?m).
 
 milk_requirement(?c, ?r) :-
-  cow(?c, ?_, ?milk, ?_, ?_),
+  cow(?c, ?, ?milk, ?, ?),
   mul(?milk, 5.0, ?r).
 
 ration_supply(?c, ?s) :-
-  cow(?c, ?_, ?_, ?density, ?intake),
+  cow(?c, ?, ?, ?density, ?intake),
   mul(?density, ?intake, ?s).
 
 total_requirement(?c, ?r) :-

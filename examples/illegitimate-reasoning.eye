@@ -67,22 +67,22 @@ fallacy(?a, hasty_generalization) :-
   sample_size(?a, ?n),
   required_sample_size(?a, ?min),
   lt(?n, ?min),
-  concludes(?a, all(?_, ?_)).
+  concludes(?a, all(?, ?)).
 
 fallacy(?a, false_dilemma) :-
   argument(?a),
-  presented_alternatives(?a, ?_),
-  omitted_alternative(?a, ?_),
-  concludes(?a, ?_).
+  presented_alternatives(?a, ?),
+  omitted_alternative(?a, ?),
+  concludes(?a, ?).
 
 reason(arg_affirming_consequent, "observing the consequent does not prove the antecedent").
 reason(arg_denying_antecedent, "denying the antecedent does not disprove the consequent").
 reason(arg_hasty_generalization, "sample size is below the threshold for a universal conclusion").
 reason(arg_false_dilemma, "a relevant alternative is omitted").
 
-type(?a, illegitimate_reasoning) :- fallacy(?a, ?_).
-conclusion(?a, ?c) :- fallacy(?a, ?_), concludes(?a, ?c).
-reason(?a, ?r) :- fallacy(?a, ?_), reason(?a, ?r).
+type(?a, illegitimate_reasoning) :- fallacy(?a, ?).
+conclusion(?a, ?c) :- fallacy(?a, ?), concludes(?a, ?c).
+reason(?a, ?r) :- fallacy(?a, ?), reason(?a, ?r).
 sampleSize(?a, ?n) :- fallacy(?a, hasty_generalization), sample_size(?a, ?n).
 requiredSampleSize(?a, ?min) :- fallacy(?a, hasty_generalization), required_sample_size(?a, ?min).
 omittedAlternative(?a, ?alt) :- fallacy(?a, false_dilemma), omitted_alternative(?a, ?alt).

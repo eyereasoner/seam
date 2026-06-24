@@ -136,7 +136,7 @@ export function termIsGround(term, env = new Env()) {
   return resolved.args.every((arg) => termIsGround(arg, env));
 }
 
-const graphicAtomChars = new Set('#$&*+-/<=>?@^~\\'.split(''));
+const graphicAtomChars = new Set('#$&*+-/<=>@^~\\'.split(''));
 
 function isAbsoluteIriText(text) {
   return /^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>"'{}|\\^`]*$/.test(text);

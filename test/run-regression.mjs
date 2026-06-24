@@ -639,9 +639,9 @@ function whiteBoxCases() {
       },
     },
     {
-      name: 'parser treats question-mark underscore as anonymous',
+      name: 'parser treats bare question mark as anonymous',
       run: () => {
-        const clauses = parseProgramText('p(?_, ?_).\n');
+        const clauses = parseProgramText('p(?, ?).\n');
         const left = clauses[0].head.args[0].name;
         const right = clauses[0].head.args[1].name;
         assertEqual(left.startsWith('__anon'), true, 'left anonymous');

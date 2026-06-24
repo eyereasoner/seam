@@ -78,24 +78,24 @@ outcome(routeDirect, "Take the direct route via Brugge.").
 
 % Verification checks, analogous to the false-producing guards in gps.n3.
 check(c1, true) :-
-  traveller_path(i1, [drive_gent_brugge, drive_brugge_oostende], ?_, ?_, ?_, ?_).
+  traveller_path(i1, [drive_gent_brugge, drive_brugge_oostende], ?, ?, ?, ?).
 
 check(c2, true) :-
-  traveller_path(i1, [drive_gent_kortrijk, drive_kortrijk_brugge, drive_brugge_oostende], ?_, ?_, ?_, ?_).
+  traveller_path(i1, [drive_gent_kortrijk, drive_kortrijk_brugge, drive_brugge_oostende], ?, ?, ?, ?).
 
 check(c3, true) :-
-  route_metrics(routeDirect, ?d1, ?_, ?_, ?_),
-  route_metrics(routeViaKortrijk, ?d2, ?_, ?_, ?_),
+  route_metrics(routeDirect, ?d1, ?, ?, ?),
+  route_metrics(routeViaKortrijk, ?d2, ?, ?, ?),
   lt(?d1, ?d2).
 
 check(c4, true) :-
-  route_metrics(routeDirect, ?_, ?c1, ?_, ?_),
-  route_metrics(routeViaKortrijk, ?_, ?c2, ?_, ?_),
+  route_metrics(routeDirect, ?, ?c1, ?, ?),
+  route_metrics(routeViaKortrijk, ?, ?c2, ?, ?),
   lt(?c1, ?c2).
 
 check(c5, true) :-
-  route_metrics(routeDirect, ?_, ?_, ?b1, ?f1),
-  route_metrics(routeViaKortrijk, ?_, ?_, ?b2, ?f2),
+  route_metrics(routeDirect, ?, ?, ?b1, ?f1),
+  route_metrics(routeViaKortrijk, ?, ?, ?b2, ?f2),
   gt(?b1, ?b2),
   gt(?f1, ?f2).
 

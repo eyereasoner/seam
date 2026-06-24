@@ -112,8 +112,8 @@ distinctPrimeCount(case, 4) :-
 
 smallestPrimeFactor(case, 3) :-
   case(fta, ?n),
-  factor_smallest(?n, [3|?_]).
+  factor_smallest(?n, [3|?]).
 
 largestPrimeFactor(case, 3881) :-
   case(fta, ?n),
-  factor_largest(?n, [3881|?_]).
+  factor_largest(?n, [3881|?]).

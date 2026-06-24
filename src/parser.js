@@ -43,14 +43,14 @@ function isNameContinueCode(code) {
 function isQuestionVariableStart(source, pos) {
   if (source[pos] !== '?') return false;
   const code = (source[pos + 1] ?? '').charCodeAt(0);
-  return code === 95 || isAsciiLetterCode(code);
+  return !source[pos + 1] || code === 95 || isAsciiLetterCode(code) || !isNameContinueCode(code);
 }
 
 function isPlainAtomStartCode(code) {
   return code >= 97 && code <= 122;
 }
 
-const graphicAtomChars = '#$&*+-/<=>?@^~\\';
+const graphicAtomChars = '#$&*+-/<=>@^~\\';
 
 function isGraphicAtomCode(code) {
   return graphicAtomChars.includes(String.fromCharCode(code));
@@ -172,10 +172,9 @@ class Parser {
     if (isQuestionVariableStart(this.source, this.pos)) {
       const start = this.pos;
       this.take(); // ?
-      this.take();
+      if (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
       while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
-      let text = this.source.slice(start, this.pos);
-      if (text === '?_') text = `__anon${this.anonymous++}`;
+      const text = this.source.slice(start, this.pos);
       return { type: TOK.VAR, text, line };
     }
 
@@ -259,6 +258,7 @@ class Parser {
     if (this.token.type === TOK.VAR) {
       const name = this.token.text;
       this.advance();
+      if (name === '?') return variable(`__anon${this.anonymous++}`);
       return variable(name);
     }
     if (this.token.type === TOK.STRING) {
@@ -346,9 +346,9 @@ function isSimpleName(text) {
 const SIMPLE_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const FAST_BINARY_FACT = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const FAST_BINARY_RULE = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\s*:-\s*([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
-const SIMPLE_VARIABLE = /^\?[A-Za-z_][A-Za-z0-9_]*$/;
+const SIMPLE_VARIABLE = /^\?(?:[A-Za-z_][A-Za-z0-9_]*)?$/;
 const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*$/;
-const GRAPHIC_ATOM = /^[#$&*+\-\/<=>?@^~\\]+$/;
+const GRAPHIC_ATOM = /^[#$&*+\-\/<=>@^~\\]+$/;
 
 function parseClausesFastNoSource(source) {
   source = String(source ?? '');
@@ -370,7 +370,7 @@ function parseClausesFastNoSource(source) {
   const scalarOrVariableFast = (text) => {
     if (!text || !isFastScalarToken(text)) throw new Error('bad simple term');
     const first = text.charCodeAt(0);
-    if (text === '?_') return variable(`__anon${anonymous++}`);
+    if (text === '?') return variable(`__anon${anonymous++}`);
     if (SIMPLE_VARIABLE.test(text)) {
       const existing = variableCache.get(text);
       if (existing) return existing;

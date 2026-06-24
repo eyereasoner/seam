@@ -82,4 +82,4 @@ fft(?wave, ?spectrum) :-
 
 dcComponent(?wave, ?dc) :-
   wave(?wave, ?samples),
-  fft8(?samples, [?dc|?_]).
+  fft8(?samples, [?dc|?]).

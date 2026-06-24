@@ -24,18 +24,18 @@ trip_data(cold_commute, 120, 90, -8, 100, 35, 0.19).
 
 % Each world adds a different combination of speed, temperature, payload, and
 % reserve factors before comparing required energy with usable battery.
-speed_factor(?t, 1.20) :- trip_data(?t, ?_, ?s, ?_, ?_, ?_, ?_), gt(?s, 100).
-speed_factor(?t, 1.00) :- trip_data(?t, ?_, ?s, ?_, ?_, ?_, ?_), le(?s, 100).
+speed_factor(?t, 1.20) :- trip_data(?t, ?, ?s, ?, ?, ?, ?), gt(?s, 100).
+speed_factor(?t, 1.00) :- trip_data(?t, ?, ?s, ?, ?, ?, ?), le(?s, 100).
 
-temperature_factor(?t, 1.15) :- trip_data(?t, ?_, ?_, ?temp, ?_, ?_, ?_), lt(?temp, 0).
-temperature_factor(?t, 1.00) :- trip_data(?t, ?_, ?_, ?temp, ?_, ?_, ?_), ge(?temp, 0).
+temperature_factor(?t, 1.15) :- trip_data(?t, ?, ?, ?temp, ?, ?, ?), lt(?temp, 0).
+temperature_factor(?t, 1.00) :- trip_data(?t, ?, ?, ?temp, ?, ?, ?), ge(?temp, 0).
 
-payload_factor(?t, 1.15) :- trip_data(?t, ?_, ?_, ?_, ?p, ?_, ?_), gt(?p, 500).
-payload_factor(?t, 1.08) :- trip_data(?t, ?_, ?_, ?_, ?p, ?_, ?_), gt(?p, 250), le(?p, 500).
-payload_factor(?t, 1.00) :- trip_data(?t, ?_, ?_, ?_, ?p, ?_, ?_), le(?p, 250).
+payload_factor(?t, 1.15) :- trip_data(?t, ?, ?, ?, ?p, ?, ?), gt(?p, 500).
+payload_factor(?t, 1.08) :- trip_data(?t, ?, ?, ?, ?p, ?, ?), gt(?p, 250), le(?p, 500).
+payload_factor(?t, 1.00) :- trip_data(?t, ?, ?, ?, ?p, ?, ?), le(?p, 250).
 
 base_energy(?t, ?e) :-
-  trip_data(?t, ?d, ?_, ?_, ?_, ?_, ?b),
+  trip_data(?t, ?d, ?, ?, ?, ?, ?b),
   mul(?d, ?b, ?e).
 
 required_energy(?t, w1, ?e) :-
@@ -61,12 +61,12 @@ required_energy(?t, w3, ?e) :-
 
 % safe_in_world/2 compares required trip energy with usable battery capacity.
 safe_in_world(?t, ?w) :-
-  trip_data(?t, ?_, ?_, ?_, ?_, ?battery, ?_),
+  trip_data(?t, ?, ?, ?, ?, ?battery, ?),
   required_energy(?t, ?w, ?required),
   le(?required, ?battery).
 
 risky_in_world(?t, ?w) :-
-  trip_data(?t, ?_, ?_, ?_, ?_, ?battery, ?_),
+  trip_data(?t, ?, ?, ?, ?, ?battery, ?),
   required_energy(?t, ?w, ?required),
   gt(?required, ?battery).
 

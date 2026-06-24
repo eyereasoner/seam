@@ -19,9 +19,9 @@ plan(?moves) :-
   goal_state(?g),
   reachable(?i, ?moves, ?g).
 
-candidate_plan([?_, ?_, ?_]).
-candidate_plan([?_, ?_, ?_, ?_]).
-candidate_plan([?_, ?_, ?_, ?_, ?_]).
+candidate_plan([?, ?, ?]).
+candidate_plan([?, ?, ?, ?]).
+candidate_plan([?, ?, ?, ?, ?]).
 
 reachable(?s, [], ?s).
 reachable(?s1, [?m|?l], ?s3) :-
@@ -29,7 +29,7 @@ reachable(?s1, [?m|?l], ?s3) :-
   reachable(?s2, ?l, ?s3).
 
 initial_state([loc1, loc2, loc3, n, n]).
-goal_state([?_, ?_, ?_, ?_, y]).
+goal_state([?, ?, ?, ?, y]).
 
 legal_move([?b, ?m, ?m, n, ?h], climb_on, [?b, ?m, ?m, y, ?h]).
 legal_move([?b, ?m, ?m, y, ?h], climb_off, [?b, ?m, ?m, n, ?h]).
