@@ -800,7 +800,7 @@ function whiteBoxCases() {
           ['matrix-chain-order.eye', 'cost', 3, false],
           ['modular-exponentiation.eye', 'pow_mod', 4, true],
           ['pell-equation.eye', 'pell', 3, true],
-          ['stirling-bell-numbers.eye', 'stirling2', 3, true],
+          ['stirling-bell-numbers.eye', 'stirling2', 3, false],
           ['totient-summatory.eye', 'gcd', 3, true],
           ['totient-summatory.eye', 'totient', 2, false],
           ['weighted-interval-scheduling.eye', 'best_from', 2, true],
