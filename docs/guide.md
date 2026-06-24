@@ -310,6 +310,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 
 | Example | Description | Golden output |
 | --- | --- | --- |
+| [`abstract-interpretation.eye`](../examples/abstract-interpretation.eye) | Performs a sign-domain abstract interpretation and reports a possible divide-by-zero warning. | [`output/abstract-interpretation.eye`](../examples/output/abstract-interpretation.eye) |
 | [`access-control-policy.eye`](../examples/access-control-policy.eye) | Evaluates role and condition based access decisions. | [`output/access-control-policy.eye`](../examples/output/access-control-policy.eye) |
 | [`ackermann.eye`](../examples/ackermann.eye) | Computes Ackermann-style hyperoperation values. | [`output/ackermann.eye`](../examples/output/ackermann.eye) |
 | [`age.eye`](../examples/age.eye) | Checks whether people meet age thresholds. | [`output/age.eye`](../examples/output/age.eye) |
@@ -438,6 +439,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`peasant.eye`](../examples/peasant.eye) | Performs peasant multiplication and exponentiation. | [`output/peasant.eye`](../examples/output/peasant.eye) |
 | [`pell-equation.eye`](../examples/pell-equation.eye) | Generates Pell-equation solutions by recurrence. | [`output/pell-equation.eye`](../examples/output/pell-equation.eye) |
 | [`pendulum-period.eye`](../examples/pendulum-period.eye) | Computes simple pendulum periods. | [`output/pendulum-period.eye`](../examples/output/pendulum-period.eye) |
+| [`pointer-analysis.eye`](../examples/pointer-analysis.eye) | Computes Andersen-style inclusion-based points-to facts over address, assign, store, and load constraints. | [`output/pointer-analysis.eye`](../examples/output/pointer-analysis.eye) |
 | [`polynomial.eye`](../examples/polynomial.eye) | Finds complex integer polynomial roots. | [`output/polynomial.eye`](../examples/output/polynomial.eye) |
 | [`prime-range.eye`](../examples/prime-range.eye) | Finds primes in a finite range and computes a totient value. | [`output/prime-range.eye`](../examples/output/prime-range.eye) |
 | [`proof-contrapositive.eye`](../examples/proof-contrapositive.eye) | Models proof by contrapositive. | [`output/proof-contrapositive.eye`](../examples/output/proof-contrapositive.eye) |
@@ -446,6 +448,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`reusable-builtins.eye`](../examples/reusable-builtins.eye) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.eye`](../examples/output/reusable-builtins.eye) |
 | [`riemann-hypothesis.eye`](../examples/riemann-hypothesis.eye) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.eye`](../examples/output/riemann-hypothesis.eye) |
 | [`route-planning.eye`](../examples/route-planning.eye) | Finds routes and records them as explicit route terms. | [`output/route-planning.eye`](../examples/output/route-planning.eye) |
+| [`sat-solver-dpll.eye`](../examples/sat-solver-dpll.eye) | Searches a CNF formula with DPLL-style recursive decisions and early contradiction pruning. | [`output/sat-solver-dpll.eye`](../examples/output/sat-solver-dpll.eye) |
 | [`security-incident-correlation.eye`](../examples/security-incident-correlation.eye) | Correlates security incidents across signals. | [`output/security-incident-correlation.eye`](../examples/output/security-incident-correlation.eye) |
 | [`send-more-money.eye`](../examples/send-more-money.eye) | Solves the SEND + MORE = MONEY cryptarithm. | [`output/send-more-money.eye`](../examples/output/send-more-money.eye) |
 | [`service-impact.eye`](../examples/service-impact.eye) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.eye`](../examples/output/service-impact.eye) |
@@ -464,6 +467,8 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`term-tools.eye`](../examples/term-tools.eye) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.eye`](../examples/output/term-tools.eye) |
 | [`totient-summatory.eye`](../examples/totient-summatory.eye) | Computes Euler totients and their summatory function. | [`output/totient-summatory.eye`](../examples/output/totient-summatory.eye) |
 | [`trust-flow-provenance-threshold.eye`](../examples/trust-flow-provenance-threshold.eye) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.eye`](../examples/output/trust-flow-provenance-threshold.eye) |
+| [`truth-maintenance-system.eye`](../examples/truth-maintenance-system.eye) | Tracks assumptions, justifications, supported beliefs, and inconsistent environments in a tiny TMS. | [`output/truth-maintenance-system.eye`](../examples/output/truth-maintenance-system.eye) |
+| [`type-inference.eye`](../examples/type-inference.eye) | Infers/checks types for a tiny lambda language using logic unification over expression syntax trees. | [`output/type-inference.eye`](../examples/output/type-inference.eye) |
 | [`turing.eye`](../examples/turing.eye) | Simulates a binary-increment Turing machine. | [`output/turing.eye`](../examples/output/turing.eye) |
 | [`vector-similarity.eye`](../examples/vector-similarity.eye) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.eye`](../examples/output/vector-similarity.eye) |
 | [`vulnerability-impact.eye`](../examples/vulnerability-impact.eye) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.eye`](../examples/output/vulnerability-impact.eye) |

@@ -1,0 +1,50 @@
+% Andersen-style inclusion-based pointer analysis.
+%
+% The program being analyzed has address-taking, assignment, store, and load
+% statements.  The logic rules compute a fixed point of points_to/2 and
+% field_points_to/2 facts.  This is the classic Datalog shape used in scalable
+% pointer-analysis papers, reduced to a small readable instance.
+
+materialize(pointsTo, 2).
+materialize(heapField, 2).
+materialize(pointerFlow, 2).
+materialize(pointerConclusion, 2).
+
+table(points_to, 2).
+table(field_points_to, 2).
+
+% Source-program statements:
+%   x = &object_a
+%   z = &object_b
+%   y = x
+%   *y = z
+%   q = *x
+%   r = q
+addr(x, object_a).
+addr(z, object_b).
+assign(y, x).
+store(y, z).
+load(q, x).
+assign(r, q).
+
+% Address-taking and assignment constraints.
+points_to(?var, ?object) :- addr(?var, ?object).
+points_to(?to, ?object) :- assign(?to, ?from), points_to(?from, ?object).
+
+% Store and load constraints.  If y may point to object_a and z may point to
+% object_b, then object_a's abstract field may point to object_b.  A later load
+% from x therefore gives q the same target.
+field_points_to(?heap_object, ?value_object) :-
+  store(?pointer, ?value),
+  points_to(?pointer, ?heap_object),
+  points_to(?value, ?value_object).
+points_to(?to, ?value_object) :-
+  load(?to, ?pointer),
+  points_to(?pointer, ?heap_object),
+  field_points_to(?heap_object, ?value_object).
+
+pointsTo(?var, ?object) :- points_to(?var, ?object).
+heapField(?heap_object, ?value_object) :- field_points_to(?heap_object, ?value_object).
+pointerFlow(load_q_from_x, ?object) :- points_to(q, ?object).
+pointerConclusion(case, "the load q = *x recovers object_b through the store *y = z and y = x") :-
+  points_to(q, object_b).
