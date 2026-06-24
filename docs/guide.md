@@ -414,6 +414,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`list-collection.eye`](../examples/list-collection.eye) | Demonstrates list and collection built-ins. | [`output/list-collection.eye`](../examples/output/list-collection.eye) |
 | [`lldm.eye`](../examples/lldm.eye) | Calculates leg-length discrepancy measurements. | [`output/lldm.eye`](../examples/output/lldm.eye) |
 | [`manufacturing-quality-control.eye`](../examples/manufacturing-quality-control.eye) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.eye`](../examples/output/manufacturing-quality-control.eye) |
+| [`markov-logic-network.eye`](../examples/markov-logic-network.eye) | Scores finite possible worlds with weighted soft formulas in a Markov Logic Network style. | [`output/markov-logic-network.eye`](../examples/output/markov-logic-network.eye) |
 | [`map-four-color-search.eye`](../examples/map-four-color-search.eye) | Searches for a valid four-colouring of the EU neighbour graph. | [`output/map-four-color-search.eye`](../examples/output/map-four-color-search.eye) |
 | [`matrix-chain-order.eye`](../examples/matrix-chain-order.eye) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.eye`](../examples/output/matrix-chain-order.eye) |
 | [`matrix-noncommutativity.eye`](../examples/matrix-noncommutativity.eye) | Multiplies 2x2 matrices and shows non-commutativity. | [`output/matrix-noncommutativity.eye`](../examples/output/matrix-noncommutativity.eye) |
