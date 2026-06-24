@@ -360,9 +360,9 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`derived-backward-rule.eye`](../examples/derived-backward-rule.eye) | Derives an inverse-property backward rule from rule data. | [`output/derived-backward-rule.eye`](../examples/output/derived-backward-rule.eye) |
 | [`derived-rule.eye`](../examples/derived-rule.eye) | Derives conclusions from rule data. | [`output/derived-rule.eye`](../examples/output/derived-rule.eye) |
 | [`diamond-property.eye`](../examples/diamond-property.eye) | Checks the diamond property of a relation. | [`output/diamond-property.eye`](../examples/output/diamond-property.eye) |
-| [`dijkstra.eye`](../examples/dijkstra.eye) | Enumerates weighted simple paths. | [`output/dijkstra.eye`](../examples/output/dijkstra.eye) |
 | [`dijkstra-findall-sort.eye`](../examples/dijkstra-findall-sort.eye) | Finds shortest paths using collected candidates. | [`output/dijkstra-findall-sort.eye`](../examples/output/dijkstra-findall-sort.eye) |
 | [`dijkstra-risk-path.eye`](../examples/dijkstra-risk-path.eye) | Ranks routes by cost and trust. | [`output/dijkstra-risk-path.eye`](../examples/output/dijkstra-risk-path.eye) |
+| [`dijkstra.eye`](../examples/dijkstra.eye) | Enumerates weighted simple paths. | [`output/dijkstra.eye`](../examples/output/dijkstra.eye) |
 | [`dining-philosophers.eye`](../examples/dining-philosophers.eye) | Simulates Chandy-Misra fork exchanges. | [`output/dining-philosophers.eye`](../examples/output/dining-philosophers.eye) |
 | [`dog.eye`](../examples/dog.eye) | Counts dogs and derives when a license is required. | [`output/dog.eye`](../examples/output/dog.eye) |
 | [`dpv-odrl-purpose-mapping.eye`](../examples/dpv-odrl-purpose-mapping.eye) | Maps a DPV process into an ODRL permission view. | [`output/dpv-odrl-purpose-mapping.eye`](../examples/output/dpv-odrl-purpose-mapping.eye) |
@@ -389,8 +389,8 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`gdpr-compliance.eye`](../examples/gdpr-compliance.eye) | Checks GDPR-style processing compliance. | [`output/gdpr-compliance.eye`](../examples/output/gdpr-compliance.eye) |
 | [`good-cobbler.eye`](../examples/good-cobbler.eye) | Demonstrates term-level structure with a good-cobbler statement. | [`output/good-cobbler.eye`](../examples/output/good-cobbler.eye) |
 | [`gps.eye`](../examples/gps.eye) | Finds and verifies route paths. | [`output/gps.eye`](../examples/output/gps.eye) |
-| [`graph.eye`](../examples/graph.eye) | Derives transitive paths over French-city road links while showing the productive recursive rule order. | [`output/graph.eye`](../examples/output/graph.eye) |
 | [`graph-reachability.eye`](../examples/graph-reachability.eye) | Derives reachable nodes in a graph. | [`output/graph-reachability.eye`](../examples/output/graph-reachability.eye) |
+| [`graph.eye`](../examples/graph.eye) | Derives transitive paths over French-city road links while showing the productive recursive rule order. | [`output/graph.eye`](../examples/output/graph.eye) |
 | [`gray-code-counter.eye`](../examples/gray-code-counter.eye) | Generates Gray-code counter states. | [`output/gray-code-counter.eye`](../examples/output/gray-code-counter.eye) |
 | [`greatest-lower-bound-uniqueness.eye`](../examples/greatest-lower-bound-uniqueness.eye) | Shows uniqueness of greatest lower bounds in a finite order instance. | [`output/greatest-lower-bound-uniqueness.eye`](../examples/output/greatest-lower-bound-uniqueness.eye) |
 | [`group-inverse-uniqueness.eye`](../examples/group-inverse-uniqueness.eye) | Shows uniqueness of inverses in a finite group instance. | [`output/group-inverse-uniqueness.eye`](../examples/output/group-inverse-uniqueness.eye) |
@@ -398,6 +398,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`hamming-code.eye`](../examples/hamming-code.eye) | Corrects a single-bit Hamming word. | [`output/hamming-code.eye`](../examples/output/hamming-code.eye) |
 | [`hanoi.eye`](../examples/hanoi.eye) | Derives the Towers of Hanoi moves. | [`output/hanoi.eye`](../examples/output/hanoi.eye) |
 | [`heat-loss.eye`](../examples/heat-loss.eye) | Computes conductive heat loss. | [`output/heat-loss.eye`](../examples/output/heat-loss.eye) |
+| [`herbrand-witnesses.eye`](../examples/herbrand-witnesses.eye) | Represents existential-style consequences as stable Herbrand witness terms. | [`output/herbrand-witnesses.eye`](../examples/output/herbrand-witnesses.eye) |
 | [`heron-theorem.eye`](../examples/heron-theorem.eye) | Computes triangle area by Heron's theorem. | [`output/heron-theorem.eye`](../examples/output/heron-theorem.eye) |
 | [`ideal-gas-law.eye`](../examples/ideal-gas-law.eye) | Applies the ideal gas law. | [`output/ideal-gas-law.eye`](../examples/output/ideal-gas-law.eye) |
 | [`illegitimate-reasoning.eye`](../examples/illegitimate-reasoning.eye) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.eye`](../examples/output/illegitimate-reasoning.eye) |
@@ -413,7 +414,9 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`list-collection.eye`](../examples/list-collection.eye) | Demonstrates list and collection built-ins. | [`output/list-collection.eye`](../examples/output/list-collection.eye) |
 | [`lldm.eye`](../examples/lldm.eye) | Calculates leg-length discrepancy measurements. | [`output/lldm.eye`](../examples/output/lldm.eye) |
 | [`manufacturing-quality-control.eye`](../examples/manufacturing-quality-control.eye) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.eye`](../examples/output/manufacturing-quality-control.eye) |
+| [`map-four-color-search.eye`](../examples/map-four-color-search.eye) | Searches for a valid four-colouring of the EU neighbour graph. | [`output/map-four-color-search.eye`](../examples/output/map-four-color-search.eye) |
 | [`matrix-chain-order.eye`](../examples/matrix-chain-order.eye) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.eye`](../examples/output/matrix-chain-order.eye) |
+| [`matrix-noncommutativity.eye`](../examples/matrix-noncommutativity.eye) | Multiplies 2x2 matrices and shows non-commutativity. | [`output/matrix-noncommutativity.eye`](../examples/output/matrix-noncommutativity.eye) |
 | [`microgrid-dispatch.eye`](../examples/microgrid-dispatch.eye) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.eye`](../examples/output/microgrid-dispatch.eye) |
 | [`missionaries-cannibals.eye`](../examples/missionaries-cannibals.eye) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.eye`](../examples/output/missionaries-cannibals.eye) |
 | [`modal-logic-kripke.eye`](../examples/modal-logic-kripke.eye) | Emulates modal box and diamond operators over a finite Kripke frame. | [`output/modal-logic-kripke.eye`](../examples/output/modal-logic-kripke.eye) |
@@ -430,21 +433,24 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`orbital-transfer-design.eye`](../examples/orbital-transfer-design.eye) | Designs a Hohmann orbital transfer. | [`output/orbital-transfer-design.eye`](../examples/output/orbital-transfer-design.eye) |
 | [`path-discovery.eye`](../examples/path-discovery.eye) | Discovers bounded air-route paths. | [`output/path-discovery.eye`](../examples/output/path-discovery.eye) |
 | [`peano-arithmetic.eye`](../examples/peano-arithmetic.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-arithmetic.eye`](../examples/output/peano-arithmetic.eye) |
+| [`peano-calculus.eye`](../examples/peano-calculus.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-calculus.eye`](../examples/output/peano-calculus.eye) |
 | [`peasant.eye`](../examples/peasant.eye) | Performs peasant multiplication and exponentiation. | [`output/peasant.eye`](../examples/output/peasant.eye) |
 | [`pell-equation.eye`](../examples/pell-equation.eye) | Generates Pell-equation solutions by recurrence. | [`output/pell-equation.eye`](../examples/output/pell-equation.eye) |
 | [`pendulum-period.eye`](../examples/pendulum-period.eye) | Computes simple pendulum periods. | [`output/pendulum-period.eye`](../examples/output/pendulum-period.eye) |
 | [`polynomial.eye`](../examples/polynomial.eye) | Finds complex integer polynomial roots. | [`output/polynomial.eye`](../examples/output/polynomial.eye) |
+| [`prime-range.eye`](../examples/prime-range.eye) | Finds primes in a finite range and computes a totient value. | [`output/prime-range.eye`](../examples/output/prime-range.eye) |
 | [`proof-contrapositive.eye`](../examples/proof-contrapositive.eye) | Models proof by contrapositive. | [`output/proof-contrapositive.eye`](../examples/output/proof-contrapositive.eye) |
 | [`quadratic-formula.eye`](../examples/quadratic-formula.eye) | Solves sample quadratic equations. | [`output/quadratic-formula.eye`](../examples/output/quadratic-formula.eye) |
 | [`radioactive-decay.eye`](../examples/radioactive-decay.eye) | Computes radioactive decay over time. | [`output/radioactive-decay.eye`](../examples/output/radioactive-decay.eye) |
 | [`reusable-builtins.eye`](../examples/reusable-builtins.eye) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.eye`](../examples/output/reusable-builtins.eye) |
 | [`riemann-hypothesis.eye`](../examples/riemann-hypothesis.eye) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.eye`](../examples/output/riemann-hypothesis.eye) |
+| [`route-planning.eye`](../examples/route-planning.eye) | Finds routes and records them as explicit route terms. | [`output/route-planning.eye`](../examples/output/route-planning.eye) |
 | [`security-incident-correlation.eye`](../examples/security-incident-correlation.eye) | Correlates security incidents across signals. | [`output/security-incident-correlation.eye`](../examples/output/security-incident-correlation.eye) |
 | [`send-more-money.eye`](../examples/send-more-money.eye) | Solves the SEND + MORE = MONEY cryptarithm. | [`output/send-more-money.eye`](../examples/output/send-more-money.eye) |
 | [`service-impact.eye`](../examples/service-impact.eye) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.eye`](../examples/output/service-impact.eye) |
+| [`shoelace-polygon-area.eye`](../examples/shoelace-polygon-area.eye) | Computes polygon area with a recursive shoelace calculation. | [`output/shoelace-polygon-area.eye`](../examples/output/shoelace-polygon-area.eye) |
 | [`sieve.eye`](../examples/sieve.eye) | Enumerates primes with a sieve-style program. | [`output/sieve.eye`](../examples/output/sieve.eye) |
 | [`skolem-functions.eye`](../examples/skolem-functions.eye) | Generates deterministic functional terms. | [`output/skolem-functions.eye`](../examples/output/skolem-functions.eye) |
-| [`herbrand-witnesses.eye`](../examples/herbrand-witnesses.eye) | Represents existential-style consequences as stable Herbrand witness terms. | [`output/herbrand-witnesses.eye`](../examples/output/herbrand-witnesses.eye) |
 | [`socket-age.eye`](../examples/socket-age.eye) | Shows socket-declared age reasoning inputs and plugs. | [`output/socket-age.eye`](../examples/output/socket-age.eye) |
 | [`socket-family.eye`](../examples/socket-family.eye) | Shows socket-declared family-source inputs and ancestry rules. | [`output/socket-family.eye`](../examples/output/socket-family.eye) |
 | [`socrates.eye`](../examples/socrates.eye) | Derives that Socrates is mortal. | [`output/socrates.eye`](../examples/output/socrates.eye) |
@@ -453,6 +459,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`stirling-bell-numbers.eye`](../examples/stirling-bell-numbers.eye) | Computes Stirling numbers and Bell numbers. | [`output/stirling-bell-numbers.eye`](../examples/output/stirling-bell-numbers.eye) |
 | [`sudoku-4x4.eye`](../examples/sudoku-4x4.eye) | Solves a compact 4x4 Sudoku by finite constraint search. | [`output/sudoku-4x4.eye`](../examples/output/sudoku-4x4.eye) |
 | [`superdense-coding.eye`](../examples/superdense-coding.eye) | Models superdense-coding bit transmission. | [`output/superdense-coding.eye`](../examples/output/superdense-coding.eye) |
+| [`symbolic-derivative.eye`](../examples/symbolic-derivative.eye) | Symbolically differentiates explicit expression terms, including products and logs. | [`output/symbolic-derivative.eye`](../examples/output/symbolic-derivative.eye) |
 | [`term-tools.eye`](../examples/term-tools.eye) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.eye`](../examples/output/term-tools.eye) |
 | [`totient-summatory.eye`](../examples/totient-summatory.eye) | Computes Euler totients and their summatory function. | [`output/totient-summatory.eye`](../examples/output/totient-summatory.eye) |
 | [`trust-flow-provenance-threshold.eye`](../examples/trust-flow-provenance-threshold.eye) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.eye`](../examples/output/trust-flow-provenance-threshold.eye) |
@@ -463,6 +470,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`weighted-interval-scheduling.eye`](../examples/weighted-interval-scheduling.eye) | Selects the best non-overlapping weighted intervals with tabled dynamic programming. | [`output/weighted-interval-scheduling.eye`](../examples/output/weighted-interval-scheduling.eye) |
 | [`witch.eye`](../examples/witch.eye) | Derives the classic “burn the witch” rule chain. | [`output/witch.eye`](../examples/output/witch.eye) |
 | [`wolf-goat-cabbage.eye`](../examples/wolf-goat-cabbage.eye) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.eye`](../examples/output/wolf-goat-cabbage.eye) |
+| [`workplace-compliance.eye`](../examples/workplace-compliance.eye) | Classifies workplace compliance from explicit action facts. | [`output/workplace-compliance.eye`](../examples/output/workplace-compliance.eye) |
 | [`zebra.eye`](../examples/zebra.eye) | Solves the zebra logic puzzle. | [`output/zebra.eye`](../examples/output/zebra.eye) |
 
 ## Golden outputs, tests, and conformance
