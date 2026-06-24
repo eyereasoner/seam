@@ -49,6 +49,7 @@ console.log(result.stdout);
 - [Playground](https://eyereasoner.github.io/eyelang/playground)
 - [Guide](docs/guide.md)
 - [Language reference](docs/language-reference.md)
+- [A Compact Reasoning Workbench](docs/compact-reasoning-workbench.md)
 
 For local browser use, serve the checkout first so the playground can load ES modules and example files:
 
