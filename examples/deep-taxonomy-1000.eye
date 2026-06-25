@@ -1,11 +1,8 @@
 % =============================================================================================================================
-% Deep Taxonomy - depth 1000 - expanded N3-style eyelang with checkpoint proof accelerators
+% Deep Taxonomy - depth 1000 - expanded N3-style eyelang
 %
-% Adjacent rules mirror the Eyeling N3 deep-taxonomy chain. The checkpoint
-% rules are redundant consequences of that chain and are placed first so eyelang
-% can prove terminal/report goals without overflowing the JavaScript call stack.
-% Report/check rules use once/1 so successful checks do not backtrack into a
-% long adjacent-only proof after a shorter checkpoint proof has succeeded.
+% Adjacent rules mirror the Eyeling N3 deep-taxonomy chain. Each step derives
+% the next taxonomy class together with two side labels.
 % =============================================================================================================================
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
@@ -26,12 +23,6 @@ a(ind, n0).
 % Derivation rules: each rule below contributes one logical step toward the displayed results.
 is(test, true) :- once(a(ind, a2)).
 a(?x, a2) :- a(?x, n1000).
-
-% Redundant checkpoint accelerators.
-
-a(?x, n1000) :- a(?x, n0).
-a(?x, n499) :- a(?x, n0).
-a(?x, n999) :- a(?x, n0).
 
 % Adjacent N3-style taxonomy rules.
 
@@ -3068,7 +3059,7 @@ arc(check6, "C6 OK - the success flag is raised only after the terminal class a2
 answer(report, "The test succeeds: starting from one individual classified as n0, the rules eventually classify it as n1000 and then as a2.") :-
  once(is(test, true)).
 
-reason(report, "The adjacent rules mirror the Eyeling N3 deep-taxonomy-1000 chain. Redundant checkpoint rules are included only as proof accelerators: each shortcut is entailed by the adjacent chain, and once/1 prevents backtracking into the long adjacent-only proof after a check has succeeded.") :-
+reason(report, "The adjacent rules mirror the Eyeling N3 deep-taxonomy-1000 chain: each rule advances one taxonomy level and adds the matching side labels.") :-
  once(a(ind, a2)),
  once(is(test, true)).
 

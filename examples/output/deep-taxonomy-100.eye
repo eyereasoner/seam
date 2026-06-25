@@ -6,7 +6,7 @@ arc(check4, "C4 OK - the final taxonomy step from n99 to n100 was completed.").
 arc(check5, "C5 OK - once n100 is reached, the terminal class a2 is derived.").
 arc(check6, "C6 OK - the success flag is raised only after the terminal class a2 is present.").
 answer(report, "The test succeeds: starting from one individual classified as n0, the rules eventually classify it as n100 and then as a2.").
-reason(report, "The adjacent rules mirror the Eyeling N3 deep-taxonomy-100 chain. Redundant checkpoint rules are included only as proof accelerators: each shortcut is entailed by the adjacent chain, and once/1 prevents backtracking into the long adjacent-only proof after a check has succeeded.").
+reason(report, "The adjacent rules mirror the Eyeling N3 deep-taxonomy-100 chain: each rule advances one taxonomy level and adds the matching side labels.").
 checkPassed(report, check1).
 checkPassed(report, check2).
 checkPassed(report, check3).

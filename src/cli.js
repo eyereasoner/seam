@@ -103,13 +103,12 @@ async function runDefault(engine, program, options) {
   const materializedKeys = new Set(goals.map((goal) => `${goal.name}/${goal.arity}`));
   const facts = program.sourceFactLines(materializedKeys);
   const lines = new Set();
-  let lastStats = null;
   const registry = engine.getDefaultRegistry();
   const explanation = options.proof ? await loadExplanation() : null;
+  const solver = new engine.Solver(program, { registry });
 
   for (const goal of goals) {
-    const solver = new engine.Solver(program, { registry });
-
+    solver.solutionsSeen = 0;
     for (const env of solver.solve([goal], new engine.Env(), 0)) {
       if (!engine.termIsGround(goal, env)) continue;
 
@@ -122,10 +121,9 @@ async function runDefault(engine, program, options) {
       if (options.proof) writeExplanation(explanation, program, engine.copyResolved(goal, env), registry);
     }
 
-    lastStats = solver.stats;
   }
 
-  if (options.stats && lastStats) printStats(lastStats);
+  if (options.stats) printStats(solver.stats);
 }
 
 function writeExplanation(explanation, program, resolved, registry) {

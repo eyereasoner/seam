@@ -1,6 +1,6 @@
 // Depth-first eyelang solver with builtin dispatch, memoization, and guarded recursion handling.
 // Most semantic decisions still flow through unification; optimizations only select candidates earlier.
-import { COMPOUND, Env, flattenConjunction, freshTerm, termToString, unify, variantTerms } from './term.js';
+import { COMPOUND, Env, copyResolved, flattenConjunction, freshTerm, termIsGround, termToString, unify, variantTerms } from './term.js';
 import { createDefaultRegistry } from './builtins/registry.js';
 import { selectClauseCandidates } from './program.js';
 
@@ -19,6 +19,7 @@ export class Solver {
     this.solutionsSeen = 0;
     this.active = [];
     this.memo = new Map();
+    this.groundChainSuccess = new Set();
     this.stats = {
       completed_goal_lists: 0,
       solve_goals_calls: 0,
@@ -34,7 +35,19 @@ export class Solver {
   cloneForInnerGoal(solutionLimit = this.solutionLimit) {
     const solver = new Solver(this.program, { registry: this.registry, maxDepth: this.maxDepth, solutionLimit });
     solver.memo = this.memo;
+    solver.groundChainSuccess = this.groundChainSuccess;
     return solver;
+  }
+
+  absorbStatsFrom(child) {
+    if (!child || child === this || !child.stats) return;
+    for (const [key, value] of Object.entries(child.stats)) {
+      if (key === 'max_depth' || key === 'max_goal_count') {
+        this.stats[key] = Math.max(this.stats[key] ?? 0, value ?? 0);
+      } else {
+        this.stats[key] = (this.stats[key] ?? 0) + (value ?? 0);
+      }
+    }
   }
 
   *solve(goals, env = new Env(), depth = 0) {
@@ -267,6 +280,7 @@ function pushMemoAnswerFrames(stack, entry, goal, rest, env, depth, active, solv
 
 function pushUserGoalUncachedFrames(stack, solver, group, goal, rest, env, depth, active) {
   if (activeVariantIn(goal, env, active)) return;
+  if (tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, active)) return;
   const candidates = selectClauseCandidates(group, goal, env);
   const frames = [];
   for (const pass of [candidates.primary, candidates.fallback]) {
@@ -292,6 +306,80 @@ function pushUserGoalUncachedFrames(stack, solver, group, goal, rest, env, depth
     }
   }
   for (let i = frames.length - 1; i >= 0; i--) stack.push(frames[i]);
+}
+
+
+function tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, active) {
+  // Compress deterministic ground single-goal chains such as deep taxonomy
+  // proofs: a(ind, n100000) -> a(ind, n99999) -> ... -> a(ind, n0).
+  // This is a search-control optimization only. It fires only while each step
+  // has exactly one matching clause and a single ground body goal; otherwise the
+  // normal clause path below remains authoritative.
+  if (!termIsGround(goal, env)) return false;
+
+  const baseEnv = env;
+  let currentGroup = group;
+  let currentGoal = copyResolved(goal, env);
+  let currentDepth = depth;
+  const currentEnv = new Env();
+  const seen = new Set();
+
+  while (true) {
+    // The compressed path is iterative and protected by `seen`, so it does not
+    // consume JavaScript recursion depth the way the ordinary solver path does.
+    // Keep recording the logical depth for diagnostics, but do not cut off long
+    // finite taxonomy chains with the recursive maxDepth guard.
+    if (solver.solutionsSeen >= solver.solutionLimit) return true;
+    solver.stats.max_depth = Math.max(solver.stats.max_depth, currentDepth);
+    const key = `${currentGoal.name}/${currentGoal.arity}:${termToString(currentGoal, currentEnv, true)}`;
+    if (seen.has(key)) return true;
+    if (activeVariantIn(currentGoal, currentEnv, active)) return true;
+    if (solver.groundChainSuccess.has(key)) {
+      rememberGroundChainSuccess(solver, seen);
+      stack.push({ kind: 'goals', goals: rest, env: baseEnv, depth: depth + 1, active });
+      return true;
+    }
+    seen.add(key);
+
+    const candidates = selectClauseCandidates(currentGroup, currentGoal, currentEnv);
+    const matches = [];
+    for (const pass of [candidates.primary, candidates.fallback]) {
+      for (const clause of pass) {
+        if (headCannotMatch(currentGoal, clause.head, currentEnv)) continue;
+        const id = nextFreshId();
+        const freshHead = freshTerm(clause.head, id);
+        const freshBody = clause.body.map((term) => freshTerm(term, id));
+        const next = new Env();
+        solver.stats.unify_calls++;
+        if (!unify(currentGoal, freshHead, next)) continue;
+        matches.push({ body: freshBody, env: next });
+        if (matches.length > 1) return false;
+      }
+    }
+
+    if (matches.length !== 1) return false;
+    const match = matches[0];
+    if (match.body.length === 0) {
+      rememberGroundChainSuccess(solver, seen);
+      stack.push({ kind: 'goals', goals: rest, env: baseEnv, depth: depth + 1, active });
+      return true;
+    }
+    if (match.body.length !== 1) return false;
+    const nextGoal = match.body[0];
+    if (nextGoal.type !== COMPOUND || !termIsGround(nextGoal, match.env)) return false;
+    const resolvedNextGoal = copyResolved(nextGoal, match.env);
+    const nextGroup = solver.program.findGroup(resolvedNextGoal.name, resolvedNextGoal.arity);
+    if (!nextGroup) return false;
+
+    currentGoal = resolvedNextGoal;
+    currentGroup = nextGroup;
+    currentDepth++;
+  }
+}
+
+
+function rememberGroundChainSuccess(solver, seen) {
+  for (const key of seen) solver.groundChainSuccess.add(key);
 }
 
 function rememberMemoAnswer(entry, goal, env) {

@@ -11,15 +11,19 @@ function* notBuiltin({ solver, goal, env }) {
   const limited = solver.cloneForInnerGoal(1);
   let found = false;
   for (const _ of limited.solve([goal.args[0]], env.clone(), 0)) { found = true; break; }
+  solver.absorbStatsFrom(limited);
   if (!found) yield env;
 }
 
 function* onceBuiltin({ solver, goal, env }) {
   const limited = solver.cloneForInnerGoal(1);
+  let first = null;
   for (const answerEnv of limited.solve([goal.args[0]], env.clone(), 0)) {
-    yield answerEnv;
+    first = answerEnv;
     break;
   }
+  solver.absorbStatsFrom(limited);
+  if (first) yield first;
 }
 
 function* forallBuiltin({ solver, goal, env }) {
@@ -28,7 +32,12 @@ function* forallBuiltin({ solver, goal, env }) {
     const checker = solver.cloneForInnerGoal(1);
     let ok = false;
     for (const _ of checker.solve([goal.args[1]], answerEnv.clone(), 0)) { ok = true; break; }
-    if (!ok) return;
+    solver.absorbStatsFrom(checker);
+    if (!ok) {
+      solver.absorbStatsFrom(generator);
+      return;
+    }
   }
+  solver.absorbStatsFrom(generator);
   yield env;
 }
