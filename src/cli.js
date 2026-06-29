@@ -139,7 +139,7 @@ Usage:
   seam [options] [file-or-url.pl|- ...]
 
 Input:
-  file-or-url.pl       Read a Seam program from a local file or http(s) URL.
+  file-or-url.pl        Read a Seam program from a local file or http(s) URL.
   -                     Read a Seam program from standard input.
 
 Options:

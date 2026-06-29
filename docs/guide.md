@@ -246,7 +246,7 @@ seam -s examples/observability-log-correlation.pl
 Add `-w` or `--warnings` when you want non-fatal portability diagnostics, such as unstratified `not/1` dependencies, printed to stderr while normal answer output still goes to stdout:
 
 ```sh
-seam --warnings policy.pl
+seam --warnings test/conformance/warnings/negation/unstratified_mutual.pl
 ```
 
 The playground has matching `--stats` and `--proof` checkboxes, so browser runs can show the same counters or explanations like the CLI.

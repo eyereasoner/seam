@@ -3,9 +3,11 @@
 [![npm version](https://img.shields.io/npm/v/seam-lang.svg)](https://www.npmjs.com/package/seam-lang)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20761726-blue.svg)](https://doi.org/10.5281/zenodo.20761726)
 
-Seam is a small logic programming language for facts, rules, goals, answers, and proofs.
-Its source syntax is Prolog-like Horn-clause syntax with deliberate seam choices, including ISO Prolog-style `X` variables, explicit `table(path, 2).` declarations for tabled predicates, advisory `mode/3` declarations for host tooling, explicit Herbrand witness terms for executable existential-style consequences, and stratified-negation diagnostics for portable `not/1` usage.
-It grew out of logic-language experiments in the EYE/N3 reasoning tradition, but is packaged here as its own project.
+Seam is a small reasoning language for facts, rules, goals, answers, and proofs.
+
+It uses Prolog-like syntax with ISO Prolog-style variables such as X, plus practical features for tabled predicates, mode declarations, witness terms, and portable not/1 usage.
+
+Seam grew out of experiments in the EYE tradition, but is packaged as its own project.
 
 ## Install and run
 
@@ -14,7 +16,7 @@ Seam has no runtime npm dependencies and no build step. From a source checkout, 
 ```bash
 node bin/seam.js examples/ancestor.pl
 node bin/seam.js --proof examples/socrates.pl
-node bin/seam.js --warnings examples/policy.pl
+node bin/seam.js --warnings test/conformance/warnings/negation/unstratified_mutual.pl
 printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/seam.js -
 ```
 
