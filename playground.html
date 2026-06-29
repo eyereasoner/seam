@@ -371,7 +371,7 @@
         <summary id="advanced-heading">⚙ Advanced configuration</summary>
         <div class="toolbar" aria-label="URL loader">
           <label for="source-url">Load Eyelang from URL</label>
-          <input id="source-url" type="url" placeholder="https://example.org/program.eye">
+          <input id="source-url" type="url" placeholder="https://example.org/program.pl">
           <button id="load-url" type="button">Load from URL</button>
         </div>
         <div class="toolbar background-row">
@@ -767,14 +767,14 @@ answer(ok) :- eq(ok, ok).
       if (!name) return;
       try {
         setStatus(`Loading ${name}…`);
-        const exampleUrl = new URL(`./examples/${name}.eye`, location.href);
+        const exampleUrl = new URL(`./examples/${name}.pl`, location.href);
         const response = await fetch(exampleUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-        setSource(await response.text(), `examples/${name}.eye`, { kind: 'example', name });
-        setStatus(`Loaded examples/${name}.eye.`);
+        setSource(await response.text(), `examples/${name}.pl`, { kind: 'example', name });
+        setStatus(`Loaded examples/${name}.pl.`);
       } catch (error) {
         setSource(FALLBACK_SOURCE, 'fallback program');
-        setStatus(`Could not load examples/${name}.eye: ${formatError(error)}`, true);
+        setStatus(`Could not load examples/${name}.pl: ${formatError(error)}`, true);
       }
     }
 
@@ -880,12 +880,9 @@ answer(ok) :- eq(ok, ok).
           while (j < text.length && /[\d.]/.test(text[j])) j++;
           out += span('number', text.slice(i, j));
           i = j;
-        } else if (ch === '?') {
+        } else if (/[A-Z_]/.test(ch)) {
           let j = i + 1;
-          if (/[A-Za-z_]/.test(text[j] || '')) {
-            j++;
-            while (j < text.length && /[A-Za-z0-9_]/.test(text[j])) j++;
-          }
+          while (j < text.length && /[A-Za-z0-9_]/.test(text[j])) j++;
           out += span('variable', text.slice(i, j));
           i = j;
         } else if (/[a-z]/.test(ch)) {
@@ -1111,9 +1108,9 @@ answer(ok) :- eq(ok, ok).
         setStatus('Creating GitHub Gist…');
         const files = {
           [GIST_STATE_FILENAME]: { content: stateText },
-          'program.eye': { content: source.value },
+          'program.pl': { content: source.value },
         };
-        if (backgroundSource.trim()) files['background.eye'] = { content: backgroundSource };
+        if (backgroundSource.trim()) files['background.pl'] = { content: backgroundSource };
         const response = await fetch('https://api.github.com/gists', {
           method: 'POST',
           headers: {

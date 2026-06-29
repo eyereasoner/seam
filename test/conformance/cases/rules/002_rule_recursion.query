@@ -1,1 +1,1 @@
-ancestor(pat, ?x)
+ancestor(pat, X)

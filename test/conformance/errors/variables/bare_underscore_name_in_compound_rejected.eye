@@ -1,1 +1,0 @@
-answer(pair(_value)).

@@ -1,5 +1,0 @@
-% Reference 12: once/1 proof output includes the proof for the selected child goal.
-materialize(answer, 1).
-choice(a).
-choice(b).
-answer(?x) :- once(choice(?x)).

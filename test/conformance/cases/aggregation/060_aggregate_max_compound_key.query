@@ -1,1 +1,1 @@
-aggregate_max([?s, ?name], ?name, score(?name, ?s), ?key, ?bestname)
+aggregate_max([S, Name], Name, score(Name, S), Key, Bestname)

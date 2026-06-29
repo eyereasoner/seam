@@ -1,3 +1,0 @@
-% compound_name_arguments/3 observes atoms as name plus empty argument list.
-materialize(answer, 2).
-answer(?name, ?args) :- compound_name_arguments(nil, ?name, ?args).

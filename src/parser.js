@@ -7,22 +7,6 @@ const TOK = {
   LPAREN: '(', RPAREN: ')', LBRACKET: '[', RBRACKET: ']', COMMA: ',', BAR: '|', DOT: '.', IF: ':-'
 };
 
-function isAbsoluteIriText(text) {
-  return /^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>"'{}|\\^`]*$/.test(text);
-}
-
-function hasAngleIriToken(source, pos) {
-  if (source[pos] !== '<') return false;
-  let text = '';
-  for (let i = pos + 1; i < source.length; i++) {
-    const ch = source[i];
-    if (ch === '>') return text.length > 0 && isAbsoluteIriText(text);
-    if (ch === '\n' || ch === '\r' || /\s/.test(ch) || ch === '<') return false;
-    text += ch;
-  }
-  return false;
-}
-
 function isWhitespaceCode(code) {
   return code === 32 || code === 9 || code === 10 || code === 13 || code === 12 || code === 11;
 }
@@ -40,10 +24,8 @@ function isNameContinueCode(code) {
 }
 
 
-function isQuestionVariableStart(source, pos) {
-  if (source[pos] !== '?') return false;
-  const code = (source[pos + 1] ?? '').charCodeAt(0);
-  return !source[pos + 1] || code === 95 || isAsciiLetterCode(code) || !isNameContinueCode(code);
+function isVariableStartCode(code) {
+  return code === 95 || (code >= 65 && code <= 90);
 }
 
 function isPlainAtomStartCode(code) {
@@ -113,18 +95,6 @@ class Parser {
     }
     if (ch === ':') throw new Error('colon names are not supported; use name or prefix_name');
 
-    if (hasAngleIriToken(this.source, this.pos)) {
-      this.take(); // <
-      let text = '';
-      while (true) {
-        if (!this.peek()) throw new Error(`parse line ${line}: unterminated IRI`);
-        const value = this.take();
-        if (value === '>') break;
-        text += value;
-      }
-      return { type: TOK.ATOM, text, line };
-    }
-
     if (ch === '"' || ch === "'") {
       const quote = this.take();
       let text = '';
@@ -169,10 +139,9 @@ class Parser {
       return { type: TOK.NUMBER, text: this.source.slice(start, this.pos), line };
     }
 
-    if (isQuestionVariableStart(this.source, this.pos)) {
+    if (isVariableStartCode(ch.charCodeAt(0))) {
       const start = this.pos;
-      this.take(); // ?
-      if (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
+      this.take();
       while (isNameContinueCode(this.peek().charCodeAt(0))) this.take();
       const text = this.source.slice(start, this.pos);
       return { type: TOK.VAR, text, line };
@@ -258,7 +227,7 @@ class Parser {
     if (this.token.type === TOK.VAR) {
       const name = this.token.text;
       this.advance();
-      if (name === '?') return variable(`__anon${this.anonymous++}`);
+      if (name === '_') return variable(`__anon${this.anonymous++}`);
       return variable(name);
     }
     if (this.token.type === TOK.STRING) {
@@ -346,7 +315,7 @@ function isSimpleName(text) {
 const SIMPLE_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const FAST_BINARY_FACT = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
 const FAST_BINARY_RULE = /^([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\s*:-\s*([a-z][A-Za-z0-9_]*)\(\s*([^,\s()[\]|"']+)\s*,\s*([^,\s()[\]|"']+)\s*\)\.$/;
-const SIMPLE_VARIABLE = /^\?(?:[A-Za-z_][A-Za-z0-9_]*)?$/;
+const SIMPLE_VARIABLE = /^(?:_|[A-Z_][A-Za-z0-9_]*)$/;
 const SIMPLE_ATOM = /^[a-z][A-Za-z0-9_]*$/;
 const GRAPHIC_ATOM = /^[#$&*+\-\/<=>@^~\\]+$/;
 
@@ -370,7 +339,7 @@ function parseClausesFastNoSource(source) {
   const scalarOrVariableFast = (text) => {
     if (!text || !isFastScalarToken(text)) throw new Error('bad simple term');
     const first = text.charCodeAt(0);
-    if (text === '?') return variable(`__anon${anonymous++}`);
+    if (text === '_') return variable(`__anon${anonymous++}`);
     if (SIMPLE_VARIABLE.test(text)) {
       const existing = variableCache.get(text);
       if (existing) return existing;

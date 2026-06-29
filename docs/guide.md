@@ -2,7 +2,7 @@
 
 This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is Prolog-like but deliberately its own compact language for facts, rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node bin/eyelang.js` when working directly from a source checkout.
 
-Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Absolute IRI atoms can be written explicitly with angle brackets, for example `<https://schema.org/name>`, when a program needs web identifiers without prefix declarations. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
+Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Web identifiers can be written as ordinary quoted atoms that include angle brackets, for example `'<https://schema.org/name>'`, when a program needs explicit IRI-shaped names without prefix declarations. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
 
 
 For the normative language definition, including lexical syntax, terms, clauses, goals, built-ins, `table/2`, `materialize/2`, and conformance boundaries, read the [Eyelang language reference](language-reference.md).
@@ -28,8 +28,8 @@ Eyelang has no runtime npm dependencies and no build step. From a source checkou
 
 ```sh
 node bin/eyelang.js --version
-node bin/eyelang.js examples/ancestor.eye
-node bin/eyelang.js facts.eye rules.eye
+node bin/eyelang.js examples/ancestor.pl
+node bin/eyelang.js facts.pl rules.pl
 printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
 ```
 
@@ -37,7 +37,7 @@ You can also use npm's local package-bin runner from the checkout:
 
 ```sh
 npm exec -- eyelang --version
-npm exec -- eyelang examples/ancestor.eye
+npm exec -- eyelang examples/ancestor.pl
 ```
 
 To make the `eyelang` command available on your `PATH` while developing this checkout, prefer npm's package link instead of a manual symlink:
@@ -63,14 +63,14 @@ eyelang -v
 Run a program and let eyelang print derived binary facts:
 
 ```sh
-eyelang examples/ancestor.eye
+eyelang examples/ancestor.pl
 ```
 
 Enable proof explanations when you want machine-readable provenance:
 
 ```sh
-eyelang --proof examples/ancestor.eye
-eyelang -p examples/ancestor.eye
+eyelang --proof examples/ancestor.pl
+eyelang -p examples/ancestor.pl
 ```
 
 eyelang-readable explanations are opt-in proof output. Each `why/2` fact contains a nested abstract proof term, and a blank line separates consecutive explanations. Using eyelang syntax for explanations keeps them in the same language as the answers themselves: they are readable by humans, parseable by eyelang, easy to test, and can be transformed or explained further like any other eyelang data. For example:
@@ -81,12 +81,12 @@ why(
   type(socrates, mortal),
   proof(
     goal(type(socrates, mortal)),
-    by(rule("socrates.eye", clause(4))),
-    bindings([binding("?x", socrates)]),
+    by(rule("socrates.pl", clause(4))),
+    bindings([binding("X", socrates)]),
     uses([
       proof(
         goal(type(socrates, man)),
-        by(fact("socrates.eye", clause(3)))
+        by(fact("socrates.pl", clause(3)))
       )
     ])
   )
@@ -94,7 +94,7 @@ why(
 
 ```
 
-The explanation output can itself be read as eyelang input; for example, another program can materialize `why/2` facts such as `why(type(socrates, mortal), ?proof)`. `--proof` adds only these explanation facts; it does not change the answers found by the solver.
+The explanation output can itself be read as eyelang input; for example, another program can materialize `why/2` facts such as `why(type(socrates, mortal), Proof)`. `--proof` adds only these explanation facts; it does not change the answers found by the solver.
 
 ### Explanation cookbook
 
@@ -103,10 +103,10 @@ Eyelang answers can carry their own provenance when proof output is enabled.
 Explain one derived fact:
 
 ```sh
-eyelang --proof examples/socrates.eye
+eyelang --proof examples/socrates.pl
 ```
 
-The output contains the answer and a `why/2` fact. The proof term shows the source rule that produced the answer and the source fact used below it. Source references use `rule("file.eye", clause(?n))` and `fact("file.eye", clause(?n))`, where `?n` is the 1-based clause number in that file.
+The output contains the answer and a `why/2` fact. The proof term shows the source rule that produced the answer and the source fact used below it. Source references use `rule("file.pl", clause(N))` and `fact("file.pl", clause(N))`, where `N` is the 1-based clause number in that file.
 
 Inspect variable bindings with a small policy program:
 
@@ -114,14 +114,14 @@ Inspect variable bindings with a small policy program:
 score(case1, 95).
 threshold(90).
 
-status(?case, accepted) :-
-  score(?case, ?score),
-  threshold(?t),
-  ge(?score, ?t).
+status(Case, accepted) :-
+  score(Case, Score),
+  threshold(T),
+  ge(Score, T).
 ```
 
 ```sh
-eyelang --proof policy.eye
+eyelang --proof policy.pl
 ```
 
 The explanation contains the instantiated answer and the variables that made the rule succeed:
@@ -132,19 +132,19 @@ why(
   status(case1, accepted),
   proof(
     goal(status(case1, accepted)),
-    by(rule("policy.eye", clause(3))),
-    bindings([binding("?case", case1), binding("?score", 95), binding("?t", 90)]),
+    by(rule("policy.pl", clause(3))),
+    bindings([binding("Case", case1), binding("Score", 95), binding("T", 90)]),
     uses([...])
   )
 ).
 ```
 
-Use the `uses([...])` list to follow the proof tree. In the policy example it contains one subproof for `score(case1, 95)`, one for `threshold(90)`, and one for the built-in comparison `ge(95, 90)`. Built-ins are shown as `builtin(?name, ?arity)` because they do not come from source clauses.
+Use the `uses([...])` list to follow the proof tree. In the policy example it contains one subproof for `score(case1, 95)`, one for `threshold(90)`, and one for the built-in comparison `ge(95, 90)`. Built-ins are shown as `builtin(Name, Arity)` because they do not come from source clauses.
 
 Reuse explanations as data:
 
 ```sh
-eyelang --proof examples/socrates.eye > socrates.why.eye
+eyelang --proof examples/socrates.pl > socrates.why.pl
 ```
 
 The resulting file is ordinary Eyelang syntax containing both answers and `why/2` proof facts.
@@ -152,9 +152,9 @@ The resulting file is ordinary Eyelang syntax containing both answers and `why/2
 Compose multiple files, stdin, and URLs:
 
 ```sh
-eyelang facts.eye rules.eye
+eyelang facts.pl rules.pl
 printf 'works(stdin, true) :- eq(ok, ok).\n' | eyelang -
-eyelang https://example.test/program.eye
+eyelang https://example.test/program.pl
 ```
 
 ## Default output
@@ -165,8 +165,8 @@ Eyelang programs write relation predicates directly:
 parent(pat, jan).
 parent(jan, emma).
 
-ancestor(?x, ?y) :- parent(?x, ?y).
-ancestor(?x, ?z) :- parent(?x, ?y), ancestor(?y, ?z).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
 By default, eyelang asks for new ground consequences of selected output predicates, suppresses duplicates, excludes source facts, sorts the result, and prints Prolog facts:
@@ -187,8 +187,8 @@ Large examples often have internal helper predicates. Add `materialize/2` declar
 materialize(answer, 2).
 
 seed(case1).
-helper(?case, score(95)) :- seed(?case).
-answer(?case, accepted) :- helper(?case, score(95)).
+helper(Case, score(95)) :- seed(Case).
+answer(Case, accepted) :- helper(Case, score(95)).
 ```
 
 The default output is then:
@@ -205,7 +205,7 @@ A good eyelang program normally has three layers:
 
 1. source facts;
 2. helper predicates for calculation or search;
-3. concise relation-style outputs, usually binary predicates such as `status(?case, ?value)`, `reason(?case, ?text)`, `ancestor(?person, ?ancestor)`, or `cost(?path, ?amount)`.
+3. concise relation-style outputs, usually binary predicates such as `status(Case, Value)`, `reason(Case, Text)`, `ancestor(Person, Ancestor)`, or `cost(Path, Amount)`.
 
 Example:
 
@@ -213,13 +213,13 @@ Example:
 score(case1, 95).
 threshold(90).
 
-accepted(?case) :-
-  score(?case, ?score),
-  threshold(?threshold),
-  ge(?score, ?threshold).
+accepted(Case) :-
+  score(Case, Score),
+  threshold(Threshold),
+  ge(Score, Threshold).
 
-status(?case, accepted) :- accepted(?case).
-reason(?case, "score exceeds threshold") :- accepted(?case).
+status(Case, accepted) :- accepted(Case).
+reason(Case, "score exceeds threshold") :- accepted(Case).
 ```
 
 When `status/2` and `reason/2` are derived, they appear in default output. If the program has many helper binary predicates, declare the intended output predicates:
@@ -240,13 +240,13 @@ The CLI is output-oriented and uses `materialize/2` to decide what to print. Emb
 Add `-s` or `--stats` when you want lightweight solver counters on stderr without changing stdout:
 
 ```sh
-eyelang -s examples/observability-log-correlation.eye
+eyelang -s examples/observability-log-correlation.pl
 ```
 
 Add `-w` or `--warnings` when you want non-fatal portability diagnostics, such as unstratified `not/1` dependencies, printed to stderr while normal answer output still goes to stdout:
 
 ```sh
-eyelang --warnings policy.eye
+eyelang --warnings policy.pl
 ```
 
 The playground has matching `--stats` and `--proof` checkboxes, so browser runs can show the same counters or explanations like the CLI.
@@ -276,20 +276,20 @@ To add a builtin, create or extend a module with `register(registry)` and call `
 Eyelang includes goal-directed aggregation helpers for finite searches:
 
 ```eyelang
-countall(?goal, ?count).
-sumall(?value, ?goal, ?sum).
-aggregate_min(?key, ?template, ?goal, ?bestkey, ?besttemplate).
-aggregate_max(?key, ?template, ?goal, ?bestkey, ?besttemplate).
+countall(Goal, Count).
+sumall(Value, Goal, Sum).
+aggregate_min(Key, Template, Goal, Bestkey, Besttemplate).
+aggregate_max(Key, Template, Goal, Bestkey, Besttemplate).
 ```
 
-Use `countall/2` for solution counts, `sumall/3` for numeric totals, and `aggregate_min/5` or `aggregate_max/5` when a search should keep only the best candidate instead of collecting and sorting every answer. The key can be a number, atom constant, string, compound term, or list; normal term ordering is used, so compound keys such as `[?cost, ?path]` are useful for deterministic tie-breaking.
+Use `countall/2` for solution counts, `sumall/3` for numeric totals, and `aggregate_min/5` or `aggregate_max/5` when a search should keep only the best candidate instead of collecting and sorting every answer. The key can be a number, atom constant, string, compound term, or list; normal term ordering is used, so compound keys such as `[Cost, Path]` are useful for deterministic tie-breaking.
 
 Example:
 
 ```eyelang
-best_cycle(?cycle, ?cost) :-
-  cities(?cities),
-  aggregate_min([?cost, ?cycle], ?cycle, candidate_cycle(?cities, ?cycle, ?cost), [?cost, ?cycle], ?cycle).
+best_cycle(Cycle, Cost) :-
+  cities(Cities),
+  aggregate_min([Cost, Cycle], Cycle, candidate_cycle(Cities, Cycle, Cost), [Cost, Cycle], Cycle).
 ```
 
 ## Context data
@@ -297,205 +297,205 @@ best_cycle(?cycle, ?cost) :-
 Comma terms can be data as well as conjunctions. eyelang provides two context utilities:
 
 ```eyelang
-holds((name(alice, "Alice"), knows(alice, bob)), name(?s, ?o)).
-holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ?name, ?args).
+holds((name(alice, "Alice"), knows(alice, bob)), name(S, O)).
+holds((ready, name(alice, "Alice"), route(alice, bob, 7)), Name, Args).
 ```
 
-Use `holds/2` when you want to match the member term directly, for example `name(?s, ?o)`, `route(?a, ?b, ?cost)`, or `edge(?a, arc(?b, ?cost))`. Use `holds/3` when you need the predicate name and argument list as data: it exposes any-arity member as atom constant `?name` plus a proper list `?args`, so zero-, binary-, and ternary members appear as `ready/0`, `name/2`, and `route/3` shapes without a special binary predicate. These utilities are useful for quoted context data, but they do not make those context members true in the ambient program. The [`context-schema-audit.eye`](../examples/context-schema-audit.eye) example shows a case that really needs `holds/3`: it audits heterogeneous message contexts by extracting every member as `?name + ?args`, computing each arity, and checking the resulting shape against a schema without knowing the predicate names in advance.
+Use `holds/2` when you want to match the member term directly, for example `name(S, O)`, `route(A, B, Cost)`, or `edge(A, arc(B, Cost))`. Use `holds/3` when you need the predicate name and argument list as data: it exposes any-arity member as atom constant `Name` plus a proper list `Args`, so zero-, binary-, and ternary members appear as `ready/0`, `name/2`, and `route/3` shapes without a special binary predicate. These utilities are useful for quoted context data, but they do not make those context members true in the ambient program. The [`context-schema-audit.pl`](../examples/context-schema-audit.pl) example shows a case that really needs `holds/3`: it audits heterogeneous message contexts by extracting every member as `Name + Args`, computing each arity, and checking the resulting shape against a schema without knowing the predicate names in advance.
 
-`matches/3` can create context data from named regular-expression captures, which is useful when text logs or messages need to become facts before later rules inspect them with `holds/2` or `holds/3`. See [`observability-log-correlation.eye`](../examples/observability-log-correlation.eye) for a complete log-correlation example.
+`matches/3` can create context data from named regular-expression captures, which is useful when text logs or messages need to become facts before later rules inspect them with `holds/2` or `holds/3`. See [`observability-log-correlation.pl`](../examples/observability-log-correlation.pl) for a complete log-correlation example.
 
 
 ## Example catalog
 
 | Example | Description | Golden output |
 | --- | --- | --- |
-| [`abstract-interpretation.eye`](../examples/abstract-interpretation.eye) | Performs a sign-domain abstract interpretation and reports a possible divide-by-zero warning. | [`output/abstract-interpretation.eye`](../examples/output/abstract-interpretation.eye) |
-| [`access-control-policy.eye`](../examples/access-control-policy.eye) | Evaluates role and condition based access decisions. | [`output/access-control-policy.eye`](../examples/output/access-control-policy.eye) |
-| [`ackermann.eye`](../examples/ackermann.eye) | Computes Ackermann-style hyperoperation values. | [`output/ackermann.eye`](../examples/output/ackermann.eye) |
-| [`age.eye`](../examples/age.eye) | Checks whether people meet age thresholds. | [`output/age.eye`](../examples/output/age.eye) |
-| [`aliases-and-namespaces.eye`](../examples/aliases-and-namespaces.eye) | Shows ordinary predicate names for vocabulary aliases. | [`output/aliases-and-namespaces.eye`](../examples/output/aliases-and-namespaces.eye) |
-| [`alignment-demo.eye`](../examples/alignment-demo.eye) | Rolls dataset concepts up through a small alignment taxonomy. | [`output/alignment-demo.eye`](../examples/output/alignment-demo.eye) |
-| [`allen-interval-calculus.eye`](../examples/allen-interval-calculus.eye) | Classifies interval relations with integer time offsets. | [`output/allen-interval-calculus.eye`](../examples/output/allen-interval-calculus.eye) |
-| [`ancestor.eye`](../examples/ancestor.eye) | Derives ancestors from parent facts. | [`output/ancestor.eye`](../examples/output/ancestor.eye) |
-| [`animal.eye`](../examples/animal.eye) | Classifies animals from traits. | [`output/animal.eye`](../examples/output/animal.eye) |
-| [`annotation.eye`](../examples/annotation.eye) | Derives facts from quoted annotation data. | [`output/annotation.eye`](../examples/output/annotation.eye) |
-| [`auroracare.eye`](../examples/auroracare.eye) | Evaluates purpose-based medical data access scenarios. | [`output/auroracare.eye`](../examples/output/auroracare.eye) |
-| [`backward.eye`](../examples/backward.eye) | Shows a backward-rule pattern as a goal-directed numeric rule. | [`output/backward.eye`](../examples/output/backward.eye) |
-| [`basic-monadic.eye`](../examples/basic-monadic.eye) | Runs the basic monadic benchmark with explicit indexed edge joins instead of specialized search builtins. | [`output/basic-monadic.eye`](../examples/output/basic-monadic.eye) |
-| [`bayes-diagnosis.eye`](../examples/bayes-diagnosis.eye) | Computes scaled Bayesian diagnosis posteriors. | [`output/bayes-diagnosis.eye`](../examples/output/bayes-diagnosis.eye) |
-| [`bayes-therapy.eye`](../examples/bayes-therapy.eye) | Ranks therapies using Bayesian disease likelihoods. | [`output/bayes-therapy.eye`](../examples/output/bayes-therapy.eye) |
-| [`beam-deflection.eye`](../examples/beam-deflection.eye) | Computes cantilever beam deflection. | [`output/beam-deflection.eye`](../examples/output/beam-deflection.eye) |
-| [`binomial-vandermonde.eye`](../examples/binomial-vandermonde.eye) | Computes binomial coefficients and checks Vandermonde's identity. | [`output/binomial-vandermonde.eye`](../examples/output/binomial-vandermonde.eye) |
-| [`blocks-world-planning.eye`](../examples/blocks-world-planning.eye) | Searches a finite blocks-world plan. | [`output/blocks-world-planning.eye`](../examples/output/blocks-world-planning.eye) |
-| [`bmi.eye`](../examples/bmi.eye) | Normalizes BMI inputs and classifies weight. | [`output/bmi.eye`](../examples/output/bmi.eye) |
-| [`braking-safety-worlds.eye`](../examples/braking-safety-worlds.eye) | Classifies braking safety under alternative worlds. | [`output/braking-safety-worlds.eye`](../examples/output/braking-safety-worlds.eye) |
-| [`buck-converter-design.eye`](../examples/buck-converter-design.eye) | Checks buck-converter ripple design. | [`output/buck-converter-design.eye`](../examples/output/buck-converter-design.eye) |
-| [`cache-performance.eye`](../examples/cache-performance.eye) | Summarizes cache latency performance. | [`output/cache-performance.eye`](../examples/output/cache-performance.eye) |
-| [`canary-release.eye`](../examples/canary-release.eye) | Decides canary rollout or rollback. | [`output/canary-release.eye`](../examples/output/canary-release.eye) |
-| [`cat-koko.eye`](../examples/cat-koko.eye) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.eye`](../examples/output/cat-koko.eye) |
-| [`catalan-convolution.eye`](../examples/catalan-convolution.eye) | Computes Catalan numbers by tabled convolution. | [`output/catalan-convolution.eye`](../examples/output/catalan-convolution.eye) |
-| [`cdcl-sat-solver.eye`](../examples/cdcl-sat-solver.eye) | Simulates one CDCL conflict-analysis step with a learned clause and backjumped model. | [`output/cdcl-sat-solver.eye`](../examples/output/cdcl-sat-solver.eye) |
-| [`chart-parser.eye`](../examples/chart-parser.eye) | Parses small sentences with a tabled chart parser. | [`output/chart-parser.eye`](../examples/output/chart-parser.eye) |
-| [`clinical-trial-screening.eye`](../examples/clinical-trial-screening.eye) | Screens candidates for a trial. | [`output/clinical-trial-screening.eye`](../examples/output/clinical-trial-screening.eye) |
-| [`collatz-1000.eye`](../examples/collatz-1000.eye) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.eye`](../examples/output/collatz-1000.eye) |
-| [`combinatorics-findall-sort.eye`](../examples/combinatorics-findall-sort.eye) | Collects and sorts finite combinations. | [`output/combinatorics-findall-sort.eye`](../examples/output/combinatorics-findall-sort.eye) |
-| [`competitive-enzyme-kinetics.eye`](../examples/competitive-enzyme-kinetics.eye) | Computes inhibited enzyme reaction rates. | [`output/competitive-enzyme-kinetics.eye`](../examples/output/competitive-enzyme-kinetics.eye) |
-| [`complex.eye`](../examples/complex.eye) | Performs arithmetic on complex pairs. | [`output/complex.eye`](../examples/output/complex.eye) |
-| [`composition-of-injective-functions-is-injective.eye`](../examples/composition-of-injective-functions-is-injective.eye) | Encodes composition and injectivity of finite functions. | [`output/composition-of-injective-functions-is-injective.eye`](../examples/output/composition-of-injective-functions-is-injective.eye) |
-| [`context-association.eye`](../examples/context-association.eye) | Associates named contexts with their contents. | [`output/context-association.eye`](../examples/output/context-association.eye) |
-| [`context-schema-audit.eye`](../examples/context-schema-audit.eye) | Audits mixed-arity context members with `holds/3`. | [`output/context-schema-audit.eye`](../examples/output/context-schema-audit.eye) |
-| [`continued-fraction-sqrt2.eye`](../examples/continued-fraction-sqrt2.eye) | Computes sqrt(2) continued-fraction convergents and Pell errors. | [`output/continued-fraction-sqrt2.eye`](../examples/output/continued-fraction-sqrt2.eye) |
-| [`control-system.eye`](../examples/control-system.eye) | Evaluates control-system measurements and targets. | [`output/control-system.eye`](../examples/output/control-system.eye) |
-| [`critical-path-schedule.eye`](../examples/critical-path-schedule.eye) | Computes earliest starts and the critical path for a project network. | [`output/critical-path-schedule.eye`](../examples/output/critical-path-schedule.eye) |
-| [`cyclic-path.eye`](../examples/cyclic-path.eye) | Computes paths in a cyclic graph. | [`output/cyclic-path.eye`](../examples/output/cyclic-path.eye) |
-| [`d3-group.eye`](../examples/d3-group.eye) | Enumerates subgroups of the D3 group. | [`output/d3-group.eye`](../examples/output/d3-group.eye) |
-| [`dairy-energy-balance.eye`](../examples/dairy-energy-balance.eye) | Classifies dairy cow energy balance. | [`output/dairy-energy-balance.eye`](../examples/output/dairy-energy-balance.eye) |
-| [`data-negotiation.eye`](../examples/data-negotiation.eye) | Chooses an accepted data-negotiation offer. | [`output/data-negotiation.eye`](../examples/output/data-negotiation.eye) |
-| [`deep-taxonomy-10.eye`](../examples/deep-taxonomy-10.eye) | Stress-tests recursive taxonomy depth 10. | [`output/deep-taxonomy-10.eye`](../examples/output/deep-taxonomy-10.eye) |
-| [`deep-taxonomy-100.eye`](../examples/deep-taxonomy-100.eye) | Stress-tests recursive taxonomy depth 100. | [`output/deep-taxonomy-100.eye`](../examples/output/deep-taxonomy-100.eye) |
-| [`deep-taxonomy-1000.eye`](../examples/deep-taxonomy-1000.eye) | Stress-tests recursive taxonomy depth 1000. | [`output/deep-taxonomy-1000.eye`](../examples/output/deep-taxonomy-1000.eye) |
-| [`deep-taxonomy-10000.eye`](../examples/deep-taxonomy-10000.eye) | Stress-tests recursive taxonomy depth 10000. | [`output/deep-taxonomy-10000.eye`](../examples/output/deep-taxonomy-10000.eye) |
-| [`deep-taxonomy-100000.eye`](../examples/deep-taxonomy-100000.eye) | Stress-tests recursive taxonomy depth 100000. | [`output/deep-taxonomy-100000.eye`](../examples/output/deep-taxonomy-100000.eye) |
-| [`delfour.eye`](../examples/delfour.eye) | Derives shopping and authorization recommendations. | [`output/delfour.eye`](../examples/output/delfour.eye) |
-| [`deontic-logic.eye`](../examples/deontic-logic.eye) | Reports obligations, prohibitions, and violations. | [`output/deontic-logic.eye`](../examples/output/deontic-logic.eye) |
-| [`derived-backward-rule.eye`](../examples/derived-backward-rule.eye) | Derives an inverse-property backward rule from rule data. | [`output/derived-backward-rule.eye`](../examples/output/derived-backward-rule.eye) |
-| [`derived-rule.eye`](../examples/derived-rule.eye) | Derives conclusions from rule data. | [`output/derived-rule.eye`](../examples/output/derived-rule.eye) |
-| [`diamond-property.eye`](../examples/diamond-property.eye) | Checks the diamond property of a relation. | [`output/diamond-property.eye`](../examples/output/diamond-property.eye) |
-| [`dijkstra-findall-sort.eye`](../examples/dijkstra-findall-sort.eye) | Finds shortest paths using collected candidates. | [`output/dijkstra-findall-sort.eye`](../examples/output/dijkstra-findall-sort.eye) |
-| [`dijkstra-risk-path.eye`](../examples/dijkstra-risk-path.eye) | Ranks routes by cost and trust. | [`output/dijkstra-risk-path.eye`](../examples/output/dijkstra-risk-path.eye) |
-| [`dijkstra.eye`](../examples/dijkstra.eye) | Enumerates weighted simple paths. | [`output/dijkstra.eye`](../examples/output/dijkstra.eye) |
-| [`dining-philosophers.eye`](../examples/dining-philosophers.eye) | Simulates Chandy-Misra fork exchanges. | [`output/dining-philosophers.eye`](../examples/output/dining-philosophers.eye) |
-| [`dog.eye`](../examples/dog.eye) | Counts dogs and derives when a license is required. | [`output/dog.eye`](../examples/output/dog.eye) |
-| [`dpv-odrl-purpose-mapping.eye`](../examples/dpv-odrl-purpose-mapping.eye) | Maps a DPV process into an ODRL permission view. | [`output/dpv-odrl-purpose-mapping.eye`](../examples/output/dpv-odrl-purpose-mapping.eye) |
-| [`drone-corridor-planner.eye`](../examples/drone-corridor-planner.eye) | Plans bounded drone corridor routes. | [`output/drone-corridor-planner.eye`](../examples/output/drone-corridor-planner.eye) |
-| [`easter-computus.eye`](../examples/easter-computus.eye) | Computes Gregorian Easter dates. | [`output/easter-computus.eye`](../examples/output/easter-computus.eye) |
-| [`electrical-rc-filter.eye`](../examples/electrical-rc-filter.eye) | Sizes an RC low-pass filter. | [`output/electrical-rc-filter.eye`](../examples/output/electrical-rc-filter.eye) |
-| [`equality-saturation.eye`](../examples/equality-saturation.eye) | Performs bounded equality saturation and extracts the cheapest equivalent expression. | [`output/equality-saturation.eye`](../examples/output/equality-saturation.eye) |
-| [`epidemic-policy.eye`](../examples/epidemic-policy.eye) | Chooses policies from risk and social cost. | [`output/epidemic-policy.eye`](../examples/output/epidemic-policy.eye) |
-| [`equivalence-classes-overlap-implies-same-class.eye`](../examples/equivalence-classes-overlap-implies-same-class.eye) | Packages the shared-member proof pattern for equivalence classes. | [`output/equivalence-classes-overlap-implies-same-class.eye`](../examples/output/equivalence-classes-overlap-implies-same-class.eye) |
-| [`eulerian-path.eye`](../examples/eulerian-path.eye) | Finds an Eulerian path using each edge once. | [`output/eulerian-path.eye`](../examples/output/eulerian-path.eye) |
-| [`ev-range-worlds.eye`](../examples/ev-range-worlds.eye) | Estimates electric-vehicle trip feasibility. | [`output/ev-range-worlds.eye`](../examples/output/ev-range-worlds.eye) |
-| [`existential-rule.eye`](../examples/existential-rule.eye) | Represents existential-style witnesses with explicit Herbrand terms. | [`output/existential-rule.eye`](../examples/output/existential-rule.eye) |
-| [`exoplanet-validation-worlds.eye`](../examples/exoplanet-validation-worlds.eye) | Validates exoplanet candidates across worlds. | [`output/exoplanet-validation-worlds.eye`](../examples/output/exoplanet-validation-worlds.eye) |
-| [`expression-eval.eye`](../examples/expression-eval.eye) | Evaluates a small arithmetic expression tree. | [`output/expression-eval.eye`](../examples/output/expression-eval.eye) |
-| [`family-cousins.eye`](../examples/family-cousins.eye) | Derives cousin and family labels. | [`output/family-cousins.eye`](../examples/output/family-cousins.eye) |
-| [`fastpow.eye`](../examples/fastpow.eye) | Computes powers by repeated squaring. | [`output/fastpow.eye`](../examples/output/fastpow.eye) |
-| [`fft8-numeric.eye`](../examples/fft8-numeric.eye) | Runs an 8-point FFT over complex pairs. | [`output/fft8-numeric.eye`](../examples/output/fft8-numeric.eye) |
-| [`fibonacci.eye`](../examples/fibonacci.eye) | Computes large Fibonacci numbers by fast doubling. | [`output/fibonacci.eye`](../examples/output/fibonacci.eye) |
-| [`field-nitrogen-balance.eye`](../examples/field-nitrogen-balance.eye) | Classifies field nitrogen balance. | [`output/field-nitrogen-balance.eye`](../examples/output/field-nitrogen-balance.eye) |
-| [`flandor.eye`](../examples/flandor.eye) | Derives a Flanders macro-insight authorization and retooling package. | [`output/flandor.eye`](../examples/output/flandor.eye) |
-| [`floating-point.eye`](../examples/floating-point.eye) | Exercises floating-point arithmetic and comparisons. | [`output/floating-point.eye`](../examples/output/floating-point.eye) |
-| [`four-color-map.eye`](../examples/four-color-map.eye) | Checks a four-colour map assignment. | [`output/four-color-map.eye`](../examples/output/four-color-map.eye) |
-| [`fundamental-theorem-arithmetic.eye`](../examples/fundamental-theorem-arithmetic.eye) | Factors integers and reconstructs products. | [`output/fundamental-theorem-arithmetic.eye`](../examples/output/fundamental-theorem-arithmetic.eye) |
-| [`gd-step-certified.eye`](../examples/gd-step-certified.eye) | Certifies a gradient-descent step. | [`output/gd-step-certified.eye`](../examples/output/gd-step-certified.eye) |
-| [`gdpr-compliance.eye`](../examples/gdpr-compliance.eye) | Checks GDPR-style processing compliance. | [`output/gdpr-compliance.eye`](../examples/output/gdpr-compliance.eye) |
-| [`good-cobbler.eye`](../examples/good-cobbler.eye) | Demonstrates term-level structure with a good-cobbler statement. | [`output/good-cobbler.eye`](../examples/output/good-cobbler.eye) |
-| [`gps.eye`](../examples/gps.eye) | Finds and verifies route paths. | [`output/gps.eye`](../examples/output/gps.eye) |
-| [`graph-reachability.eye`](../examples/graph-reachability.eye) | Derives reachable nodes in a graph. | [`output/graph-reachability.eye`](../examples/output/graph-reachability.eye) |
-| [`graph.eye`](../examples/graph.eye) | Derives transitive paths over French-city road links while showing the productive recursive rule order. | [`output/graph.eye`](../examples/output/graph.eye) |
-| [`gray-code-counter.eye`](../examples/gray-code-counter.eye) | Generates Gray-code counter states. | [`output/gray-code-counter.eye`](../examples/output/gray-code-counter.eye) |
-| [`greatest-lower-bound-uniqueness.eye`](../examples/greatest-lower-bound-uniqueness.eye) | Shows uniqueness of greatest lower bounds in a finite order instance. | [`output/greatest-lower-bound-uniqueness.eye`](../examples/output/greatest-lower-bound-uniqueness.eye) |
-| [`group-inverse-uniqueness.eye`](../examples/group-inverse-uniqueness.eye) | Shows uniqueness of inverses in a finite group instance. | [`output/group-inverse-uniqueness.eye`](../examples/output/group-inverse-uniqueness.eye) |
-| [`hamiltonian-path.eye`](../examples/hamiltonian-path.eye) | Finds a Hamiltonian path. | [`output/hamiltonian-path.eye`](../examples/output/hamiltonian-path.eye) |
-| [`hamming-code.eye`](../examples/hamming-code.eye) | Corrects a single-bit Hamming word. | [`output/hamming-code.eye`](../examples/output/hamming-code.eye) |
-| [`hanoi.eye`](../examples/hanoi.eye) | Derives the Towers of Hanoi moves. | [`output/hanoi.eye`](../examples/output/hanoi.eye) |
-| [`heat-loss.eye`](../examples/heat-loss.eye) | Computes conductive heat loss. | [`output/heat-loss.eye`](../examples/output/heat-loss.eye) |
-| [`herbrand-witnesses.eye`](../examples/herbrand-witnesses.eye) | Represents existential-style consequences as stable Herbrand witness terms. | [`output/herbrand-witnesses.eye`](../examples/output/herbrand-witnesses.eye) |
-| [`heron-theorem.eye`](../examples/heron-theorem.eye) | Computes triangle area by Heron's theorem. | [`output/heron-theorem.eye`](../examples/output/heron-theorem.eye) |
-| [`ideal-gas-law.eye`](../examples/ideal-gas-law.eye) | Applies the ideal gas law. | [`output/ideal-gas-law.eye`](../examples/output/ideal-gas-law.eye) |
-| [`illegitimate-reasoning.eye`](../examples/illegitimate-reasoning.eye) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.eye`](../examples/output/illegitimate-reasoning.eye) |
-| [`integer-partitions.eye`](../examples/integer-partitions.eye) | Counts integer partitions with tabled dynamic programming. | [`output/integer-partitions.eye`](../examples/output/integer-partitions.eye) |
-| [`intuitionistic-logic-kripke.eye`](../examples/intuitionistic-logic-kripke.eye) | Emulates intuitionistic Kripke forcing and constructive implication. | [`output/intuitionistic-logic-kripke.eye`](../examples/output/intuitionistic-logic-kripke.eye) |
-| [`job-shop-scheduling.eye`](../examples/job-shop-scheduling.eye) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.eye`](../examples/output/job-shop-scheduling.eye) |
-| [`knapsack-optimization.eye`](../examples/knapsack-optimization.eye) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.eye`](../examples/output/knapsack-optimization.eye) |
-| [`knuth-bendix-completion.eye`](../examples/knuth-bendix-completion.eye) | Checks bounded Knuth-Bendix-style critical pairs for joinability. | [`output/knuth-bendix-completion.eye`](../examples/output/knuth-bendix-completion.eye) |
-| [`knowledge-engineering-alignment-flow.eye`](../examples/knowledge-engineering-alignment-flow.eye) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.eye`](../examples/output/knowledge-engineering-alignment-flow.eye) |
-| [`language.eye`](../examples/language.eye) | Shows the modern Eyelang surface syntax in one compact recursive graph example. | [`output/language.eye`](../examples/output/language.eye) |
-| [`law-of-cosines.eye`](../examples/law-of-cosines.eye) | Computes a triangle side by cosine law. | [`output/law-of-cosines.eye`](../examples/output/law-of-cosines.eye) |
-| [`least-squares-regression.eye`](../examples/least-squares-regression.eye) | Fits a least-squares regression line. | [`output/least-squares-regression.eye`](../examples/output/least-squares-regression.eye) |
-| [`linear-logic-resources.eye`](../examples/linear-logic-resources.eye) | Emulates linear logic resource consumption with explicit state threading. | [`output/linear-logic-resources.eye`](../examples/output/linear-logic-resources.eye) |
-| [`list-collection.eye`](../examples/list-collection.eye) | Demonstrates list and collection built-ins. | [`output/list-collection.eye`](../examples/output/list-collection.eye) |
-| [`lldm.eye`](../examples/lldm.eye) | Calculates leg-length discrepancy measurements. | [`output/lldm.eye`](../examples/output/lldm.eye) |
-| [`manufacturing-quality-control.eye`](../examples/manufacturing-quality-control.eye) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.eye`](../examples/output/manufacturing-quality-control.eye) |
-| [`markov-logic-network.eye`](../examples/markov-logic-network.eye) | Scores finite possible worlds with weighted soft formulas in a Markov Logic Network style. | [`output/markov-logic-network.eye`](../examples/output/markov-logic-network.eye) |
-| [`map-four-color-search.eye`](../examples/map-four-color-search.eye) | Searches for a valid four-colouring of the EU neighbour graph. | [`output/map-four-color-search.eye`](../examples/output/map-four-color-search.eye) |
-| [`matrix-chain-order.eye`](../examples/matrix-chain-order.eye) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.eye`](../examples/output/matrix-chain-order.eye) |
-| [`matrix-noncommutativity.eye`](../examples/matrix-noncommutativity.eye) | Multiplies 2x2 matrices and shows non-commutativity. | [`output/matrix-noncommutativity.eye`](../examples/output/matrix-noncommutativity.eye) |
-| [`microgrid-dispatch.eye`](../examples/microgrid-dispatch.eye) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.eye`](../examples/output/microgrid-dispatch.eye) |
-| [`missionaries-cannibals.eye`](../examples/missionaries-cannibals.eye) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.eye`](../examples/output/missionaries-cannibals.eye) |
-| [`modal-logic-kripke.eye`](../examples/modal-logic-kripke.eye) | Emulates modal box and diamond operators over a finite Kripke frame. | [`output/modal-logic-kripke.eye`](../examples/output/modal-logic-kripke.eye) |
-| [`modular-exponentiation.eye`](../examples/modular-exponentiation.eye) | Computes modular powers by repeated squaring. | [`output/modular-exponentiation.eye`](../examples/output/modular-exponentiation.eye) |
-| [`monkey-bananas.eye`](../examples/monkey-bananas.eye) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.eye`](../examples/output/monkey-bananas.eye) |
-| [`n-queens-8.eye`](../examples/n-queens-8.eye) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.eye`](../examples/output/n-queens-8.eye) |
-| [`network-sla.eye`](../examples/network-sla.eye) | Checks network path SLA compliance. | [`output/network-sla.eye`](../examples/output/network-sla.eye) |
-| [`newton-raphson.eye`](../examples/newton-raphson.eye) | Finds roots by Newton-Raphson iteration. | [`output/newton-raphson.eye`](../examples/output/newton-raphson.eye) |
-| [`nixon-diamond.eye`](../examples/nixon-diamond.eye) | Reports the classic Nixon-diamond conflict. | [`output/nixon-diamond.eye`](../examples/output/nixon-diamond.eye) |
-| [`observability-log-correlation.eye`](../examples/observability-log-correlation.eye) | Extracts named regex captures from observability logs and correlates events by trace id. | [`output/observability-log-correlation.eye`](../examples/output/observability-log-correlation.eye) |
-| [`odrl-dpv-fpv-trust-flow.eye`](../examples/odrl-dpv-fpv-trust-flow.eye) | Decides ODRL/DPV data flows with local FPV trust gates. | [`output/odrl-dpv-fpv-trust-flow.eye`](../examples/output/odrl-dpv-fpv-trust-flow.eye) |
-| [`odrl-dpv-healthcare-risk-ranked.eye`](../examples/odrl-dpv-healthcare-risk-ranked.eye) | Ranks healthcare policy risks and mitigations. | [`output/odrl-dpv-healthcare-risk-ranked.eye`](../examples/output/odrl-dpv-healthcare-risk-ranked.eye) |
-| [`odrl-dpv-risk-ranked.eye`](../examples/odrl-dpv-risk-ranked.eye) | Ranks data-policy risks and mitigations. | [`output/odrl-dpv-risk-ranked.eye`](../examples/output/odrl-dpv-risk-ranked.eye) |
-| [`orbital-transfer-design.eye`](../examples/orbital-transfer-design.eye) | Designs a Hohmann orbital transfer. | [`output/orbital-transfer-design.eye`](../examples/output/orbital-transfer-design.eye) |
-| [`path-discovery.eye`](../examples/path-discovery.eye) | Discovers bounded air-route paths. | [`output/path-discovery.eye`](../examples/output/path-discovery.eye) |
-| [`partial-evaluator.eye`](../examples/partial-evaluator.eye) | Specializes tiny expression programs by folding static inputs into residual code. | [`output/partial-evaluator.eye`](../examples/output/partial-evaluator.eye) |
-| [`peano-arithmetic.eye`](../examples/peano-arithmetic.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-arithmetic.eye`](../examples/output/peano-arithmetic.eye) |
-| [`peano-calculus.eye`](../examples/peano-calculus.eye) | Computes Peano addition, multiplication, and factorial. | [`output/peano-calculus.eye`](../examples/output/peano-calculus.eye) |
-| [`peasant.eye`](../examples/peasant.eye) | Performs peasant multiplication and exponentiation. | [`output/peasant.eye`](../examples/output/peasant.eye) |
-| [`pell-equation.eye`](../examples/pell-equation.eye) | Generates Pell-equation solutions by recurrence. | [`output/pell-equation.eye`](../examples/output/pell-equation.eye) |
-| [`pendulum-period.eye`](../examples/pendulum-period.eye) | Computes simple pendulum periods. | [`output/pendulum-period.eye`](../examples/output/pendulum-period.eye) |
-| [`pointer-analysis.eye`](../examples/pointer-analysis.eye) | Computes Andersen-style inclusion-based points-to facts over address, assign, store, and load constraints. | [`output/pointer-analysis.eye`](../examples/output/pointer-analysis.eye) |
-| [`polynomial.eye`](../examples/polynomial.eye) | Finds complex integer polynomial roots. | [`output/polynomial.eye`](../examples/output/polynomial.eye) |
-| [`prime-range.eye`](../examples/prime-range.eye) | Finds primes in a finite range and computes a totient value. | [`output/prime-range.eye`](../examples/output/prime-range.eye) |
-| [`proof-contrapositive.eye`](../examples/proof-contrapositive.eye) | Models proof by contrapositive. | [`output/proof-contrapositive.eye`](../examples/output/proof-contrapositive.eye) |
-| [`quadratic-formula.eye`](../examples/quadratic-formula.eye) | Solves sample quadratic equations. | [`output/quadratic-formula.eye`](../examples/output/quadratic-formula.eye) |
-| [`radioactive-decay.eye`](../examples/radioactive-decay.eye) | Computes radioactive decay over time. | [`output/radioactive-decay.eye`](../examples/output/radioactive-decay.eye) |
-| [`register-allocation.eye`](../examples/register-allocation.eye) | Allocates temporaries to two registers with spilling by bounded graph-coloring search. | [`output/register-allocation.eye`](../examples/output/register-allocation.eye) |
-| [`reusable-builtins.eye`](../examples/reusable-builtins.eye) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.eye`](../examples/output/reusable-builtins.eye) |
-| [`riemann-hypothesis.eye`](../examples/riemann-hypothesis.eye) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.eye`](../examples/output/riemann-hypothesis.eye) |
-| [`route-planning.eye`](../examples/route-planning.eye) | Finds routes and records them as explicit route terms. | [`output/route-planning.eye`](../examples/output/route-planning.eye) |
-| [`sat-solver-dpll.eye`](../examples/sat-solver-dpll.eye) | Searches a CNF formula with DPLL-style recursive decisions and early contradiction pruning. | [`output/sat-solver-dpll.eye`](../examples/output/sat-solver-dpll.eye) |
-| [`security-incident-correlation.eye`](../examples/security-incident-correlation.eye) | Correlates security incidents across signals. | [`output/security-incident-correlation.eye`](../examples/output/security-incident-correlation.eye) |
-| [`send-more-money.eye`](../examples/send-more-money.eye) | Solves the SEND + MORE = MONEY cryptarithm. | [`output/send-more-money.eye`](../examples/output/send-more-money.eye) |
-| [`service-impact.eye`](../examples/service-impact.eye) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.eye`](../examples/output/service-impact.eye) |
-| [`shoelace-polygon-area.eye`](../examples/shoelace-polygon-area.eye) | Computes polygon area with a recursive shoelace calculation. | [`output/shoelace-polygon-area.eye`](../examples/output/shoelace-polygon-area.eye) |
-| [`sieve.eye`](../examples/sieve.eye) | Enumerates primes with a sieve-style program. | [`output/sieve.eye`](../examples/output/sieve.eye) |
-| [`skolem-functions.eye`](../examples/skolem-functions.eye) | Generates deterministic functional terms. | [`output/skolem-functions.eye`](../examples/output/skolem-functions.eye) |
-| [`socket-age.eye`](../examples/socket-age.eye) | Shows socket-declared age reasoning inputs and plugs. | [`output/socket-age.eye`](../examples/output/socket-age.eye) |
-| [`socket-family.eye`](../examples/socket-family.eye) | Shows socket-declared family-source inputs and ancestry rules. | [`output/socket-family.eye`](../examples/output/socket-family.eye) |
-| [`socrates.eye`](../examples/socrates.eye) | Derives that Socrates is mortal. | [`output/socrates.eye`](../examples/output/socrates.eye) |
-| [`stable-marriage.eye`](../examples/stable-marriage.eye) | Finds stable matchings by excluding blocking pairs. | [`output/stable-marriage.eye`](../examples/output/stable-marriage.eye) |
-| [`statistics-summary.eye`](../examples/statistics-summary.eye) | Computes population statistics for a sample. | [`output/statistics-summary.eye`](../examples/output/statistics-summary.eye) |
-| [`stirling-bell-numbers.eye`](../examples/stirling-bell-numbers.eye) | Computes Stirling numbers and Bell numbers. | [`output/stirling-bell-numbers.eye`](../examples/output/stirling-bell-numbers.eye) |
-| [`sudoku-4x4.eye`](../examples/sudoku-4x4.eye) | Solves a compact 4x4 Sudoku by finite constraint search. | [`output/sudoku-4x4.eye`](../examples/output/sudoku-4x4.eye) |
-| [`superdense-coding.eye`](../examples/superdense-coding.eye) | Models superdense-coding bit transmission. | [`output/superdense-coding.eye`](../examples/output/superdense-coding.eye) |
-| [`symbolic-derivative.eye`](../examples/symbolic-derivative.eye) | Symbolically differentiates explicit expression terms, including products and logs. | [`output/symbolic-derivative.eye`](../examples/output/symbolic-derivative.eye) |
-| [`term-tools.eye`](../examples/term-tools.eye) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.eye`](../examples/output/term-tools.eye) |
-| [`totient-summatory.eye`](../examples/totient-summatory.eye) | Computes Euler totients and their summatory function. | [`output/totient-summatory.eye`](../examples/output/totient-summatory.eye) |
-| [`trust-flow-provenance-threshold.eye`](../examples/trust-flow-provenance-threshold.eye) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.eye`](../examples/output/trust-flow-provenance-threshold.eye) |
-| [`truth-maintenance-system.eye`](../examples/truth-maintenance-system.eye) | Tracks assumptions, justifications, supported beliefs, and inconsistent environments in a tiny TMS. | [`output/truth-maintenance-system.eye`](../examples/output/truth-maintenance-system.eye) |
-| [`type-inference.eye`](../examples/type-inference.eye) | Infers/checks types for a tiny lambda language using logic unification over expression syntax trees. | [`output/type-inference.eye`](../examples/output/type-inference.eye) |
-| [`turing.eye`](../examples/turing.eye) | Simulates a binary-increment Turing machine. | [`output/turing.eye`](../examples/output/turing.eye) |
-| [`vector-similarity.eye`](../examples/vector-similarity.eye) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.eye`](../examples/output/vector-similarity.eye) |
-| [`vulnerability-impact.eye`](../examples/vulnerability-impact.eye) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.eye`](../examples/output/vulnerability-impact.eye) |
-| [`web-names.eye`](../examples/web-names.eye) | Uses angle-bracket IRI atoms as first-class web names and joins them across a tiny graph. | [`output/web-names.eye`](../examples/output/web-names.eye) |
-| [`weighted-interval-scheduling.eye`](../examples/weighted-interval-scheduling.eye) | Selects the best non-overlapping weighted intervals with tabled dynamic programming. | [`output/weighted-interval-scheduling.eye`](../examples/output/weighted-interval-scheduling.eye) |
-| [`witch.eye`](../examples/witch.eye) | Derives the classic “burn the witch” rule chain. | [`output/witch.eye`](../examples/output/witch.eye) |
-| [`wolf-goat-cabbage.eye`](../examples/wolf-goat-cabbage.eye) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.eye`](../examples/output/wolf-goat-cabbage.eye) |
-| [`workplace-compliance.eye`](../examples/workplace-compliance.eye) | Classifies workplace compliance from explicit action facts. | [`output/workplace-compliance.eye`](../examples/output/workplace-compliance.eye) |
-| [`zebra.eye`](../examples/zebra.eye) | Solves the zebra logic puzzle. | [`output/zebra.eye`](../examples/output/zebra.eye) |
+| [`abstract-interpretation.pl`](../examples/abstract-interpretation.pl) | Performs a sign-domain abstract interpretation and reports a possible divide-by-zero warning. | [`output/abstract-interpretation.pl`](../examples/output/abstract-interpretation.pl) |
+| [`access-control-policy.pl`](../examples/access-control-policy.pl) | Evaluates role and condition based access decisions. | [`output/access-control-policy.pl`](../examples/output/access-control-policy.pl) |
+| [`ackermann.pl`](../examples/ackermann.pl) | Computes Ackermann-style hyperoperation values. | [`output/ackermann.pl`](../examples/output/ackermann.pl) |
+| [`age.pl`](../examples/age.pl) | Checks whether people meet age thresholds. | [`output/age.pl`](../examples/output/age.pl) |
+| [`aliases-and-namespaces.pl`](../examples/aliases-and-namespaces.pl) | Shows ordinary predicate names for vocabulary aliases. | [`output/aliases-and-namespaces.pl`](../examples/output/aliases-and-namespaces.pl) |
+| [`alignment-demo.pl`](../examples/alignment-demo.pl) | Rolls dataset concepts up through a small alignment taxonomy. | [`output/alignment-demo.pl`](../examples/output/alignment-demo.pl) |
+| [`allen-interval-calculus.pl`](../examples/allen-interval-calculus.pl) | Classifies interval relations with integer time offsets. | [`output/allen-interval-calculus.pl`](../examples/output/allen-interval-calculus.pl) |
+| [`ancestor.pl`](../examples/ancestor.pl) | Derives ancestors from parent facts. | [`output/ancestor.pl`](../examples/output/ancestor.pl) |
+| [`animal.pl`](../examples/animal.pl) | Classifies animals from traits. | [`output/animal.pl`](../examples/output/animal.pl) |
+| [`annotation.pl`](../examples/annotation.pl) | Derives facts from quoted annotation data. | [`output/annotation.pl`](../examples/output/annotation.pl) |
+| [`auroracare.pl`](../examples/auroracare.pl) | Evaluates purpose-based medical data access scenarios. | [`output/auroracare.pl`](../examples/output/auroracare.pl) |
+| [`backward.pl`](../examples/backward.pl) | Shows a backward-rule pattern as a goal-directed numeric rule. | [`output/backward.pl`](../examples/output/backward.pl) |
+| [`basic-monadic.pl`](../examples/basic-monadic.pl) | Runs the basic monadic benchmark with explicit indexed edge joins instead of specialized search builtins. | [`output/basic-monadic.pl`](../examples/output/basic-monadic.pl) |
+| [`bayes-diagnosis.pl`](../examples/bayes-diagnosis.pl) | Computes scaled Bayesian diagnosis posteriors. | [`output/bayes-diagnosis.pl`](../examples/output/bayes-diagnosis.pl) |
+| [`bayes-therapy.pl`](../examples/bayes-therapy.pl) | Ranks therapies using Bayesian disease likelihoods. | [`output/bayes-therapy.pl`](../examples/output/bayes-therapy.pl) |
+| [`beam-deflection.pl`](../examples/beam-deflection.pl) | Computes cantilever beam deflection. | [`output/beam-deflection.pl`](../examples/output/beam-deflection.pl) |
+| [`binomial-vandermonde.pl`](../examples/binomial-vandermonde.pl) | Computes binomial coefficients and checks Vandermonde's identity. | [`output/binomial-vandermonde.pl`](../examples/output/binomial-vandermonde.pl) |
+| [`blocks-world-planning.pl`](../examples/blocks-world-planning.pl) | Searches a finite blocks-world plan. | [`output/blocks-world-planning.pl`](../examples/output/blocks-world-planning.pl) |
+| [`bmi.pl`](../examples/bmi.pl) | Normalizes BMI inputs and classifies weight. | [`output/bmi.pl`](../examples/output/bmi.pl) |
+| [`braking-safety-worlds.pl`](../examples/braking-safety-worlds.pl) | Classifies braking safety under alternative worlds. | [`output/braking-safety-worlds.pl`](../examples/output/braking-safety-worlds.pl) |
+| [`buck-converter-design.pl`](../examples/buck-converter-design.pl) | Checks buck-converter ripple design. | [`output/buck-converter-design.pl`](../examples/output/buck-converter-design.pl) |
+| [`cache-performance.pl`](../examples/cache-performance.pl) | Summarizes cache latency performance. | [`output/cache-performance.pl`](../examples/output/cache-performance.pl) |
+| [`canary-release.pl`](../examples/canary-release.pl) | Decides canary rollout or rollback. | [`output/canary-release.pl`](../examples/output/canary-release.pl) |
+| [`cat-koko.pl`](../examples/cat-koko.pl) | Demonstrates named existential witnesses from a Cat Koko rule pattern. | [`output/cat-koko.pl`](../examples/output/cat-koko.pl) |
+| [`catalan-convolution.pl`](../examples/catalan-convolution.pl) | Computes Catalan numbers by tabled convolution. | [`output/catalan-convolution.pl`](../examples/output/catalan-convolution.pl) |
+| [`cdcl-sat-solver.pl`](../examples/cdcl-sat-solver.pl) | Simulates one CDCL conflict-analysis step with a learned clause and backjumped model. | [`output/cdcl-sat-solver.pl`](../examples/output/cdcl-sat-solver.pl) |
+| [`chart-parser.pl`](../examples/chart-parser.pl) | Parses small sentences with a tabled chart parser. | [`output/chart-parser.pl`](../examples/output/chart-parser.pl) |
+| [`clinical-trial-screening.pl`](../examples/clinical-trial-screening.pl) | Screens candidates for a trial. | [`output/clinical-trial-screening.pl`](../examples/output/clinical-trial-screening.pl) |
+| [`collatz-1000.pl`](../examples/collatz-1000.pl) | Materializes Collatz trajectories for starts 1000 down to 1. | [`output/collatz-1000.pl`](../examples/output/collatz-1000.pl) |
+| [`combinatorics-findall-sort.pl`](../examples/combinatorics-findall-sort.pl) | Collects and sorts finite combinations. | [`output/combinatorics-findall-sort.pl`](../examples/output/combinatorics-findall-sort.pl) |
+| [`competitive-enzyme-kinetics.pl`](../examples/competitive-enzyme-kinetics.pl) | Computes inhibited enzyme reaction rates. | [`output/competitive-enzyme-kinetics.pl`](../examples/output/competitive-enzyme-kinetics.pl) |
+| [`complex.pl`](../examples/complex.pl) | Performs arithmetic on complex pairs. | [`output/complex.pl`](../examples/output/complex.pl) |
+| [`composition-of-injective-functions-is-injective.pl`](../examples/composition-of-injective-functions-is-injective.pl) | Encodes composition and injectivity of finite functions. | [`output/composition-of-injective-functions-is-injective.pl`](../examples/output/composition-of-injective-functions-is-injective.pl) |
+| [`context-association.pl`](../examples/context-association.pl) | Associates named contexts with their contents. | [`output/context-association.pl`](../examples/output/context-association.pl) |
+| [`context-schema-audit.pl`](../examples/context-schema-audit.pl) | Audits mixed-arity context members with `holds/3`. | [`output/context-schema-audit.pl`](../examples/output/context-schema-audit.pl) |
+| [`continued-fraction-sqrt2.pl`](../examples/continued-fraction-sqrt2.pl) | Computes sqrt(2) continued-fraction convergents and Pell errors. | [`output/continued-fraction-sqrt2.pl`](../examples/output/continued-fraction-sqrt2.pl) |
+| [`control-system.pl`](../examples/control-system.pl) | Evaluates control-system measurements and targets. | [`output/control-system.pl`](../examples/output/control-system.pl) |
+| [`critical-path-schedule.pl`](../examples/critical-path-schedule.pl) | Computes earliest starts and the critical path for a project network. | [`output/critical-path-schedule.pl`](../examples/output/critical-path-schedule.pl) |
+| [`cyclic-path.pl`](../examples/cyclic-path.pl) | Computes paths in a cyclic graph. | [`output/cyclic-path.pl`](../examples/output/cyclic-path.pl) |
+| [`d3-group.pl`](../examples/d3-group.pl) | Enumerates subgroups of the D3 group. | [`output/d3-group.pl`](../examples/output/d3-group.pl) |
+| [`dairy-energy-balance.pl`](../examples/dairy-energy-balance.pl) | Classifies dairy cow energy balance. | [`output/dairy-energy-balance.pl`](../examples/output/dairy-energy-balance.pl) |
+| [`data-negotiation.pl`](../examples/data-negotiation.pl) | Chooses an accepted data-negotiation offer. | [`output/data-negotiation.pl`](../examples/output/data-negotiation.pl) |
+| [`deep-taxonomy-10.pl`](../examples/deep-taxonomy-10.pl) | Stress-tests recursive taxonomy depth 10. | [`output/deep-taxonomy-10.pl`](../examples/output/deep-taxonomy-10.pl) |
+| [`deep-taxonomy-100.pl`](../examples/deep-taxonomy-100.pl) | Stress-tests recursive taxonomy depth 100. | [`output/deep-taxonomy-100.pl`](../examples/output/deep-taxonomy-100.pl) |
+| [`deep-taxonomy-1000.pl`](../examples/deep-taxonomy-1000.pl) | Stress-tests recursive taxonomy depth 1000. | [`output/deep-taxonomy-1000.pl`](../examples/output/deep-taxonomy-1000.pl) |
+| [`deep-taxonomy-10000.pl`](../examples/deep-taxonomy-10000.pl) | Stress-tests recursive taxonomy depth 10000. | [`output/deep-taxonomy-10000.pl`](../examples/output/deep-taxonomy-10000.pl) |
+| [`deep-taxonomy-100000.pl`](../examples/deep-taxonomy-100000.pl) | Stress-tests recursive taxonomy depth 100000. | [`output/deep-taxonomy-100000.pl`](../examples/output/deep-taxonomy-100000.pl) |
+| [`delfour.pl`](../examples/delfour.pl) | Derives shopping and authorization recommendations. | [`output/delfour.pl`](../examples/output/delfour.pl) |
+| [`deontic-logic.pl`](../examples/deontic-logic.pl) | Reports obligations, prohibitions, and violations. | [`output/deontic-logic.pl`](../examples/output/deontic-logic.pl) |
+| [`derived-backward-rule.pl`](../examples/derived-backward-rule.pl) | Derives an inverse-property backward rule from rule data. | [`output/derived-backward-rule.pl`](../examples/output/derived-backward-rule.pl) |
+| [`derived-rule.pl`](../examples/derived-rule.pl) | Derives conclusions from rule data. | [`output/derived-rule.pl`](../examples/output/derived-rule.pl) |
+| [`diamond-property.pl`](../examples/diamond-property.pl) | Checks the diamond property of a relation. | [`output/diamond-property.pl`](../examples/output/diamond-property.pl) |
+| [`dijkstra-findall-sort.pl`](../examples/dijkstra-findall-sort.pl) | Finds shortest paths using collected candidates. | [`output/dijkstra-findall-sort.pl`](../examples/output/dijkstra-findall-sort.pl) |
+| [`dijkstra-risk-path.pl`](../examples/dijkstra-risk-path.pl) | Ranks routes by cost and trust. | [`output/dijkstra-risk-path.pl`](../examples/output/dijkstra-risk-path.pl) |
+| [`dijkstra.pl`](../examples/dijkstra.pl) | Enumerates weighted simple paths. | [`output/dijkstra.pl`](../examples/output/dijkstra.pl) |
+| [`dining-philosophers.pl`](../examples/dining-philosophers.pl) | Simulates Chandy-Misra fork exchanges. | [`output/dining-philosophers.pl`](../examples/output/dining-philosophers.pl) |
+| [`dog.pl`](../examples/dog.pl) | Counts dogs and derives when a license is required. | [`output/dog.pl`](../examples/output/dog.pl) |
+| [`dpv-odrl-purpose-mapping.pl`](../examples/dpv-odrl-purpose-mapping.pl) | Maps a DPV process into an ODRL permission view. | [`output/dpv-odrl-purpose-mapping.pl`](../examples/output/dpv-odrl-purpose-mapping.pl) |
+| [`drone-corridor-planner.pl`](../examples/drone-corridor-planner.pl) | Plans bounded drone corridor routes. | [`output/drone-corridor-planner.pl`](../examples/output/drone-corridor-planner.pl) |
+| [`easter-computus.pl`](../examples/easter-computus.pl) | Computes Gregorian Easter dates. | [`output/easter-computus.pl`](../examples/output/easter-computus.pl) |
+| [`electrical-rc-filter.pl`](../examples/electrical-rc-filter.pl) | Sizes an RC low-pass filter. | [`output/electrical-rc-filter.pl`](../examples/output/electrical-rc-filter.pl) |
+| [`equality-saturation.pl`](../examples/equality-saturation.pl) | Performs bounded equality saturation and extracts the cheapest equivalent expression. | [`output/equality-saturation.pl`](../examples/output/equality-saturation.pl) |
+| [`epidemic-policy.pl`](../examples/epidemic-policy.pl) | Chooses policies from risk and social cost. | [`output/epidemic-policy.pl`](../examples/output/epidemic-policy.pl) |
+| [`equivalence-classes-overlap-implies-same-class.pl`](../examples/equivalence-classes-overlap-implies-same-class.pl) | Packages the shared-member proof pattern for equivalence classes. | [`output/equivalence-classes-overlap-implies-same-class.pl`](../examples/output/equivalence-classes-overlap-implies-same-class.pl) |
+| [`eulerian-path.pl`](../examples/eulerian-path.pl) | Finds an Eulerian path using each edge once. | [`output/eulerian-path.pl`](../examples/output/eulerian-path.pl) |
+| [`ev-range-worlds.pl`](../examples/ev-range-worlds.pl) | Estimates electric-vehicle trip feasibility. | [`output/ev-range-worlds.pl`](../examples/output/ev-range-worlds.pl) |
+| [`existential-rule.pl`](../examples/existential-rule.pl) | Represents existential-style witnesses with explicit Herbrand terms. | [`output/existential-rule.pl`](../examples/output/existential-rule.pl) |
+| [`exoplanet-validation-worlds.pl`](../examples/exoplanet-validation-worlds.pl) | Validates exoplanet candidates across worlds. | [`output/exoplanet-validation-worlds.pl`](../examples/output/exoplanet-validation-worlds.pl) |
+| [`expression-eval.pl`](../examples/expression-eval.pl) | Evaluates a small arithmetic expression tree. | [`output/expression-eval.pl`](../examples/output/expression-eval.pl) |
+| [`family-cousins.pl`](../examples/family-cousins.pl) | Derives cousin and family labels. | [`output/family-cousins.pl`](../examples/output/family-cousins.pl) |
+| [`fastpow.pl`](../examples/fastpow.pl) | Computes powers by repeated squaring. | [`output/fastpow.pl`](../examples/output/fastpow.pl) |
+| [`fft8-numeric.pl`](../examples/fft8-numeric.pl) | Runs an 8-point FFT over complex pairs. | [`output/fft8-numeric.pl`](../examples/output/fft8-numeric.pl) |
+| [`fibonacci.pl`](../examples/fibonacci.pl) | Computes large Fibonacci numbers by fast doubling. | [`output/fibonacci.pl`](../examples/output/fibonacci.pl) |
+| [`field-nitrogen-balance.pl`](../examples/field-nitrogen-balance.pl) | Classifies field nitrogen balance. | [`output/field-nitrogen-balance.pl`](../examples/output/field-nitrogen-balance.pl) |
+| [`flandor.pl`](../examples/flandor.pl) | Derives a Flanders macro-insight authorization and retooling package. | [`output/flandor.pl`](../examples/output/flandor.pl) |
+| [`floating-point.pl`](../examples/floating-point.pl) | Exercises floating-point arithmetic and comparisons. | [`output/floating-point.pl`](../examples/output/floating-point.pl) |
+| [`four-color-map.pl`](../examples/four-color-map.pl) | Checks a four-colour map assignment. | [`output/four-color-map.pl`](../examples/output/four-color-map.pl) |
+| [`fundamental-theorem-arithmetic.pl`](../examples/fundamental-theorem-arithmetic.pl) | Factors integers and reconstructs products. | [`output/fundamental-theorem-arithmetic.pl`](../examples/output/fundamental-theorem-arithmetic.pl) |
+| [`gd-step-certified.pl`](../examples/gd-step-certified.pl) | Certifies a gradient-descent step. | [`output/gd-step-certified.pl`](../examples/output/gd-step-certified.pl) |
+| [`gdpr-compliance.pl`](../examples/gdpr-compliance.pl) | Checks GDPR-style processing compliance. | [`output/gdpr-compliance.pl`](../examples/output/gdpr-compliance.pl) |
+| [`good-cobbler.pl`](../examples/good-cobbler.pl) | Demonstrates term-level structure with a good-cobbler statement. | [`output/good-cobbler.pl`](../examples/output/good-cobbler.pl) |
+| [`gps.pl`](../examples/gps.pl) | Finds and verifies route paths. | [`output/gps.pl`](../examples/output/gps.pl) |
+| [`graph-reachability.pl`](../examples/graph-reachability.pl) | Derives reachable nodes in a graph. | [`output/graph-reachability.pl`](../examples/output/graph-reachability.pl) |
+| [`graph.pl`](../examples/graph.pl) | Derives transitive paths over French-city road links while showing the productive recursive rule order. | [`output/graph.pl`](../examples/output/graph.pl) |
+| [`gray-code-counter.pl`](../examples/gray-code-counter.pl) | Generates Gray-code counter states. | [`output/gray-code-counter.pl`](../examples/output/gray-code-counter.pl) |
+| [`greatest-lower-bound-uniqueness.pl`](../examples/greatest-lower-bound-uniqueness.pl) | Shows uniqueness of greatest lower bounds in a finite order instance. | [`output/greatest-lower-bound-uniqueness.pl`](../examples/output/greatest-lower-bound-uniqueness.pl) |
+| [`group-inverse-uniqueness.pl`](../examples/group-inverse-uniqueness.pl) | Shows uniqueness of inverses in a finite group instance. | [`output/group-inverse-uniqueness.pl`](../examples/output/group-inverse-uniqueness.pl) |
+| [`hamiltonian-path.pl`](../examples/hamiltonian-path.pl) | Finds a Hamiltonian path. | [`output/hamiltonian-path.pl`](../examples/output/hamiltonian-path.pl) |
+| [`hamming-code.pl`](../examples/hamming-code.pl) | Corrects a single-bit Hamming word. | [`output/hamming-code.pl`](../examples/output/hamming-code.pl) |
+| [`hanoi.pl`](../examples/hanoi.pl) | Derives the Towers of Hanoi moves. | [`output/hanoi.pl`](../examples/output/hanoi.pl) |
+| [`heat-loss.pl`](../examples/heat-loss.pl) | Computes conductive heat loss. | [`output/heat-loss.pl`](../examples/output/heat-loss.pl) |
+| [`herbrand-witnesses.pl`](../examples/herbrand-witnesses.pl) | Represents existential-style consequences as stable Herbrand witness terms. | [`output/herbrand-witnesses.pl`](../examples/output/herbrand-witnesses.pl) |
+| [`heron-theorem.pl`](../examples/heron-theorem.pl) | Computes triangle area by Heron's theorem. | [`output/heron-theorem.pl`](../examples/output/heron-theorem.pl) |
+| [`ideal-gas-law.pl`](../examples/ideal-gas-law.pl) | Applies the ideal gas law. | [`output/ideal-gas-law.pl`](../examples/output/ideal-gas-law.pl) |
+| [`illegitimate-reasoning.pl`](../examples/illegitimate-reasoning.pl) | Detects suspect reasoning patterns. | [`output/illegitimate-reasoning.pl`](../examples/output/illegitimate-reasoning.pl) |
+| [`integer-partitions.pl`](../examples/integer-partitions.pl) | Counts integer partitions with tabled dynamic programming. | [`output/integer-partitions.pl`](../examples/output/integer-partitions.pl) |
+| [`intuitionistic-logic-kripke.pl`](../examples/intuitionistic-logic-kripke.pl) | Emulates intuitionistic Kripke forcing and constructive implication. | [`output/intuitionistic-logic-kripke.pl`](../examples/output/intuitionistic-logic-kripke.pl) |
+| [`job-shop-scheduling.pl`](../examples/job-shop-scheduling.pl) | Searches a small job-shop schedule and minimizes makespan. | [`output/job-shop-scheduling.pl`](../examples/output/job-shop-scheduling.pl) |
+| [`knapsack-optimization.pl`](../examples/knapsack-optimization.pl) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.pl`](../examples/output/knapsack-optimization.pl) |
+| [`knuth-bendix-completion.pl`](../examples/knuth-bendix-completion.pl) | Checks bounded Knuth-Bendix-style critical pairs for joinability. | [`output/knuth-bendix-completion.pl`](../examples/output/knuth-bendix-completion.pl) |
+| [`knowledge-engineering-alignment-flow.pl`](../examples/knowledge-engineering-alignment-flow.pl) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.pl`](../examples/output/knowledge-engineering-alignment-flow.pl) |
+| [`language.pl`](../examples/language.pl) | Shows the modern Eyelang surface syntax in one compact recursive graph example. | [`output/language.pl`](../examples/output/language.pl) |
+| [`law-of-cosines.pl`](../examples/law-of-cosines.pl) | Computes a triangle side by cosine law. | [`output/law-of-cosines.pl`](../examples/output/law-of-cosines.pl) |
+| [`least-squares-regression.pl`](../examples/least-squares-regression.pl) | Fits a least-squares regression line. | [`output/least-squares-regression.pl`](../examples/output/least-squares-regression.pl) |
+| [`linear-logic-resources.pl`](../examples/linear-logic-resources.pl) | Emulates linear logic resource consumption with explicit state threading. | [`output/linear-logic-resources.pl`](../examples/output/linear-logic-resources.pl) |
+| [`list-collection.pl`](../examples/list-collection.pl) | Demonstrates list and collection built-ins. | [`output/list-collection.pl`](../examples/output/list-collection.pl) |
+| [`lldm.pl`](../examples/lldm.pl) | Calculates leg-length discrepancy measurements. | [`output/lldm.pl`](../examples/output/lldm.pl) |
+| [`manufacturing-quality-control.pl`](../examples/manufacturing-quality-control.pl) | Evaluates process capability and quality. | [`output/manufacturing-quality-control.pl`](../examples/output/manufacturing-quality-control.pl) |
+| [`markov-logic-network.pl`](../examples/markov-logic-network.pl) | Scores finite possible worlds with weighted soft formulas in a Markov Logic Network style. | [`output/markov-logic-network.pl`](../examples/output/markov-logic-network.pl) |
+| [`map-four-color-search.pl`](../examples/map-four-color-search.pl) | Searches for a valid four-colouring of the EU neighbour graph. | [`output/map-four-color-search.pl`](../examples/output/map-four-color-search.pl) |
+| [`matrix-chain-order.pl`](../examples/matrix-chain-order.pl) | Finds an optimal matrix-chain multiplication order. | [`output/matrix-chain-order.pl`](../examples/output/matrix-chain-order.pl) |
+| [`matrix-noncommutativity.pl`](../examples/matrix-noncommutativity.pl) | Multiplies 2x2 matrices and shows non-commutativity. | [`output/matrix-noncommutativity.pl`](../examples/output/matrix-noncommutativity.pl) |
+| [`microgrid-dispatch.pl`](../examples/microgrid-dispatch.pl) | Plans microgrid dispatch and reserve. | [`output/microgrid-dispatch.pl`](../examples/output/microgrid-dispatch.pl) |
+| [`missionaries-cannibals.pl`](../examples/missionaries-cannibals.pl) | Solves the missionaries-and-cannibals river crossing puzzle. | [`output/missionaries-cannibals.pl`](../examples/output/missionaries-cannibals.pl) |
+| [`modal-logic-kripke.pl`](../examples/modal-logic-kripke.pl) | Emulates modal box and diamond operators over a finite Kripke frame. | [`output/modal-logic-kripke.pl`](../examples/output/modal-logic-kripke.pl) |
+| [`modular-exponentiation.pl`](../examples/modular-exponentiation.pl) | Computes modular powers by repeated squaring. | [`output/modular-exponentiation.pl`](../examples/output/modular-exponentiation.pl) |
+| [`monkey-bananas.pl`](../examples/monkey-bananas.pl) | Solves the monkey-and-bananas puzzle. | [`output/monkey-bananas.pl`](../examples/output/monkey-bananas.pl) |
+| [`n-queens-8.pl`](../examples/n-queens-8.pl) | Solves the 8-queens search problem with diagonal constraints. | [`output/n-queens-8.pl`](../examples/output/n-queens-8.pl) |
+| [`network-sla.pl`](../examples/network-sla.pl) | Checks network path SLA compliance. | [`output/network-sla.pl`](../examples/output/network-sla.pl) |
+| [`newton-raphson.pl`](../examples/newton-raphson.pl) | Finds roots by Newton-Raphson iteration. | [`output/newton-raphson.pl`](../examples/output/newton-raphson.pl) |
+| [`nixon-diamond.pl`](../examples/nixon-diamond.pl) | Reports the classic Nixon-diamond conflict. | [`output/nixon-diamond.pl`](../examples/output/nixon-diamond.pl) |
+| [`observability-log-correlation.pl`](../examples/observability-log-correlation.pl) | Extracts named regex captures from observability logs and correlates events by trace id. | [`output/observability-log-correlation.pl`](../examples/output/observability-log-correlation.pl) |
+| [`odrl-dpv-fpv-trust-flow.pl`](../examples/odrl-dpv-fpv-trust-flow.pl) | Decides ODRL/DPV data flows with local FPV trust gates. | [`output/odrl-dpv-fpv-trust-flow.pl`](../examples/output/odrl-dpv-fpv-trust-flow.pl) |
+| [`odrl-dpv-healthcare-risk-ranked.pl`](../examples/odrl-dpv-healthcare-risk-ranked.pl) | Ranks healthcare policy risks and mitigations. | [`output/odrl-dpv-healthcare-risk-ranked.pl`](../examples/output/odrl-dpv-healthcare-risk-ranked.pl) |
+| [`odrl-dpv-risk-ranked.pl`](../examples/odrl-dpv-risk-ranked.pl) | Ranks data-policy risks and mitigations. | [`output/odrl-dpv-risk-ranked.pl`](../examples/output/odrl-dpv-risk-ranked.pl) |
+| [`orbital-transfer-design.pl`](../examples/orbital-transfer-design.pl) | Designs a Hohmann orbital transfer. | [`output/orbital-transfer-design.pl`](../examples/output/orbital-transfer-design.pl) |
+| [`path-discovery.pl`](../examples/path-discovery.pl) | Discovers bounded air-route paths. | [`output/path-discovery.pl`](../examples/output/path-discovery.pl) |
+| [`partial-evaluator.pl`](../examples/partial-evaluator.pl) | Specializes tiny expression programs by folding static inputs into residual code. | [`output/partial-evaluator.pl`](../examples/output/partial-evaluator.pl) |
+| [`peano-arithmetic.pl`](../examples/peano-arithmetic.pl) | Computes Peano addition, multiplication, and factorial. | [`output/peano-arithmetic.pl`](../examples/output/peano-arithmetic.pl) |
+| [`peano-calculus.pl`](../examples/peano-calculus.pl) | Computes Peano addition, multiplication, and factorial. | [`output/peano-calculus.pl`](../examples/output/peano-calculus.pl) |
+| [`peasant.pl`](../examples/peasant.pl) | Performs peasant multiplication and exponentiation. | [`output/peasant.pl`](../examples/output/peasant.pl) |
+| [`pell-equation.pl`](../examples/pell-equation.pl) | Generates Pell-equation solutions by recurrence. | [`output/pell-equation.pl`](../examples/output/pell-equation.pl) |
+| [`pendulum-period.pl`](../examples/pendulum-period.pl) | Computes simple pendulum periods. | [`output/pendulum-period.pl`](../examples/output/pendulum-period.pl) |
+| [`pointer-analysis.pl`](../examples/pointer-analysis.pl) | Computes Andersen-style inclusion-based points-to facts over address, assign, store, and load constraints. | [`output/pointer-analysis.pl`](../examples/output/pointer-analysis.pl) |
+| [`polynomial.pl`](../examples/polynomial.pl) | Finds complex integer polynomial roots. | [`output/polynomial.pl`](../examples/output/polynomial.pl) |
+| [`prime-range.pl`](../examples/prime-range.pl) | Finds primes in a finite range and computes a totient value. | [`output/prime-range.pl`](../examples/output/prime-range.pl) |
+| [`proof-contrapositive.pl`](../examples/proof-contrapositive.pl) | Models proof by contrapositive. | [`output/proof-contrapositive.pl`](../examples/output/proof-contrapositive.pl) |
+| [`quadratic-formula.pl`](../examples/quadratic-formula.pl) | Solves sample quadratic equations. | [`output/quadratic-formula.pl`](../examples/output/quadratic-formula.pl) |
+| [`radioactive-decay.pl`](../examples/radioactive-decay.pl) | Computes radioactive decay over time. | [`output/radioactive-decay.pl`](../examples/output/radioactive-decay.pl) |
+| [`register-allocation.pl`](../examples/register-allocation.pl) | Allocates temporaries to two registers with spilling by bounded graph-coloring search. | [`output/register-allocation.pl`](../examples/output/register-allocation.pl) |
+| [`reusable-builtins.pl`](../examples/reusable-builtins.pl) | Tours reusable numeric, list, and string builtins. | [`output/reusable-builtins.pl`](../examples/output/reusable-builtins.pl) |
+| [`riemann-hypothesis.pl`](../examples/riemann-hypothesis.pl) | Checks a finite catalogue of non-trivial zeta zeros against the Riemann-hypothesis condition. | [`output/riemann-hypothesis.pl`](../examples/output/riemann-hypothesis.pl) |
+| [`route-planning.pl`](../examples/route-planning.pl) | Finds routes and records them as explicit route terms. | [`output/route-planning.pl`](../examples/output/route-planning.pl) |
+| [`sat-solver-dpll.pl`](../examples/sat-solver-dpll.pl) | Searches a CNF formula with DPLL-style recursive decisions and early contradiction pruning. | [`output/sat-solver-dpll.pl`](../examples/output/sat-solver-dpll.pl) |
+| [`security-incident-correlation.pl`](../examples/security-incident-correlation.pl) | Correlates security incidents across signals. | [`output/security-incident-correlation.pl`](../examples/output/security-incident-correlation.pl) |
+| [`send-more-money.pl`](../examples/send-more-money.pl) | Solves the SEND + MORE = MONEY cryptarithm. | [`output/send-more-money.pl`](../examples/output/send-more-money.pl) |
+| [`service-impact.pl`](../examples/service-impact.pl) | Analyzes service impact over cyclic dependencies. | [`output/service-impact.pl`](../examples/output/service-impact.pl) |
+| [`shoelace-polygon-area.pl`](../examples/shoelace-polygon-area.pl) | Computes polygon area with a recursive shoelace calculation. | [`output/shoelace-polygon-area.pl`](../examples/output/shoelace-polygon-area.pl) |
+| [`sieve.pl`](../examples/sieve.pl) | Enumerates primes with a sieve-style program. | [`output/sieve.pl`](../examples/output/sieve.pl) |
+| [`skolem-functions.pl`](../examples/skolem-functions.pl) | Generates deterministic functional terms. | [`output/skolem-functions.pl`](../examples/output/skolem-functions.pl) |
+| [`socket-age.pl`](../examples/socket-age.pl) | Shows socket-declared age reasoning inputs and plugs. | [`output/socket-age.pl`](../examples/output/socket-age.pl) |
+| [`socket-family.pl`](../examples/socket-family.pl) | Shows socket-declared family-source inputs and ancestry rules. | [`output/socket-family.pl`](../examples/output/socket-family.pl) |
+| [`socrates.pl`](../examples/socrates.pl) | Derives that Socrates is mortal. | [`output/socrates.pl`](../examples/output/socrates.pl) |
+| [`stable-marriage.pl`](../examples/stable-marriage.pl) | Finds stable matchings by excluding blocking pairs. | [`output/stable-marriage.pl`](../examples/output/stable-marriage.pl) |
+| [`statistics-summary.pl`](../examples/statistics-summary.pl) | Computes population statistics for a sample. | [`output/statistics-summary.pl`](../examples/output/statistics-summary.pl) |
+| [`stirling-bell-numbers.pl`](../examples/stirling-bell-numbers.pl) | Computes Stirling numbers and Bell numbers. | [`output/stirling-bell-numbers.pl`](../examples/output/stirling-bell-numbers.pl) |
+| [`sudoku-4x4.pl`](../examples/sudoku-4x4.pl) | Solves a compact 4x4 Sudoku by finite constraint search. | [`output/sudoku-4x4.pl`](../examples/output/sudoku-4x4.pl) |
+| [`superdense-coding.pl`](../examples/superdense-coding.pl) | Models superdense-coding bit transmission. | [`output/superdense-coding.pl`](../examples/output/superdense-coding.pl) |
+| [`symbolic-derivative.pl`](../examples/symbolic-derivative.pl) | Symbolically differentiates explicit expression terms, including products and logs. | [`output/symbolic-derivative.pl`](../examples/output/symbolic-derivative.pl) |
+| [`term-tools.pl`](../examples/term-tools.pl) | Inspects, builds, renders, and validates terms with reusable term/control builtins. | [`output/term-tools.pl`](../examples/output/term-tools.pl) |
+| [`totient-summatory.pl`](../examples/totient-summatory.pl) | Computes Euler totients and their summatory function. | [`output/totient-summatory.pl`](../examples/output/totient-summatory.pl) |
+| [`trust-flow-provenance-threshold.pl`](../examples/trust-flow-provenance-threshold.pl) | Classifies message trust from provenance confidence scores. | [`output/trust-flow-provenance-threshold.pl`](../examples/output/trust-flow-provenance-threshold.pl) |
+| [`truth-maintenance-system.pl`](../examples/truth-maintenance-system.pl) | Tracks assumptions, justifications, supported beliefs, and inconsistent environments in a tiny TMS. | [`output/truth-maintenance-system.pl`](../examples/output/truth-maintenance-system.pl) |
+| [`type-inference.pl`](../examples/type-inference.pl) | Infers/checks types for a tiny lambda language using logic unification over expression syntax trees. | [`output/type-inference.pl`](../examples/output/type-inference.pl) |
+| [`turing.pl`](../examples/turing.pl) | Simulates a binary-increment Turing machine. | [`output/turing.pl`](../examples/output/turing.pl) |
+| [`vector-similarity.pl`](../examples/vector-similarity.pl) | Computes dot product, norm, and cosine similarity. | [`output/vector-similarity.pl`](../examples/output/vector-similarity.pl) |
+| [`vulnerability-impact.pl`](../examples/vulnerability-impact.pl) | Analyzes vulnerable transitive dependencies and urgent patch impact. | [`output/vulnerability-impact.pl`](../examples/output/vulnerability-impact.pl) |
+| [`web-names.pl`](../examples/web-names.pl) | Uses quoted IRI-shaped atoms as first-class web names and joins them across a tiny graph. | [`output/web-names.pl`](../examples/output/web-names.pl) |
+| [`weighted-interval-scheduling.pl`](../examples/weighted-interval-scheduling.pl) | Selects the best non-overlapping weighted intervals with tabled dynamic programming. | [`output/weighted-interval-scheduling.pl`](../examples/output/weighted-interval-scheduling.pl) |
+| [`witch.pl`](../examples/witch.pl) | Derives the classic “burn the witch” rule chain. | [`output/witch.pl`](../examples/output/witch.pl) |
+| [`wolf-goat-cabbage.pl`](../examples/wolf-goat-cabbage.pl) | Solves the wolf-goat-cabbage river crossing. | [`output/wolf-goat-cabbage.pl`](../examples/output/wolf-goat-cabbage.pl) |
+| [`workplace-compliance.pl`](../examples/workplace-compliance.pl) | Classifies workplace compliance from explicit action facts. | [`output/workplace-compliance.pl`](../examples/output/workplace-compliance.pl) |
+| [`zebra.pl`](../examples/zebra.pl) | Solves the zebra logic puzzle. | [`output/zebra.pl`](../examples/output/zebra.pl) |
 
 ## Golden outputs, tests, and conformance
 
-Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:eyelang` covers the eyelang integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.eye` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:
+Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:eyelang` covers the eyelang integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.pl` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:
 
 ```sh
-for f in examples/*.eye; do
+for f in examples/*.pl; do
   [ -e "$f" ] || continue
   b=$(basename "$f")
   EYELANG_LOCAL_TIME=2026-05-30 eyelang "$f" > "examples/output/$b"
 done
 
-for f in examples/proof/*.eye; do
+for f in examples/proof/*.pl; do
   b=$(basename "$f")
   EYELANG_LOCAL_TIME=2026-05-30 eyelang --proof "examples/$b" > "examples/proof/$b"
 done
@@ -525,7 +525,7 @@ npm run conformance:report
 
 Release preparation runs the same report and writes [`conformance-report.md`](../conformance-report.md), so each published package carries a current conformance summary.
 
-The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based eyelang corpus. Positive cases pair `cases/<name>.eye` with exact expected stdout under `expected/<name>.eye`; negative cases pair `errors/<name>.eye` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.eye` with exact `--warnings` stdout and stderr files under `expected-warnings/`; proof cases pair `proofs/<name>.eye` with exact `--proof` output under `expected-proofs/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, standard warnings, and the machine-readable `why/2` proof-output contract. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
+The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based eyelang corpus. Positive cases pair `cases/<name>.pl` with exact expected stdout under `expected/<name>.pl`; negative cases pair `errors/<name>.pl` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.pl` with exact `--warnings` stdout and stderr files under `expected-warnings/`; proof cases pair `proofs/<name>.pl` with exact `--proof` output under `expected-proofs/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, standard warnings, and the machine-readable `why/2` proof-output contract. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
 
 ## Development and release
 
@@ -544,7 +544,7 @@ eyelang --help
 Useful profiling smoke test:
 
 ```sh
-eyelang -s examples/observability-log-correlation.eye > /dev/null
+eyelang -s examples/observability-log-correlation.pl > /dev/null
 ```
 
 For a release:
@@ -562,7 +562,7 @@ For a release:
 
 Eyeling is the RDF/Notation3 member of the family. It reads N3-style triples, quoted formulas, forward rules written with `=>`, backward rules written with `<=`, RDF terms, RDF-JS data, and RDF-oriented streams. That makes it the better fit when data interchange with RDF/N3 tools is the main requirement.
 
-Eyelang is the compact Prolog-style member of the family. It uses ordinary predicate syntax such as `parent(alice, bob).` and `ancestor(?x, ?z) :- parent(?x, ?y), ancestor(?y, ?z).` The core remains close to the Prolog tradition while deliberately staying smaller and more explicit than ISO Prolog. It is a good fit when the problem is naturally relational, goal-directed, finite, and does not need RDF graph interchange.
+Eyelang is the compact Prolog-style member of the family. It uses ordinary predicate syntax such as `parent(alice, bob).` and `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` The core remains close to the Prolog tradition while deliberately staying smaller and more explicit than ISO Prolog. It is a good fit when the problem is naturally relational, goal-directed, finite, and does not need RDF graph interchange.
 
 A useful rule of thumb:
 
@@ -594,9 +594,9 @@ Use `-s` or `--stats` for a quick sanity check while optimizing solver changes. 
 eyelang hashes predicate groups by name and arity, then indexes clauses by scalar argument values. It also builds two-argument composite indexes for scalar pairs and probes those composite indexes without per-lookup heap allocation. This helps both large generated programs with many predicates and selective queries such as:
 
 ```eyelang
-edge(g1, a, ?x).
-path(a, ?y).
-status(?case, accepted).
+edge(g1, a, X).
+path(a, Y).
+status(Case, accepted).
 ```
 
 Ground facts use a fast path that avoids freshening and copying a rule body. Recursive-predicate detection uses an explicit work stack, which keeps large predicate chains safer in the browser. Recursive examples use an active-call variant guard to prevent common cyclic closures from looping. Selected predicates can be tabled with:

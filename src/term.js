@@ -138,14 +138,6 @@ export function termIsGround(term, env = new Env()) {
 
 const graphicAtomChars = new Set('#$&*+-/<=>@^~\\'.split(''));
 
-function isAbsoluteIriText(text) {
-  return /^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>"'{}|\\^`]*$/.test(text);
-}
-
-function writeAngleIri(name) {
-  return `<${name}>`;
-}
-
 function atomNeedsQuotes(name) {
   if (!name) return true;
   if (name === '[]') return false;
@@ -167,8 +159,24 @@ function quoteAtom(name) {
 }
 
 function writeAtom(name) {
-  if (isAbsoluteIriText(name)) return writeAngleIri(name);
   return atomNeedsQuotes(name) ? quoteAtom(name) : name;
+}
+
+function legacyVariableToIso(name) {
+  if (name === '?') return '_';
+  const tail = name.slice(1);
+  if (!tail) return '_';
+  if (tail[0] === '_') return tail;
+  return tail[0].toUpperCase() + tail.slice(1);
+}
+
+function writeVariable(name) {
+  name = String(name ?? '');
+  if (/^\?(?:[A-Za-z_][A-Za-z0-9_]*)?$/.test(name)) return legacyVariableToIso(name);
+  if (/^(?:_|[A-Z_][A-Za-z0-9_]*)$/.test(name)) return name;
+  const sanitized = name.replace(/[^A-Za-z0-9_]/g, '_');
+  if (!sanitized) return '_';
+  return /^[A-Z_]/.test(sanitized) ? sanitized : `_${sanitized}`;
 }
 
 function writeString(value, quoteStrings) {
@@ -199,7 +207,7 @@ function writeList(term, env) {
 
 export function termToString(term, env = new Env(), quoteStrings = true) {
   const resolved = deref(term, env);
-  if (resolved.type === VAR) return resolved.name;
+  if (resolved.type === VAR) return writeVariable(resolved.name);
   if (isCons(resolved)) return writeList(resolved, env);
   if (resolved.type === STRING) return writeString(resolved.name, quoteStrings);
   if (resolved.type === ATOM) return writeAtom(resolved.name);

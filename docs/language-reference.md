@@ -78,7 +78,7 @@ An **atomic formula** is a predicate application such as `parent(pat, jan)` or `
 
 This distinction is normative: `pat` is an atom constant and can appear as a term argument; `parent(pat, jan)` is an atomic formula and can appear as a fact, rule head, or goal. A compound term such as `pair(pat, jan)` has the same surface shape as an atomic formula, but its role is determined by context: as data it is a compound term, and as a clause head or goal it is an atomic formula with predicate symbol `pair/2`.
 
-A **clause** is either a fact such as `parent(pat, jan).` or a rule such as `ancestor(?x, ?y) :- parent(?x, ?y).`.
+A **clause** is either a fact such as `parent(pat, jan).` or a rule such as `ancestor(X, Y) :- parent(X, Y).`.
 
 A **goal** is an atomic formula, a built-in call, or a comma conjunction.
 
@@ -92,7 +92,7 @@ Eyelang is designed to be:
 
 - small enough to embed and audit;
 - deterministic in textual output order after duplicate suppression;
-- useful for relation-style `p(?s, ?o)` output through ordinary predicate names;
+- useful for relation-style `p(S, O)` output through ordinary predicate names;
 - practical for examples involving recursion, lists, arithmetic, strings, aggregation, finite search, and context-valued data.
 
 Non-goals include complete ISO Prolog compatibility, operator declarations, module systems, dynamic database updates, cut-based control, and full bottom-up closure semantics.
@@ -123,18 +123,18 @@ A colon outside `:-` is not part of the language. Namespace-like names SHOULD be
 
 ### 3.4 Variables
 
-A variable is either the bare anonymous variable `?`, or starts with `?` followed by an ASCII letter or underscore and then zero or more ASCII letters, digits, or underscores. This N3/SPARQL-style spelling is the only source-level variable spelling in eyelang.
+A variable is either the bare anonymous variable `_`, or starts with an uppercase ASCII letter or underscore and then zero or more ASCII letters, digits, or underscores. This is the source-level variable spelling used by ISO Prolog.
 
 Examples:
 
 ```eyelang
-?x
-?person
-?_thing
-?
+X
+Person
+_thing
+_
 ```
 
-Each bare `?` anonymous variable occurrence is fresh. A bare `_` is not a variable in eyelang source.
+Each bare `_` anonymous variable occurrence is fresh. A name such as `_thing` is a named variable and is reused within its clause.
 
 ### 3.5 Atom constants
 
@@ -150,15 +150,15 @@ case_123
 'a-b'
 ```
 
-Absolute IRI atom constants MAY also be written between angle brackets. The content must be an absolute IRI-like lexical value with a scheme such as `https:` or `urn:`. Eyelang stores the content as the atom value and prints absolute IRI atoms with angle brackets on read-back:
+IRI-shaped atom constants SHOULD be written as quoted atoms containing the angle brackets. This keeps the surface syntax ISO Prolog-compatible while preserving the visible web identifier text:
 
 ```eyelang
-<https://example.org/alice>
-<urn:example:bob>
-triple(<https://example.org/alice>, <https://schema.org/name>, "Alice").
+'<https://example.org/alice>'
+'<urn:example:bob>'
+triple('<https://example.org/alice>', '<https://schema.org/name>', "Alice").
 ```
 
-Quoted absolute IRI atoms remain valid input, but read-back normalizes them to angle-bracket syntax. For example, `'https://example.org/alice'` prints as `<https://example.org/alice>`.
+Unquoted angle-bracket IRI syntax is not part of the source language. If the angle brackets are part of the atom name, include them inside the quoted atom, for example `'<https://example.org/alice>'`.
 
 A quoted atom constant is enclosed in single quotes. A single quote inside a quoted atom constant is represented by doubling it:
 
@@ -174,7 +174,7 @@ A graphic atom constant is one or more graphic characters from this set:
 #$&*+-/<=>@^~\
 ```
 
-Angle-bracket IRI syntax is recognized only for absolute IRI-like contents. Graphic atoms such as `<=>`, `<`, and `>=` remain graphic atoms.
+Graphic atoms such as `<=>`, `<`, and `>=` remain graphic atoms. Longer names containing letters or punctuation outside the graphic set should be quoted, for example `'<abc>'`.
 
 ### 3.6 Strings
 
@@ -228,7 +228,7 @@ The syntax `nil()` is intentionally rejected so eyelang source and read-back out
 
 ### 5.1 Variables
 
-Variables are scoped to a single clause or selected goal. A variable in a rule head and body denotes the same logical variable within that clause. Names preserve their spelling, so repeated `?x` occurrences in one clause refer to the same variable.
+Variables are scoped to a single clause or selected goal. A variable in a rule head and body denotes the same logical variable within that clause. Names preserve their spelling, so repeated `X` occurrences in one clause refer to the same variable.
 
 ### 5.2 Atom constants, strings, and numbers
 
@@ -279,12 +279,12 @@ parent(pat, jan).
 A rule has a head and a body:
 
 ```eyelang
-ancestor(?x, ?y) :-
-  parent(?x, ?y).
+ancestor(X, Y) :-
+  parent(X, Y).
 
-ancestor(?x, ?z) :-
-  parent(?x, ?y),
-  ancestor(?y, ?z).
+ancestor(X, Z) :-
+  parent(X, Y),
+  ancestor(Y, Z).
 ```
 
 Clauses with the same predicate name and arity define one predicate group. Predicate name and arity are both significant: `p/1` and `p/2` are different predicates.
@@ -322,10 +322,10 @@ parent(pat, jan).
 places the ground atomic formula `parent(pat, jan)` in the interpretation. A rule such as:
 
 ```eyelang
-ancestor(?x, ?z) :- parent(?x, ?y), ancestor(?y, ?z).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-is read universally over Herbrand terms: for every substitution of `?x`, `?y`, and `?z` by ground Herbrand terms, if both ground body atomic formulas are true, then the ground head atomic formula is true. The declarative meaning of a pure program is the **least Herbrand model**: the smallest set of ground atomic formulas that contains all facts and is closed under all rules.
+is read universally over Herbrand terms: for every substitution of `X`, `Y`, and `Z` by ground Herbrand terms, if both ground body atomic formulas are true, then the ground head atomic formula is true. The declarative meaning of a pure program is the **least Herbrand model**: the smallest set of ground atomic formulas that contains all facts and is closed under all rules.
 
 Equivalently, the least Herbrand model is obtained by repeatedly applying the immediate-consequence operation: start with the source facts, add every ground rule head whose ground body is already true, and continue to the least fixed point. This definition is mathematical; an implementation does not have to compute the model bottom-up.
 
@@ -336,11 +336,11 @@ Variables do not range over external objects, records, pointers, or host-languag
 eyelang has no blank nodes and no existential variables in rule heads. Existential-style consequences SHOULD be represented by explicit Herbrand witness terms written directly in rule heads:
 
 ```eyelang
-has_parent(?child, parent_of(?child)) :-
-  person(?child).
+has_parent(Child, parent_of(Child)) :-
+  person(Child).
 
-registration(?student, ?course, registration_of(?student, ?course)) :-
-  takes(?student, ?course).
+registration(Student, Course, registration_of(Student, Course)) :-
+  takes(Student, Course).
 ```
 
 These rules may derive `parent_of(alice)` or `registration_of(alice, logic)` as ordinary visible Herbrand terms. The witness is deterministic: the same functor and inputs produce the same term, while different inputs produce different terms by normal syntactic identity. This is the practical executable form of existential-style consequences in Eyelang; it does not introduce hidden blank nodes or special quantifier syntax.
@@ -349,7 +349,7 @@ These rules may derive `parent_of(alice)` or `registration_of(alice, logic)` as 
 
 Because the domain is Herbrand, equality in the pure language is syntactic identity of terms after substitution. Two distinct atom constants are distinct. Two compound terms are equal only when they have the same functor, the same arity, and pairwise equal arguments. Lists follow the same rule through their `[]` and `./2` representation.
 
-Operationally, eyelang uses first-order unification to find substitutions. The implementation does not perform an occurs check, so cyclic terms are not part of the portable Herbrand reading even if a particular implementation can temporarily construct recursive bindings internally. Portable programs SHOULD avoid relying on occurs-check-sensitive cases such as `eq(?x, f(?x))`.
+Operationally, eyelang uses first-order unification to find substitutions. The implementation does not perform an occurs check, so cyclic terms are not part of the portable Herbrand reading even if a particular implementation can temporarily construct recursive bindings internally. Portable programs SHOULD avoid relying on occurs-check-sensitive cases such as `eq(X, f(X))`.
 
 ### 8.3 Goal-directed execution versus model-theoretic meaning
 
@@ -361,9 +361,9 @@ Default CLI output is also a host behavior, not a separate semantics. It asks br
 
 Built-ins are specified relations or operations added to the Herbrand core. A built-in call in a goal has the syntax of an atomic formula, but its success relation is specified procedurally here rather than by source clauses. Some built-ins, such as `eq/2`, `append/3`, `member/2`, and `length/2`, can be understood as relations over Herbrand terms. Others, such as arithmetic, string matching, date/time predicates, aggregation, `once/1`, and negation-as-failure, are operational extensions whose behavior is defined by this specification rather than by pure least-Herbrand-model semantics alone.
 
-Arithmetic and string built-ins do not introduce a separate semantic universe. They inspect the lexical values of already represented Herbrand constants and, when they succeed, bind output arguments to eyelang terms such as numbers, strings, or atom constants. For example, `add(2, 3, ?x)` may bind `?x` to the number term `5`; it does not mean that variables range over host-language numbers outside the Herbrand universe.
+Arithmetic and string built-ins do not introduce a separate semantic universe. They inspect the lexical values of already represented Herbrand constants and, when they succeed, bind output arguments to eyelang terms such as numbers, strings, or atom constants. For example, `add(2, 3, X)` may bind `X` to the number term `5`; it does not mean that variables range over host-language numbers outside the Herbrand universe.
 
-Negation-as-failure `not(?goal)` is especially operational: it succeeds when the current goal-directed search finds no solution for `?goal`. It is not classical negation and should not be read as adding negative facts to the Herbrand model. Programs using negation SHOULD keep the negated goal sufficiently ground and finite.
+Negation-as-failure `not(Goal)` is especially operational: it succeeds when the current goal-directed search finds no solution for `Goal`. It is not classical negation and should not be read as adding negative facts to the Herbrand model. Programs using negation SHOULD keep the negated goal sufficiently ground and finite.
 
 ### 8.5 Stratified negation
 
@@ -372,15 +372,15 @@ Portable programs using user-defined predicates under `not/1` SHOULD be **strati
 For example, this is stratified because `open/1` depends negatively on `closed/1`, but `closed/1` does not depend back on `open/1`:
 
 ```eyelang
-closed(?x) :- blocked(?x).
-open(?x) :- candidate(?x), not(closed(?x)).
+closed(X) :- blocked(X).
+open(X) :- candidate(X), not(closed(X)).
 ```
 
 This is not stratified because `p/1` and `q/1` form a cycle that contains a negative dependency:
 
 ```eyelang
-p(?x) :- q(?x).
-q(?x) :- not(p(?x)).
+p(X) :- q(X).
+q(X) :- not(p(X)).
 ```
 
 The JavaScript implementation records stratification metadata on `Program` instances: `stratifiedNegation`, `negationStratificationErrors`, `negationDependencies`, and per-group `negationStratum`. This diagnostic is computed lazily when one of those properties or helper methods is first read, or eagerly when parsing with `{ analyzeNegation: true }` or `{ strictNegation: true }`. The CLI option `-w` / `--warnings` requests this diagnostic and prints non-fatal warnings to stderr. Embedders that want to reject non-portable negation can parse with `{ strictNegation: true }` or call `program.assertStratifiedNegation()`.
@@ -397,36 +397,36 @@ Implementations MAY provide additional built-ins, but such built-ins are impleme
 
 | Built-in | Meaning |
 |---|---|
-| `eq(?a, ?b)` | Succeeds when `?a` and `?b` unify. |
-| `neq(?a, ?b)` | Succeeds when `?a` and `?b` do not unify. |
+| `eq(A, B)` | Succeeds when `A` and `B` unify. |
+| `neq(A, B)` | Succeeds when `A` and `B` do not unify. |
 
 ### 9.2 Arithmetic
 
 | Built-in | Meaning |
 |---|---|
-| `neg(?a, ?b)` | `?b` is the numeric negation of `?a`. |
-| `abs(?a, ?b)` | `?b` is the absolute value of `?a`. |
-| `sin(?a, ?b)`, `cos(?a, ?b)`, `tan(?a, ?b)` | Trigonometric floating functions. |
-| `asin(?a, ?b)`, `acos(?a, ?b)`, `atan2(?y, ?x, ?angle)` | Inverse trigonometric floating functions. |
-| `sqrt(?a, ?b)` | Square root. Fails for negative inputs. |
-| `floor(?a, ?b)`, `ceiling(?a, ?b)`, `trunc(?a, ?b)`, `rounded(?a, ?b)` | Integer-valued numeric rounding functions. |
-| `exp(?a, ?b)`, `log(?a, ?b)` | Natural exponent and logarithm. `log/2` fails for non-positive inputs. |
-| `add(?a, ?b, ?c)` | `?c = ?a + ?b`. |
-| `sub(?a, ?b, ?c)` | `?c = ?a - ?b`. |
-| `mul(?a, ?b, ?c)` | `?c = ?a * ?b`. |
-| `div(?a, ?b, ?c)` | `?c = ?a / ?b`; integer inputs use integer division. |
-| `mod(?a, ?b, ?c)` | Integer remainder. |
-| `pow(?a, ?b, ?c)` | `?c = ?a^?b`. |
-| `min(?a, ?b, ?c)`, `max(?a, ?b, ?c)` | Numeric minimum and maximum. |
+| `neg(A, B)` | `B` is the numeric negation of `A`. |
+| `abs(A, B)` | `B` is the absolute value of `A`. |
+| `sin(A, B)`, `cos(A, B)`, `tan(A, B)` | Trigonometric floating functions. |
+| `asin(A, B)`, `acos(A, B)`, `atan2(Y, X, Angle)` | Inverse trigonometric floating functions. |
+| `sqrt(A, B)` | Square root. Fails for negative inputs. |
+| `floor(A, B)`, `ceiling(A, B)`, `trunc(A, B)`, `rounded(A, B)` | Integer-valued numeric rounding functions. |
+| `exp(A, B)`, `log(A, B)` | Natural exponent and logarithm. `log/2` fails for non-positive inputs. |
+| `add(A, B, C)` | `C = A + B`. |
+| `sub(A, B, C)` | `C = A - B`. |
+| `mul(A, B, C)` | `C = A * B`. |
+| `div(A, B, C)` | `C = A / B`; integer inputs use integer division. |
+| `mod(A, B, C)` | Integer remainder. |
+| `pow(A, B, C)` | `C = A^B`. |
+| `min(A, B, C)`, `max(A, B, C)` | Numeric minimum and maximum. |
 
 ### 9.3 Comparison
 
 | Built-in | Meaning |
 |---|---|
-| `lt(?a, ?b)` | `?a < ?b`. |
-| `gt(?a, ?b)` | `?a > ?b`. |
-| `le(?a, ?b)` | `?a =< ?b`. |
-| `ge(?a, ?b)` | `?a >= ?b`. |
+| `lt(A, B)` | `A < B`. |
+| `gt(A, B)` | `A > B`. |
+| `le(A, B)` | `A =< B`. |
+| `ge(A, B)` | `A >= B`. |
 
 Comparisons interpret numeric-looking terms numerically. Other scalar terms are compared lexically.
 
@@ -434,66 +434,66 @@ Comparisons interpret numeric-looking terms numerically. Other scalar terms are 
 
 | Built-in | Meaning |
 |---|---|
-| `local_time(?t)` | Binds `?t` to the local date string. For deterministic runs, `EYELANG_LOCAL_TIME=YYYY-MM-DD` overrides the current date. |
-| `difference(?a, ?b, ?d)` | Computes an ISO-like date/duration difference. |
+| `local_time(T)` | Binds `T` to the local date string. For deterministic runs, `EYELANG_LOCAL_TIME=YYYY-MM-DD` overrides the current date. |
+| `difference(A, B, D)` | Computes an ISO-like date/duration difference. |
 
 ### 9.5 Generators
 
 | Built-in | Meaning |
 |---|---|
-| `between(?low, ?high, ?x)` | Enumerates integers from `?low` through `?high`. |
-| `smallest_divisor_from(?n, ?start, ?d)` | Finds a divisor of `?n` starting at `?start`. |
+| `between(Low, High, X)` | Enumerates integers from `Low` through `High`. |
+| `smallest_divisor_from(N, Start, D)` | Finds a divisor of `N` starting at `Start`. |
 
 ### 9.6 Strings and atom constants
 
 | Built-in | Meaning |
 |---|---|
-| `str_concat(?a, ?b, ?c)` | String concatenation. |
-| `contains(?text, ?needle)` | `?text` contains `?needle`. |
-| `matches(?text, ?pattern)` | Text matches a simple implementation regex/search pattern. |
-| `matches(?text, ?pattern, ?context)` | `?text` matches a JavaScript regular expression with named capture groups; `?context` is a comma context containing one unary term per matched capture group. |
-| `not_matches(?text, ?pattern)` | Negation of `matches/2`. |
-| `split(?text, ?separator, ?parts)` | Splits text into a proper list of strings. |
-| `join(?parts, ?separator, ?text)` | Joins a proper list of scalar terms into a string. |
-| `substring(?text, ?start, ?length, ?out)` | Extracts a zero-based substring. |
-| `replace(?text, ?search, ?replacement, ?out)` | Replaces all non-empty literal occurrences of `?search`. |
-| `lowercase(?text, ?out)`, `uppercase(?text, ?out)`, `trim(?text, ?out)` | Text normalization helpers. |
-| `number_string(?number, ?string)` | Converts a number to a string or parses a numeric string into a number. |
-| `atom_string(?atom, ?string)` | Converts between atom constants and strings. |
-| `term_string(?term, ?string)` | Renders a ground term as its eyelang source string. |
+| `str_concat(A, B, C)` | String concatenation. |
+| `contains(Text, Needle)` | `Text` contains `Needle`. |
+| `matches(Text, Pattern)` | Text matches a simple implementation regex/search pattern. |
+| `matches(Text, Pattern, Context)` | `Text` matches a JavaScript regular expression with named capture groups; `Context` is a comma context containing one unary term per matched capture group. |
+| `not_matches(Text, Pattern)` | Negation of `matches/2`. |
+| `split(Text, Separator, Parts)` | Splits text into a proper list of strings. |
+| `join(Parts, Separator, Text)` | Joins a proper list of scalar terms into a string. |
+| `substring(Text, Start, Length, Out)` | Extracts a zero-based substring. |
+| `replace(Text, Search, Replacement, Out)` | Replaces all non-empty literal occurrences of `Search`. |
+| `lowercase(Text, Out)`, `uppercase(Text, Out)`, `trim(Text, Out)` | Text normalization helpers. |
+| `number_string(Number, String)` | Converts a number to a string or parses a numeric string into a number. |
+| `atom_string(Atom, String)` | Converts between atom constants and strings. |
+| `term_string(Term, String)` | Renders a ground term as its eyelang source string. |
 
 ### 9.7 Lists
 
 | Built-in | Meaning |
 |---|---|
-| `append(?a, ?b, ?c)` | List append/split relation. |
-| `nth0(?index, ?list, ?value)` | Zero-based list lookup. |
-| `set_nth0(?index, ?list, ?value, ?out)` | Functional list update. |
-| `head(?list, ?head)` | Head of a non-empty list. |
-| `rest(?list, ?tail)` | Tail of a non-empty list. |
-| `last(?list, ?last)` | Last element of a non-empty proper list. |
-| `take(?n, ?list, ?prefix)` | First `?n` items of a proper list. |
-| `drop(?n, ?list, ?suffix)` | Proper-list suffix after dropping `?n` items. |
-| `slice(?start, ?length, ?list, ?slice)` | Zero-based proper-list slice. |
-| `member(?x, ?list)` | Member generator. |
-| `select(?x, ?list, ?rest)` | Selects one occurrence. |
-| `not_member(?x, ?list)` | Succeeds when `?x` is not a member. |
-| `reverse(?a, ?b)` | Reverses a proper list. |
-| `length(?list, ?n)` | Proper-list length. |
-| `sum_list(?list, ?sum)` | Numeric sum of a proper list; empty lists produce `0`. |
-| `min_list(?list, ?min)`, `max_list(?list, ?max)` | Minimum and maximum under standard term ordering. |
-| `list_to_set(?list, ?set)` | Removes duplicates while preserving the first occurrence order. |
-| `sort(?input, ?output)` | Sorts and deduplicates a proper list. |
+| `append(A, B, C)` | List append/split relation. |
+| `nth0(Index, List, Value)` | Zero-based list lookup. |
+| `set_nth0(Index, List, Value, Out)` | Functional list update. |
+| `head(List, Head)` | Head of a non-empty list. |
+| `rest(List, Tail)` | Tail of a non-empty list. |
+| `last(List, Last)` | Last element of a non-empty proper list. |
+| `take(N, List, Prefix)` | First `N` items of a proper list. |
+| `drop(N, List, Suffix)` | Proper-list suffix after dropping `N` items. |
+| `slice(Start, Length, List, Slice)` | Zero-based proper-list slice. |
+| `member(X, List)` | Member generator. |
+| `select(X, List, Rest)` | Selects one occurrence. |
+| `not_member(X, List)` | Succeeds when `X` is not a member. |
+| `reverse(A, B)` | Reverses a proper list. |
+| `length(List, N)` | Proper-list length. |
+| `sum_list(List, Sum)` | Numeric sum of a proper list; empty lists produce `0`. |
+| `min_list(List, Min)`, `max_list(List, Max)` | Minimum and maximum under standard term ordering. |
+| `list_to_set(List, Set)` | Removes duplicates while preserving the first occurrence order. |
+| `sort(Input, Output)` | Sorts and deduplicates a proper list. |
 
 ### 9.8 Aggregation and ordering
 
 | Built-in | Meaning |
 |---|---|
-| `findall(?template, ?goal, ?bag)` | Collects all templates for solutions of `?goal`. |
-| `countall(?goal, ?count)` | Counts solutions of `?goal`; empty solution sets produce `0`. |
-| `sumall(?template, ?goal, ?sum)` | Sums numeric `?template` values over solutions of `?goal`; empty solution sets produce `0`. |
-| `aggregate_min(?key, ?template, ?goal, ?bestkey, ?besttemplate)` | Selects the solution of `?goal` with the smallest resolved `?key`, returning that key and the corresponding resolved `?template`. Fails when `?goal` has no solutions. |
-| `aggregate_max(?key, ?template, ?goal, ?bestkey, ?besttemplate)` | Selects the solution of `?goal` with the largest resolved `?key`, returning that key and the corresponding resolved `?template`. Fails when `?goal` has no solutions. |
+| `findall(Template, Goal, Bag)` | Collects all templates for solutions of `Goal`. |
+| `countall(Goal, Count)` | Counts solutions of `Goal`; empty solution sets produce `0`. |
+| `sumall(Template, Goal, Sum)` | Sums numeric `Template` values over solutions of `Goal`; empty solution sets produce `0`. |
+| `aggregate_min(Key, Template, Goal, Bestkey, Besttemplate)` | Selects the solution of `Goal` with the smallest resolved `Key`, returning that key and the corresponding resolved `Template`. Fails when `Goal` has no solutions. |
+| `aggregate_max(Key, Template, Goal, Bestkey, Besttemplate)` | Selects the solution of `Goal` with the largest resolved `Key`, returning that key and the corresponding resolved `Template`. Fails when `Goal` has no solutions. |
 
 ### 9.9 Context and term inspection
 
@@ -501,34 +501,34 @@ Context terms are data representations of atomic formulas and comma conjunctions
 
 | Built-in | Meaning |
 |---|---|
-| `holds(?context, ?term)` | Enumerates member terms inside a context term and unifies each member with `?term`. |
-| `holds(?context, ?name, ?args)` | Enumerates context members of any arity, exposing each member as atom constant `?name` plus a proper argument list `?args`. |
-| `functor(?term, ?name, ?arity)` | Decomposes a non-variable term into its name and arity. |
-| `arg(?index, ?term, ?arg)` | Extracts the 1-based argument of a compound term. |
-| `compound_name_arguments(?term, ?name, ?args)` | Decomposes a compound term, treats an atom as a zero-argument term, or constructs a term from an atom name and proper argument list. Empty `?args` constructs an atom. |
+| `holds(Context, Term)` | Enumerates member terms inside a context term and unifies each member with `Term`. |
+| `holds(Context, Name, Args)` | Enumerates context members of any arity, exposing each member as atom constant `Name` plus a proper argument list `Args`. |
+| `functor(Term, Name, Arity)` | Decomposes a non-variable term into its name and arity. |
+| `arg(Index, Term, Arg)` | Extracts the 1-based argument of a compound term. |
+| `compound_name_arguments(Term, Name, Args)` | Decomposes a compound term, treats an atom as a zero-argument term, or constructs a term from an atom name and proper argument list. Empty `Args` constructs an atom. |
 
 Example:
 
 ```eyelang
-holds((name(alice, "Alice"), knows(alice, bob)), name(?s, ?o)).
-holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ?name, ?args).
+holds((name(alice, "Alice"), knows(alice, bob)), name(S, O)).
+holds((ready, name(alice, "Alice"), route(alice, bob, 7)), Name, Args).
 functor(route(alice, bob, 7), route, 3).
 arg(2, route(alice, bob, 7), bob).
-compound_name_arguments(?term, route, [alice, bob, 7]).
+compound_name_arguments(Term, route, [alice, bob, 7]).
 compound_name_arguments(nil, nil, []).
 ```
 
 The first goal can yield `holds((name(alice, "Alice"), knows(alice, bob)), name(alice, "Alice")).` The second can yield `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), ready, []).`, `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), name, [alice, "Alice"]).`, and `holds((ready, name(alice, "Alice"), route(alice, bob, 7)), route, [alice, bob, 7]).`
 
-`holds/3` is the appropriate form for schema-style introspection because it exposes the predicate name and all arguments without assuming a fixed arity. For example, a single rule can inspect `heartbeat`, `source(sensor17)`, `temperature(sensor17, 38)`, and `signature(sensor17, sha256, ?hash, ?time)` as `heartbeat/0`, `source/1`, `temperature/2`, and `signature/4`; see [`context-schema-audit.eye`](../examples/context-schema-audit.eye).
+`holds/3` is the appropriate form for schema-style introspection because it exposes the predicate name and all arguments without assuming a fixed arity. For example, a single rule can inspect `heartbeat`, `source(sensor17)`, `temperature(sensor17, 38)`, and `signature(sensor17, sha256, Hash, Time)` as `heartbeat/0`, `source/1`, `temperature/2`, and `signature/4`; see [`context-schema-audit.pl`](../examples/context-schema-audit.pl).
 
 ### 9.10 Search control
 
 | Built-in | Meaning |
 |---|---|
-| `not(?goal)` | Negation as failure. Succeeds when `?goal` has no solution. Portable user-defined negation should be stratified. |
-| `once(?goal)` | Succeeds with at most the first solution of `?goal`. |
-| `forall(?generator, ?test)` | Succeeds when every solution of `?generator` also satisfies `?test`; succeeds vacuously when `?generator` has no solutions. |
+| `not(Goal)` | Negation as failure. Succeeds when `Goal` has no solution. Portable user-defined negation should be stratified. |
+| `once(Goal)` | Succeeds with at most the first solution of `Goal`. |
+| `forall(Generator, Test)` | Succeeds when every solution of `Generator` also satisfies `Test`; succeeds vacuously when `Generator` has no solutions. |
 
 ## 10. Implementation-specific built-ins
 
@@ -538,7 +538,7 @@ Implementation-specific built-ins are not required for conformance to this speci
 
 An implementation-specific built-in SHOULD obey the same surface-language discipline as standard built-ins:
 
-- it is called using ordinary atomic-formula syntax, for example `some_extension(?a, ?b)`;
+- it is called using ordinary atomic-formula syntax, for example `some_extension(A, B)`;
 - its arguments and results are eyelang terms from the Herbrand universe;
 - it succeeds, fails, and binds variables as a relation over eyelang terms;
 - it SHOULD document its intended modes, especially which arguments must be ground before it runs deterministically;
@@ -593,13 +593,13 @@ semidet(edge, 2).
 
 `mode/3`, `det/2`, and `semidet/2` are advisory declarations. They describe a predicate group's intended calling pattern and determinism, but they do not change proof search or answer output. Because they are ordinary facts, programs may also query them.
 
-For `mode(?name, ?arity, ?modes)`, the first argument MUST be an atom constant naming the predicate, the second argument MUST be a non-negative integer arity, and the third argument MUST be a proper list whose length is equal to the arity. Portable mode atoms are:
+For `mode(Name, Arity, Modes)`, the first argument MUST be an atom constant naming the predicate, the second argument MUST be a non-negative integer arity, and the third argument MUST be a proper list whose length is equal to the arity. Portable mode atoms are:
 
 - `in`: the argument is expected to be supplied by the caller;
 - `out`: the argument is expected to be produced by the predicate;
 - `any`: no portable mode commitment is made for that argument.
 
-`det(?name, ?arity)` declares that a predicate is intended to produce exactly one answer for calls in its documented modes. `semidet(?name, ?arity)` declares that a predicate is intended to produce zero or one answer. This specification does not require runtime enforcement; hosts MAY use these declarations for linting, documentation, indexing decisions, or editor support.
+`det(Name, Arity)` declares that a predicate is intended to produce exactly one answer for calls in its documented modes. `semidet(Name, Arity)` declares that a predicate is intended to produce zero or one answer. This specification does not require runtime enforcement; hosts MAY use these declarations for linting, documentation, indexing decisions, or editor support.
 
 Example:
 
@@ -623,16 +623,16 @@ In this specification, sockets are a portable **programming pattern** expressed 
 The minimal socket vocabulary is:
 
 ```eyelang
-socket(?name, ?contract).
-plug(?provider, ?name).
-provides(?signature).
-requires(?signature).
+socket(Name, Contract).
+plug(Provider, Name).
+provides(Signature).
+requires(Signature).
 ```
 
-`?name` and `?provider` are ordinary eyelang terms, usually atom constants. `?contract` is an ordinary eyelang term that describes the expected or offered knowledge. A portable signature form is:
+`Name` and `Provider` are ordinary eyelang terms, usually atom constants. `Contract` is an ordinary eyelang term that describes the expected or offered knowledge. A portable signature form is:
 
 ```eyelang
-predicate(?predicatename, ?arity)
+predicate(Predicatename, Arity)
 ```
 
 For example:
@@ -657,12 +657,12 @@ plug(family_file, family_source).
 parent(pat, jan).
 parent(jan, emma).
 
-ancestor(?x, ?y) :-
-    parent(?x, ?y).
+ancestor(X, Y) :-
+    parent(X, Y).
 
-ancestor(?x, ?z) :-
-    parent(?x, ?y),
-    ancestor(?y, ?z).
+ancestor(X, Z) :-
+    parent(X, Y),
+    ancestor(Y, Z).
 ```
 
 The `ancestor/2` rules do not depend on a particular storage mechanism for `parent/2`. In a small test, the provider may be the same file. In an embedded host, it may be a database adapter, a document extractor, a remote service, or another eyelang module. The socket facts make that boundary explicit without changing the logical meaning of the rules.
@@ -693,7 +693,7 @@ Default host output behavior is:
 
 ### 13.1 Explanation output
 
-When proof output is enabled, each answer SHOULD be followed by a machine-readable `why/2` fact. Explanation output is ordinary eyelang syntax whose second argument is a nested abstract proof term such as `proof(goal(?g), by(?method), bindings(?bindings), uses(?proofs))`; implementations SHOULD print `goal(...)` and `by(...)` on separate lines for readability. A proof term preserves the answer goal, derivation method, relevant bindings, and nested uses while omitting proof IDs. User clauses SHOULD be referenced explicitly as `fact(?filename, clause(?n))` or `rule(?filename, clause(?n))`, where `?n` is the 1-based clause number within that source. Built-ins SHOULD be referenced as `builtin(?name, ?arity)` because they do not come from source clauses. Explanation output is outside the logical semantics of the input program and MUST NOT change the set of answers.
+When proof output is enabled, each answer SHOULD be followed by a machine-readable `why/2` fact. Explanation output is ordinary eyelang syntax whose second argument is a nested abstract proof term such as `proof(goal(G), by(Method), bindings(Bindings), uses(Proofs))`; implementations SHOULD print `goal(...)` and `by(...)` on separate lines for readability. A proof term preserves the answer goal, derivation method, relevant bindings, and nested uses while omitting proof IDs. User clauses SHOULD be referenced explicitly as `fact(Filename, clause(N))` or `rule(Filename, clause(N))`, where `N` is the 1-based clause number within that source. Built-ins SHOULD be referenced as `builtin(Name, Arity)` because they do not come from source clauses. Explanation output is outside the logical semantics of the input program and MUST NOT change the set of answers.
 
 ## 14. Conformance
 
@@ -714,13 +714,11 @@ A conforming eyelang implementation supports the standard language described abo
 
 Browser execution, package layout, CLI URL loading, and any implementation-specific built-ins described in host documentation are outside this conformance surface unless separately standardized.
 
-Conformance cases live in the repository under `test/conformance/`. They are run by `npm test` before the example suite, and can be run alone with `node test/run-conformance.mjs`. Positive cases have input programs under `conformance/cases/` and exact expected standard-output files under `conformance/expected/`; both use `.eye` so expected output remains eyelang-readable. Expected-error cases live under `conformance/errors/` with exact messages under `conformance/expected-errors/`. Expected-warning cases live under `conformance/warnings/` with exact `--warnings` stdout and stderr files under `conformance/expected-warnings/`. The corpus is grouped by language area, including arithmetic, strings, lists, terms, atoms, variables, negation, declarations, materialization, rules, syntax, and errors.
+Conformance cases live in the repository under `test/conformance/`. They are run by `npm test` before the example suite, and can be run alone with `node test/run-conformance.mjs`. Positive cases have input programs under `conformance/cases/` and exact expected standard-output files under `conformance/expected/`; both use `.pl` so expected output remains eyelang-readable. Expected-error cases live under `conformance/errors/` with exact messages under `conformance/expected-errors/`. Expected-warning cases live under `conformance/warnings/` with exact `--warnings` stdout and stderr files under `conformance/expected-warnings/`. The corpus is grouped by language area, including arithmetic, strings, lists, terms, atoms, variables, negation, declarations, materialization, rules, syntax, and errors.
 
 ## 15. Relationship to ISO Prolog
 
-eyelang source is intended to be familiar to Prolog readers, but eyelang is not ISO Prolog and intentionally avoids some ISO-compatible source spellings. Notable differences include:
-
-- `?x` variables are the only variable spelling; traditional Prolog `X` and `_` variables are rejected;
+eyelang source is intended to be familiar to Prolog readers and uses ISO Prolog-compatible variable and quoted-atom spelling, but eyelang is not ISO Prolog. Notable differences include:
 - no operators or operator declarations;
 - no zero-arity compound syntax such as `nil()`;
 - no cut;
@@ -731,7 +729,7 @@ eyelang source is intended to be familiar to Prolog readers, but eyelang is not 
 - no variables in functor or predicate position;
 - no occurs check in unification.
 
-Programs intended to be portable to eyelang SHOULD use `?` variables, avoid ISO-specific syntax, and keep terms explicit. Atom names that are not plain lowercase-starting names, graphic atom tokens, or angle-bracket absolute IRI atoms SHOULD be written as quoted atoms, for example `'a-b'`.
+Programs intended to be portable to eyelang SHOULD use uppercase or underscore variables, avoid ISO-specific features that eyelang does not implement, and keep terms explicit. Atom names that are not plain lowercase-starting names or graphic atom tokens SHOULD be written as quoted atoms, for example `'a-b'` or `'<abc>'`.
 
 ## 16. Examples
 
@@ -741,29 +739,29 @@ Programs intended to be portable to eyelang SHOULD use `?` variables, avoid ISO-
 parent(pat, jan).
 parent(jan, emma).
 
-ancestor(?x, ?y) :- parent(?x, ?y).
-ancestor(?x, ?z) :- parent(?x, ?y), ancestor(?y, ?z).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
 ### 16.2 Arithmetic
 
 ```eyelang
-square(?x, ?y) :- mul(?x, ?x, ?y).
-answer(three, ?y) :- square(3, ?y).
+square(X, Y) :- mul(X, X, Y).
+answer(three, Y) :- square(3, Y).
 ```
 
 ### 16.3 Lists
 
 ```eyelang
-first([?x | ?_rest], ?x).
-answer(example, ?x) :- first([a, b, c], ?x).
+first([X | _rest], X).
+answer(example, X) :- first([a, b, c], X).
 ```
 
 ### 16.4 Negation as failure
 
 ```eyelang
 closed(b).
-open(?x) :- not(closed(?x)).
+open(X) :- not(closed(X)).
 status(a, open) :- open(a).
 ```
 

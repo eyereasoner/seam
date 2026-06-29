@@ -8,24 +8,24 @@ All conformance files live under topic directories such as `arithmetic/`, `lists
 
 A normal positive case consists of:
 
-- `conformance/cases/<name>.eye` — input program;
-- `conformance/expected/<name>.eye` — exact expected standard output, stored as eyelang-readable facts.
+- `conformance/cases/<name>.pl` — input program;
+- `conformance/expected/<name>.pl` — exact expected standard output, stored as eyelang-readable facts.
 
 Expected-error cases consist of:
 
-- `conformance/errors/<name>.eye` — input program that must fail during parsing or execution;
+- `conformance/errors/<name>.pl` — input program that must fail during parsing or execution;
 - `conformance/expected-errors/<name>.txt` — exact expected error message followed by a newline.
 
 Expected-warning cases consist of:
 
-- `conformance/warnings/<name>.eye` — input program run through the CLI with `--warnings`;
-- `conformance/expected-warnings/<name>.eye` — exact expected standard output;
+- `conformance/warnings/<name>.pl` — input program run through the CLI with `--warnings`;
+- `conformance/expected-warnings/<name>.pl` — exact expected standard output;
 - `conformance/expected-warnings/<name>.txt` — exact expected standard error.
 
 Expected-proof cases consist of:
 
-- `conformance/proofs/<name>.eye` — input program run through the CLI with `--proof`;
-- `conformance/expected-proofs/<name>.eye` — exact expected standard output, including both answer facts and `why/2` proof facts.
+- `conformance/proofs/<name>.pl` — input program run through the CLI with `--proof`;
+- `conformance/expected-proofs/<name>.pl` — exact expected standard output, including both answer facts and `why/2` proof facts.
 
 Case names may be nested in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, or `syntax/`. Expected files mirror the same relative path.
 

@@ -1,1 +1,1 @@
-parse line 1: bad character "A"
+parse line 1: expected ., got (

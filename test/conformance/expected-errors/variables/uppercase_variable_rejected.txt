@@ -1,1 +1,1 @@
-parse line 1: bad character "X"
+parse line 1: bad character "?"

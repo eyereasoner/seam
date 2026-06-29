@@ -34,7 +34,7 @@ function listCaseFiles(kind, filter = null) {
 
 function matchesFilter(kind, name, filter) {
   if (filter == null) return true;
-  const stem = name.slice(0, -4);
+  const stem = name.slice(0, -3);
   const label = kind === 'errors' ? 'error' : kind === 'warnings' ? 'warning' : kind;
   return name.includes(filter)
     || stem === filter
@@ -49,7 +49,7 @@ function listEyeFiles(base, dir = base) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...listEyeFiles(base, full));
-    } else if (entry.isFile() && entry.name.endsWith('.eye')) {
+    } else if (entry.isFile() && entry.name.endsWith('.pl')) {
       files.push(path.relative(base, full).split(path.sep).join('/'));
     }
   }
@@ -57,22 +57,22 @@ function listEyeFiles(base, dir = base) {
 }
 
 function runCaseFile(reporter, file) {
-  const name = file.slice(0, -4);
+  const name = file.slice(0, -3);
   reporter.test(name, () => runCase(name, file));
 }
 
 function runErrorFile(reporter, file) {
-  const name = file.slice(0, -4);
+  const name = file.slice(0, -3);
   reporter.test(`error/${name}`, () => runErrorCase(name, file));
 }
 
 function runWarningFile(reporter, file) {
-  const name = file.slice(0, -4);
+  const name = file.slice(0, -3);
   reporter.test(`warning/${name}`, () => runWarningCase(name, file));
 }
 
 function runProofFile(reporter, file) {
-  const name = file.slice(0, -4);
+  const name = file.slice(0, -3);
   reporter.test(`proof/${name}`, () => runProofCase(name, file));
 }
 
@@ -80,7 +80,7 @@ function runCase(name, file) {
   const casesDir = path.join(root, 'conformance', 'cases');
   const expectedDir = path.join(root, 'conformance', 'expected');
   const programFile = path.join(casesDir, file);
-  const expected = path.join(expectedDir, `${name}.eye`);
+  const expected = path.join(expectedDir, `${name}.pl`);
   const text = fs.readFileSync(programFile, 'utf8');
   const program = Program.parseSources([{ text, filename: file }], { sourceMetadata: false, markRecursive: false });
   const actual = run(program).stdout;
@@ -111,7 +111,7 @@ function runWarningCase(name, file) {
   const warningsDir = path.join(root, 'conformance', 'warnings');
   const expectedDir = path.join(root, 'conformance', 'expected-warnings');
   const programFile = path.join(warningsDir, file);
-  const expectedStdout = path.join(expectedDir, `${name}.eye`);
+  const expectedStdout = path.join(expectedDir, `${name}.pl`);
   const expectedStderr = path.join(expectedDir, `${name}.txt`);
   const text = fs.readFileSync(programFile, 'utf8');
   const result = spawnSync(process.execPath, [cliBin, '--warnings', '-'], {
@@ -132,7 +132,7 @@ function runProofCase(name, file) {
   const proofsDir = path.join(root, 'conformance', 'proofs');
   const expectedDir = path.join(root, 'conformance', 'expected-proofs');
   const programFile = path.join(proofsDir, file);
-  const expected = path.join(expectedDir, `${name}.eye`);
+  const expected = path.join(expectedDir, `${name}.pl`);
   const text = fs.readFileSync(programFile, 'utf8');
   const result = spawnSync(process.execPath, [cliBin, '--proof', '-'], {
     cwd: packageRoot,

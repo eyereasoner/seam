@@ -11,10 +11,10 @@ const packageRoot = path.resolve(root, '..');
 const conformanceRoot = path.join(root, 'conformance');
 
 const KINDS = [
-  { kind: 'cases', expectedKind: 'expected', expectedExt: '.eye', column: 'positive' },
+  { kind: 'cases', expectedKind: 'expected', expectedExt: '.pl', column: 'positive' },
   { kind: 'errors', expectedKind: 'expected-errors', expectedExt: '.txt', column: 'errors' },
-  { kind: 'warnings', expectedKind: 'expected-warnings', expectedExt: '.eye', column: 'warnings' },
-  { kind: 'proofs', expectedKind: 'expected-proofs', expectedExt: '.eye', column: 'proofs' },
+  { kind: 'warnings', expectedKind: 'expected-warnings', expectedExt: '.pl', column: 'warnings' },
+  { kind: 'proofs', expectedKind: 'expected-proofs', expectedExt: '.pl', column: 'proofs' },
 ];
 
 export function buildConformanceReport() {
@@ -30,7 +30,7 @@ export function buildConformanceReport() {
       counts[column]++;
       counts.total++;
 
-      const stem = file.slice(0, -4);
+      const stem = file.slice(0, -3);
       const expected = path.join(conformanceRoot, expectedKind, `${stem}${expectedExt}`);
       if (!fs.existsSync(expected)) issues.push(`missing ${expectedKind}/${stem}${expectedExt}`);
       if (kind === 'warnings') {
@@ -83,7 +83,7 @@ function listEyeFiles(base, dir = base) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...listEyeFiles(base, full));
-    } else if (entry.isFile() && entry.name.endsWith('.eye')) {
+    } else if (entry.isFile() && entry.name.endsWith('.pl')) {
       files.push(path.relative(base, full).split(path.sep).join('/'));
     }
   }

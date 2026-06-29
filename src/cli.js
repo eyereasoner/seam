@@ -136,10 +136,10 @@ async function usage(stream) {
   stream.write(`eyelang ${await packageVersion()}
 
 Usage:
-  eyelang [options] [file-or-url.eye|- ...]
+  eyelang [options] [file-or-url.pl|- ...]
 
 Input:
-  file-or-url.eye       Read an Eyelang program from a local file or http(s) URL.
+  file-or-url.pl       Read an Eyelang program from a local file or http(s) URL.
   -                     Read an Eyelang program from standard input.
 
 Options:
