@@ -1,6 +1,6 @@
 {
   "name": "seam-lang",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A small reasoning language with ISO Prolog-compatible surface syntax.",
   "type": "module",
   "main": "./index.js",
