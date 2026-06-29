@@ -1,6 +1,6 @@
 # Seam
 
-[![npm version](https://img.shields.io/npm/v/seam.svg)](https://www.npmjs.com/package/seam)
+[![npm version](https://img.shields.io/npm/v/seam-lang.svg)](https://www.npmjs.com/package/seam-lang)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20761726-blue.svg)](https://doi.org/10.5281/zenodo.20761726)
 
 Seam is a small logic programming language for facts, rules, goals, answers, and proofs.
