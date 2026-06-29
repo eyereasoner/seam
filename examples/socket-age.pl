@@ -1,8 +1,8 @@
 % socket-age.pl
 %
-% A small runnable eyelang Socket example for age reasoning.
+% A small runnable seam Socket example for age reasoning.
 %
-% The socket facts are ordinary eyelang data. They document the semantic
+% The socket facts are ordinary seam data. They document the semantic
 % openings that this rule module expects:
 %
 %   - a patient registry that provides birthDay/2
@@ -12,7 +12,7 @@
 % The plug facts say which concrete providers are connected.
 %
 % Run:
-%   eyelang socket-age.pl
+%   seam socket-age.pl
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(ageAbove, 2).

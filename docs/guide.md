@@ -1,16 +1,16 @@
-# Eyelang Guide
+# Seam Guide
 
-This guide introduces Eyelang, a small Horn-clause language and engine whose source syntax is Prolog-like but deliberately its own compact language for facts, rules, goals, answers, and proofs. Eyelang works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `eyelang` CLI, or use `node bin/eyelang.js` when working directly from a source checkout.
+This guide introduces Seam, a small Horn-clause language and engine whose source syntax is Prolog-like but deliberately its own compact language for facts, rules, goals, answers, and proofs. Seam works over ordinary terms, lists, arithmetic, strings, and finite search. Run it with the `seam` CLI, or use `node bin/seam.js` when working directly from a source checkout.
 
-Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Web identifiers can be written as ordinary quoted atoms that include angle brackets, for example `'<https://schema.org/name>'`, when a program needs explicit IRI-shaped names without prefix declarations. Eyelang output is ordinary Eyelang syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
+Programs write relations directly, for example `ancestor(pat, emma)` or `status(case1, accepted)`. Web identifiers can be written as ordinary quoted atoms that include angle brackets, for example `'<https://schema.org/name>'`, when a program needs explicit IRI-shaped names without prefix declarations. Seam output is ordinary Seam syntax: by default, the CLI materializes selected answer facts and prints those facts only. Pass `--proof` (or `-p`) when you also want each answer followed by a `why/2` explanation fact that records the proof. Programs may add `materialize/2` declarations such as `materialize(answer, 2).` to focus output on selected predicates.
 
 
-For the normative language definition, including lexical syntax, terms, clauses, goals, built-ins, `table/2`, `materialize/2`, and conformance boundaries, read the [Eyelang language reference](language-reference.md).
+For the normative language definition, including lexical syntax, terms, clauses, goals, built-ins, `table/2`, `materialize/2`, and conformance boundaries, read the [Seam language reference](language-reference.md).
 
 ## Contents
 
 1. [Quick start](#quick-start)
-2. [Running eyelang](#running-eyelang)
+2. [Running seam](#running-seam)
 3. [Default output](#default-output)
 4. [Writing programs](#writing-programs)
 5. [Aggregation helpers](#aggregation-helpers)
@@ -24,58 +24,58 @@ For the normative language definition, including lexical syntax, terms, clauses,
 
 ## Quick start
 
-Eyelang has no runtime npm dependencies and no build step. From a source checkout, run the CLI entry point directly with Node.js 18 or newer:
+Seam has no runtime npm dependencies and no build step. From a source checkout, run the CLI entry point directly with Node.js 18 or newer:
 
 ```sh
-node bin/eyelang.js --version
-node bin/eyelang.js examples/ancestor.pl
-node bin/eyelang.js facts.pl rules.pl
-printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/eyelang.js -
+node bin/seam.js --version
+node bin/seam.js examples/ancestor.pl
+node bin/seam.js facts.pl rules.pl
+printf 'works(stdin, true) :- eq(ok, ok).\n' | node bin/seam.js -
 ```
 
 You can also use npm's local package-bin runner from the checkout:
 
 ```sh
-npm exec -- eyelang --version
-npm exec -- eyelang examples/ancestor.pl
+npm exec -- seam --version
+npm exec -- seam examples/ancestor.pl
 ```
 
-To make the `eyelang` command available on your `PATH` while developing this checkout, prefer npm's package link instead of a manual symlink:
+To make the `seam` command available on your `PATH` while developing this checkout, prefer npm's package link instead of a manual symlink:
 
 ```sh
 npm link
-eyelang --version
+seam --version
 ```
 
 `npm install -g .` is another local-checkout option if you want npm to install the package globally instead of linking it. Avoid hand-written `/usr/local/bin` symlinks unless you really need one; npm already reads the `bin` entry in `package.json` and creates the correct executable shim.
 
-## Running eyelang
+## Running seam
 
-The commands in this section use `eyelang` for readability. In a source checkout where you have not run `npm link` or `npm install -g .`, replace `eyelang` with `node bin/eyelang.js`, or run the command through `npm exec -- eyelang`.
+The commands in this section use `seam` for readability. In a source checkout where you have not run `npm link` or `npm install -g .`, replace `seam` with `node bin/seam.js`, or run the command through `npm exec -- seam`.
 
 Show the package version:
 
 ```sh
-eyelang --version
-eyelang -v
+seam --version
+seam -v
 ```
 
-Run a program and let eyelang print derived binary facts:
+Run a program and let seam print derived binary facts:
 
 ```sh
-eyelang examples/ancestor.pl
+seam examples/ancestor.pl
 ```
 
 Enable proof explanations when you want machine-readable provenance:
 
 ```sh
-eyelang --proof examples/ancestor.pl
-eyelang -p examples/ancestor.pl
+seam --proof examples/ancestor.pl
+seam -p examples/ancestor.pl
 ```
 
-eyelang-readable explanations are opt-in proof output. Each `why/2` fact contains a nested abstract proof term, and a blank line separates consecutive explanations. Using eyelang syntax for explanations keeps them in the same language as the answers themselves: they are readable by humans, parseable by eyelang, easy to test, and can be transformed or explained further like any other eyelang data. For example:
+seam-readable explanations are opt-in proof output. Each `why/2` fact contains a nested abstract proof term, and a blank line separates consecutive explanations. Using seam syntax for explanations keeps them in the same language as the answers themselves: they are readable by humans, parseable by seam, easy to test, and can be transformed or explained further like any other seam data. For example:
 
-```eyelang
+```seam
 type(socrates, mortal).
 why(
   type(socrates, mortal),
@@ -94,23 +94,23 @@ why(
 
 ```
 
-The explanation output can itself be read as eyelang input; for example, another program can materialize `why/2` facts such as `why(type(socrates, mortal), Proof)`. `--proof` adds only these explanation facts; it does not change the answers found by the solver.
+The explanation output can itself be read as seam input; for example, another program can materialize `why/2` facts such as `why(type(socrates, mortal), Proof)`. `--proof` adds only these explanation facts; it does not change the answers found by the solver.
 
 ### Explanation cookbook
 
-Eyelang answers can carry their own provenance when proof output is enabled.
+Seam answers can carry their own provenance when proof output is enabled.
 
 Explain one derived fact:
 
 ```sh
-eyelang --proof examples/socrates.pl
+seam --proof examples/socrates.pl
 ```
 
 The output contains the answer and a `why/2` fact. The proof term shows the source rule that produced the answer and the source fact used below it. Source references use `rule("file.pl", clause(N))` and `fact("file.pl", clause(N))`, where `N` is the 1-based clause number in that file.
 
 Inspect variable bindings with a small policy program:
 
-```eyelang
+```seam
 score(case1, 95).
 threshold(90).
 
@@ -121,12 +121,12 @@ status(Case, accepted) :-
 ```
 
 ```sh
-eyelang --proof policy.pl
+seam --proof policy.pl
 ```
 
 The explanation contains the instantiated answer and the variables that made the rule succeed:
 
-```eyelang
+```seam
 status(case1, accepted).
 why(
   status(case1, accepted),
@@ -144,24 +144,24 @@ Use the `uses([...])` list to follow the proof tree. In the policy example it co
 Reuse explanations as data:
 
 ```sh
-eyelang --proof examples/socrates.pl > socrates.why.pl
+seam --proof examples/socrates.pl > socrates.why.pl
 ```
 
-The resulting file is ordinary Eyelang syntax containing both answers and `why/2` proof facts.
+The resulting file is ordinary Seam syntax containing both answers and `why/2` proof facts.
 
 Compose multiple files, stdin, and URLs:
 
 ```sh
-eyelang facts.pl rules.pl
-printf 'works(stdin, true) :- eq(ok, ok).\n' | eyelang -
-eyelang https://example.test/program.pl
+seam facts.pl rules.pl
+printf 'works(stdin, true) :- eq(ok, ok).\n' | seam -
+seam https://example.test/program.pl
 ```
 
 ## Default output
 
-Eyelang programs write relation predicates directly:
+Seam programs write relation predicates directly:
 
-```eyelang
+```seam
 parent(pat, jan).
 parent(jan, emma).
 
@@ -169,9 +169,9 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-By default, eyelang asks for new ground consequences of selected output predicates, suppresses duplicates, excludes source facts, sorts the result, and prints Prolog facts:
+By default, seam asks for new ground consequences of selected output predicates, suppresses duplicates, excludes source facts, sorts the result, and prints Prolog facts:
 
-```eyelang
+```seam
 ancestor(jan, emma).
 ancestor(pat, emma).
 ancestor(pat, jan).
@@ -183,7 +183,7 @@ This default is intentionally output-oriented. It is not a complete bottom-up sa
 
 Large examples often have internal helper predicates. Add `materialize/2` declarations to restrict default output to selected predicates:
 
-```eyelang
+```seam
 materialize(answer, 2).
 
 seed(case1).
@@ -193,15 +193,15 @@ answer(Case, accepted) :- helper(Case, score(95)).
 
 The default output is then:
 
-```eyelang
+```seam
 answer(case1, accepted).
 ```
 
-`materialize/2` is a declaration, not a logical rule to prove. It affects which predicates the CLI prints, not the meaning of the rules themselves. Materialized output facts are not inserted back into the running program for later goals; if later output predicates reuse the same derived helper relation, eyelang proves it again unless that helper is declared with `table/2`. Source facts are indexed and reused normally, and tabled solved goals are reused inside the same solver run.
+`materialize/2` is a declaration, not a logical rule to prove. It affects which predicates the CLI prints, not the meaning of the rules themselves. Materialized output facts are not inserted back into the running program for later goals; if later output predicates reuse the same derived helper relation, seam proves it again unless that helper is declared with `table/2`. Source facts are indexed and reused normally, and tabled solved goals are reused inside the same solver run.
 
 ## Writing programs
 
-A good eyelang program normally has three layers:
+A good seam program normally has three layers:
 
 1. source facts;
 2. helper predicates for calculation or search;
@@ -209,7 +209,7 @@ A good eyelang program normally has three layers:
 
 Example:
 
-```eyelang
+```seam
 score(case1, 95).
 threshold(90).
 
@@ -224,7 +224,7 @@ reason(Case, "score exceeds threshold") :- accepted(Case).
 
 When `status/2` and `reason/2` are derived, they appear in default output. If the program has many helper binary predicates, declare the intended output predicates:
 
-```eyelang
+```seam
 materialize(status, 2).
 materialize(reason, 2).
 ```
@@ -240,13 +240,13 @@ The CLI is output-oriented and uses `materialize/2` to decide what to print. Emb
 Add `-s` or `--stats` when you want lightweight solver counters on stderr without changing stdout:
 
 ```sh
-eyelang -s examples/observability-log-correlation.pl
+seam -s examples/observability-log-correlation.pl
 ```
 
 Add `-w` or `--warnings` when you want non-fatal portability diagnostics, such as unstratified `not/1` dependencies, printed to stderr while normal answer output still goes to stdout:
 
 ```sh
-eyelang --warnings policy.pl
+seam --warnings policy.pl
 ```
 
 The playground has matching `--stats` and `--proof` checkboxes, so browser runs can show the same counters or explanations like the CLI.
@@ -254,7 +254,7 @@ The playground has matching `--stats` and `--proof` checkboxes, so browser runs 
 
 ### Builtins
 
-Eyelang builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Built-ins are called as ordinary Eyelang predicates. See the [Eyelang language reference](language-reference.md#9-standard-built-in-predicates) for the portable profile. The bundled implementation currently registers 80 name/arity entries across 78 predicate names:
+Seam builtins are registered by name and arity in small modules under [`src/builtins`](../src/builtins). This keeps the runtime portable to Node.js and the browser while giving each builtin family a clear boundary. Built-ins are called as ordinary Seam predicates. See the [Seam language reference](language-reference.md#9-standard-built-in-predicates) for the portable profile. The bundled implementation currently registers 80 name/arity entries across 78 predicate names:
 
 | Family | Count | Built-ins |
 |---|---:|---|
@@ -273,9 +273,9 @@ To add a builtin, create or extend a module with `register(registry)` and call `
 
 ## Aggregation helpers
 
-Eyelang includes goal-directed aggregation helpers for finite searches:
+Seam includes goal-directed aggregation helpers for finite searches:
 
-```eyelang
+```seam
 countall(Goal, Count).
 sumall(Value, Goal, Sum).
 aggregate_min(Key, Template, Goal, Bestkey, Besttemplate).
@@ -286,7 +286,7 @@ Use `countall/2` for solution counts, `sumall/3` for numeric totals, and `aggreg
 
 Example:
 
-```eyelang
+```seam
 best_cycle(Cycle, Cost) :-
   cities(Cities),
   aggregate_min([Cost, Cycle], Cycle, candidate_cycle(Cities, Cycle, Cost), [Cost, Cycle], Cycle).
@@ -294,9 +294,9 @@ best_cycle(Cycle, Cost) :-
 
 ## Context data
 
-Comma terms can be data as well as conjunctions. eyelang provides two context utilities:
+Comma terms can be data as well as conjunctions. seam provides two context utilities:
 
-```eyelang
+```seam
 holds((name(alice, "Alice"), knows(alice, bob)), name(S, O)).
 holds((ready, name(alice, "Alice"), route(alice, bob, 7)), Name, Args).
 ```
@@ -411,7 +411,7 @@ Use `holds/2` when you want to match the member term directly, for example `name
 | [`knapsack-optimization.pl`](../examples/knapsack-optimization.pl) | Optimizes a finite 0/1 knapsack pack with aggregation. | [`output/knapsack-optimization.pl`](../examples/output/knapsack-optimization.pl) |
 | [`knuth-bendix-completion.pl`](../examples/knuth-bendix-completion.pl) | Checks bounded Knuth-Bendix-style critical pairs for joinability. | [`output/knuth-bendix-completion.pl`](../examples/output/knuth-bendix-completion.pl) |
 | [`knowledge-engineering-alignment-flow.pl`](../examples/knowledge-engineering-alignment-flow.pl) | Specializes reusable alignment rules into a target-shaped flow view. | [`output/knowledge-engineering-alignment-flow.pl`](../examples/output/knowledge-engineering-alignment-flow.pl) |
-| [`language.pl`](../examples/language.pl) | Shows the modern Eyelang surface syntax in one compact recursive graph example. | [`output/language.pl`](../examples/output/language.pl) |
+| [`language.pl`](../examples/language.pl) | Shows the modern Seam surface syntax in one compact recursive graph example. | [`output/language.pl`](../examples/output/language.pl) |
 | [`law-of-cosines.pl`](../examples/law-of-cosines.pl) | Computes a triangle side by cosine law. | [`output/law-of-cosines.pl`](../examples/output/law-of-cosines.pl) |
 | [`least-squares-regression.pl`](../examples/least-squares-regression.pl) | Fits a least-squares regression line. | [`output/least-squares-regression.pl`](../examples/output/least-squares-regression.pl) |
 | [`linear-logic-resources.pl`](../examples/linear-logic-resources.pl) | Emulates linear logic resource consumption with explicit state threading. | [`output/linear-logic-resources.pl`](../examples/output/linear-logic-resources.pl) |
@@ -486,28 +486,28 @@ Use `holds/2` when you want to match the member term directly, for example `name
 
 ## Golden outputs, tests, and conformance
 
-Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:eyelang` covers the eyelang integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.pl` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:
+Golden answer outputs live in [`examples/output`](../examples/output). `npm run test:seam` covers the seam integration check, conformance cases, regression checks, runnable examples, and proof-output examples. A curated proof-output suite for `.pl` examples lives in [`examples/proof`](../examples/proof). Example tests pin `local_time/1` to `2026-05-30` so date-dependent examples stay deterministic. Regenerate them after an intentional output or explanation change:
 
 ```sh
 for f in examples/*.pl; do
   [ -e "$f" ] || continue
   b=$(basename "$f")
-  EYELANG_LOCAL_TIME=2026-05-30 eyelang "$f" > "examples/output/$b"
+  SEAM_LOCAL_TIME=2026-05-30 seam "$f" > "examples/output/$b"
 done
 
 for f in examples/proof/*.pl; do
   b=$(basename "$f")
-  EYELANG_LOCAL_TIME=2026-05-30 eyelang --proof "examples/$b" > "examples/proof/$b"
+  SEAM_LOCAL_TIME=2026-05-30 seam --proof "examples/$b" > "examples/proof/$b"
 done
 ```
 
-Run the full eyelang suite:
+Run the full seam suite:
 
 ```sh
-npm run test:eyelang
+npm run test:seam
 ```
 
-The eyelang corpus runner runs in this order: Conformance, Regression/API/White-box, Examples. Each section prints its own subtotal, followed by a suite-specific grand total. The suite checks the conformance cases derived from the language reference, supplemental regression/API/white-box checks, and every runnable example against its golden output.
+The seam corpus runner runs in this order: Conformance, Regression/API/White-box, Examples. Each section prints its own subtotal, followed by a suite-specific grand total. The suite checks the conformance cases derived from the language reference, supplemental regression/API/white-box checks, and every runnable example against its golden output.
 
 Run only one internal suite when you are iterating:
 
@@ -525,26 +525,26 @@ npm run conformance:report
 
 Release preparation runs the same report and writes [`conformance-report.md`](../conformance-report.md), so each published package carries a current conformance summary.
 
-The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based eyelang corpus. Positive cases pair `cases/<name>.pl` with exact expected stdout under `expected/<name>.pl`; negative cases pair `errors/<name>.pl` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.pl` with exact `--warnings` stdout and stderr files under `expected-warnings/`; proof cases pair `proofs/<name>.pl` with exact `--proof` output under `expected-proofs/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, standard warnings, and the machine-readable `why/2` proof-output contract. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
+The conformance suite lives in [`test/conformance/`](../test/conformance/) as a file-based seam corpus. Positive cases pair `cases/<name>.pl` with exact expected stdout under `expected/<name>.pl`; negative cases pair `errors/<name>.pl` with exact expected error text under `expected-errors/<name>.txt`; warning cases pair `warnings/<name>.pl` with exact `--warnings` stdout and stderr files under `expected-warnings/`; proof cases pair `proofs/<name>.pl` with exact `--proof` output under `expected-proofs/`. Cases may be grouped in category directories such as `arithmetic/`, `strings/`, `lists/`, `terms/`, `atoms/`, `variables/`, `negation/`, and `syntax/`, so another implementation can reuse the same corpus as an executable language contract. The suite covers the standard language surface from the language reference, including reusable built-ins, standard errors, standard warnings, and the machine-readable `why/2` proof-output contract. The regression suite lives in [`test/run-regression.mjs`](../test/run-regression.mjs) and covers CLI regressions, the public JavaScript API, and white-box invariants for parser, unification, and indexing behavior.
 
 ## Development and release
 
 Common commands:
 
 ```sh
-npm run test:eyelang        # alias for npm test
+npm run test:seam        # alias for npm test
 npm test                    # full conformance, regression/API/white-box, examples, and proof examples
 npm run conformance:report  # conformance coverage summary by category
 node test/run-conformance.mjs
 node test/run-regression.mjs
 node test/run-examples.mjs
-eyelang --help
+seam --help
 ```
 
 Useful profiling smoke test:
 
 ```sh
-eyelang -s examples/observability-log-correlation.pl > /dev/null
+seam -s examples/observability-log-correlation.pl > /dev/null
 ```
 
 For a release:
@@ -552,30 +552,30 @@ For a release:
 1. update `VERSION`;
 2. update `README.md` and the language reference;
 3. regenerate golden outputs if behavior changed;
-4. run `npm run test:eyelang`;
+4. run `npm run test:seam`;
 5. run `npm run conformance:report -- conformance-report.md`;
 6. publish the repository with the browser playground assets if publishing the playground. The playground includes controls equivalent to CLI `--stats` and `--proof`.
 
 ## Relationship to Eyeling
 
-[Eyeling](https://github.com/eyereasoner/eyeling) and eyelang share the same goal of small, inspectable rule-based reasoning in JavaScript, but they make different language and implementation trade-offs.
+[Eyeling](https://github.com/eyereasoner/eyeling) and seam share the same goal of small, inspectable rule-based reasoning in JavaScript, but they make different language and implementation trade-offs.
 
 Eyeling is the RDF/Notation3 member of the family. It reads N3-style triples, quoted formulas, forward rules written with `=>`, backward rules written with `<=`, RDF terms, RDF-JS data, and RDF-oriented streams. That makes it the better fit when data interchange with RDF/N3 tools is the main requirement.
 
-Eyelang is the compact Prolog-style member of the family. It uses ordinary predicate syntax such as `parent(alice, bob).` and `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` The core remains close to the Prolog tradition while deliberately staying smaller and more explicit than ISO Prolog. It is a good fit when the problem is naturally relational, goal-directed, finite, and does not need RDF graph interchange.
+Seam is the compact Prolog-style member of the family. It uses ordinary predicate syntax such as `parent(alice, bob).` and `ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).` The core remains close to the Prolog tradition while deliberately staying smaller and more explicit than ISO Prolog. It is a good fit when the problem is naturally relational, goal-directed, finite, and does not need RDF graph interchange.
 
 A useful rule of thumb:
 
 | Use case | Prefer | Why |
 | --- | --- | --- |
 | RDF/N3 data, triples, prefixes, graph terms, RDF-JS, RDF message streams | Eyeling | The surface language and APIs are RDF/Notation3-native. |
-| Compact relational rules over ordinary terms, lists, arithmetic, and finite search | eyelang | The syntax is shorter for non-RDF relation programs and output is ordinary facts. |
+| Compact relational rules over ordinary terms, lists, arithmetic, and finite search | seam | The syntax is shorter for non-RDF relation programs and output is ordinary facts. |
 | Human-auditable derivations | Either | Both can emit proof explanations when requested. |
-| Large generated Horn-clause workloads | eyelang | The engine specializes in predicate/arity indexing, scalar argument indexes, fast fact paths, and materialized output goals. |
+| Large generated Horn-clause workloads | seam | The engine specializes in predicate/arity indexing, scalar argument indexes, fast fact paths, and materialized output goals. |
 
-On local smoke benchmarks, eyelang is substantially faster on large generated Horn-clause and recursion-heavy workloads. These numbers are 5-run medians with stdout redirected to `/dev/null`, using Node.js `v22.16.0`, eyelang from this checkout, and Eyeling package version `1.34.6` with its default output mode. The ratio is `Eyeling median / eyelang median`, so larger numbers mean eyelang was faster.
+On local smoke benchmarks, seam is substantially faster on large generated Horn-clause and recursion-heavy workloads. These numbers are 5-run medians with stdout redirected to `/dev/null`, using Node.js `v22.16.0`, seam from this checkout, and Eyeling package version `1.34.6` with its default output mode. The ratio is `Eyeling median / seam median`, so larger numbers mea seam was faster.
 
-| Example | eyelang median | Eyeling median | Ratio |
+| Example | seam median | Eyeling median | Ratio |
 | --- | ---: | ---: | ---: |
 | `fundamental-theorem-arithmetic` | `0.16 sec` | `2.00 sec` | `12.66x` |
 | `deep-taxonomy-100000` | `1.69 sec` | `4.72 sec` | `2.79x` |
@@ -585,15 +585,15 @@ On local smoke benchmarks, eyelang is substantially faster on large generated Ho
 
 Treat these as smoke comparisons rather than a formal benchmark: hardware, Node.js version, package version, CLI startup, and output mode all matter.
 
-The projects are therefore complementary rather than replacements for each other: Eyeling optimizes for Semantic Web interoperability and N3 expressiveness; eyelang optimizes for a small standard-looking relational rule language and fast finite goal-directed execution.
+The projects are therefore complementary rather than replacements for each other: Eyeling optimizes for Semantic Web interoperability and N3 expressiveness; seam optimizes for a small standard-looking relational rule language and fast finite goal-directed execution.
 
 ## Performance notes
 
 Use `-s` or `--stats` for a quick sanity check while optimizing solver changes. It prints counters such as `solve_goals_calls`, `unify_calls`, `deterministic_rule_expansions`, `candidate_lists_selected`, `clause_candidates_considered`, `clauses_tried`, `max_depth`, and `max_solver_call_depth` to stderr, leaving normal output stable for golden-file tests. The `max_solver_call_depth` counter is especially useful for browser regressions, where the VM call stack can be tighter than a command-line run. Use `-w` or `--warnings` separately when you want portability diagnostics without enabling stricter parsing.
 
-eyelang hashes predicate groups by name and arity, then indexes clauses by scalar argument values. It also builds two-argument composite indexes for scalar pairs and probes those composite indexes without per-lookup heap allocation. This helps both large generated programs with many predicates and selective queries such as:
+seam hashes predicate groups by name and arity, then indexes clauses by scalar argument values. It also builds two-argument composite indexes for scalar pairs and probes those composite indexes without per-lookup heap allocation. This helps both large generated programs with many predicates and selective queries such as:
 
-```eyelang
+```seam
 edge(g1, a, X).
 path(a, Y).
 status(Case, accepted).
@@ -601,13 +601,13 @@ status(Case, accepted).
 
 Ground facts use a fast path that avoids freshening and copying a rule body. Recursive-predicate detection uses an explicit work stack, which keeps large predicate chains safer in the browser. Recursive examples use an active-call variant guard to prevent common cyclic closures from looping. Selected predicates can be tabled with:
 
-```eyelang
+```seam
 table(path, 2).
 ```
 
 Predicates can also carry advisory mode and determinism declarations for documentation and host tooling:
 
-```eyelang
+```seam
 mode(path, 2, [in, out]).
 semidet(edge, 2).
 ```
@@ -618,4 +618,4 @@ When using `not/1` over user-defined predicates, keep the dependency graph strat
 
 ## Implementation limits
 
-Eyelang is intentionally smaller than ISO Prolog. It has no operators, zero-arity compound syntax, cut, modules, dynamic database updates, DCGs, or complete ISO library. Arity-zero data is always written and read back as an atom, such as `nil`, never `nil()`. Negation is negation-as-failure through `not/1`. Search is goal-directed and expected to be finite for the selected output goals. Output explanations are non-normative proof printouts and do not change answer semantics. 
+Seam is intentionally smaller than ISO Prolog. It has no operators, zero-arity compound syntax, cut, modules, dynamic database updates, DCGs, or complete ISO library. Arity-zero data is always written and read back as an atom, such as `nil`, never `nil()`. Negation is negation-as-failure through `not/1`. Search is goal-directed and expected to be finite for the selected output goals. Output explanations are non-normative proof printouts and do not change answer semantics. 

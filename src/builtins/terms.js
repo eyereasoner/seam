@@ -1,4 +1,4 @@
-// Term-inspection builtins for reusable meta-programming over eyelang terms.
+// Term-inspection builtins for reusable meta-programming over seam terms.
 import { atom, compound, deref, listFromItems, lexicalValue, numberTerm, properListItems, stringTerm, unify } from '../term.js';
 
 export const termBuiltins = {

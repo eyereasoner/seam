@@ -12,7 +12,7 @@ materialize(collatzTrajectory, 2).
 table(collatz, 2).
 
 % Program structure: facts set up the scenario, and rules derive the materialized conclusions.
-% The N3 source defines repeat/2 recursively; this Eyelang version uses the
+% The N3 source defines repeat/2 recursively; this Seam version uses the
 % equivalent bounded generator so the 1000-case regression remains stack-safe.
 
 % Query / materialization of the test suite.

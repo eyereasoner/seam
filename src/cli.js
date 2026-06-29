@@ -1,4 +1,4 @@
-// Command-line interface for eyelang.
+// Command-line interface for seam.
 // It loads programs from files, URLs, or stdin, then materializes derived output predicates.
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -47,7 +47,7 @@ export async function main(argv) {
   }
 
   if (options.version) {
-    process.stdout.write(`eyelang ${await packageVersion()}\n`);
+    process.stdout.write(`seam ${await packageVersion()}\n`);
     return;
   }
 
@@ -133,14 +133,14 @@ function writeExplanation(explanation, program, resolved, registry) {
 }
 
 async function usage(stream) {
-  stream.write(`eyelang ${await packageVersion()}
+  stream.write(`seam ${await packageVersion()}
 
 Usage:
-  eyelang [options] [file-or-url.pl|- ...]
+  seam [options] [file-or-url.pl|- ...]
 
 Input:
-  file-or-url.pl       Read an Eyelang program from a local file or http(s) URL.
-  -                     Read an Eyelang program from standard input.
+  file-or-url.pl       Read a Seam program from a local file or http(s) URL.
+  -                     Read a Seam program from standard input.
 
 Options:
   -h, --help            Show this help text and exit.
@@ -168,14 +168,14 @@ function printWarnings(program) {
   const errors = program.negationStratificationErrors;
   if (errors.length === 0) return;
 
-  process.stderr.write('eyelang warning: unstratified negation\n');
+  process.stderr.write('seam warning: unstratified negation\n');
   for (const edge of errors) {
     process.stderr.write(`  ${edge.from} depends negatively on ${edge.to}\n`);
   }
 }
 
 function printStats(stats) {
-  process.stderr.write('eyelang stats:\n');
+  process.stderr.write('seam stats:\n');
   for (const [key, value] of Object.entries(stats)) {
     process.stderr.write(`  ${key}: ${value}\n`);
   }

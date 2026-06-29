@@ -1,6 +1,6 @@
-% Eyelang language-identity example.
+% Seam language-identity example.
 %
-% This file intentionally uses the modern Eyelang surface syntax:
+% This file intentionally uses the modern Seam surface syntax:
 %   - `.pl` source files instead of Prolog `.pl` files
 %   - ISO Prolog-style uppercase variables
 %   - `table/2` for tabled recursive predicates

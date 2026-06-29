@@ -15,7 +15,7 @@ const filterArg = process.argv[2] ?? null;
 
 export function runConformance(reporter = new TestReporter(), requestedFilter = null) {
   const filter = requestedFilter ?? filterArg;
-  const label = filter == null ? 'eyelang' : `eyelang ${filter}`;
+  const label = filter == null ? 'seam' : `seam ${filter}`;
   reporter.section(`Conformance ${label}`);
   for (const file of listCaseFiles('cases', filter)) runCaseFile(reporter, file);
   for (const file of listCaseFiles('errors', filter)) runErrorFile(reporter, file);

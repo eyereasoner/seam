@@ -1,1 +1,1 @@
-answer(string, "eyelang").
+answer(string, "seam").

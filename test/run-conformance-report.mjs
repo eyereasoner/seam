@@ -56,7 +56,7 @@ export function buildConformanceReport() {
 
 export function formatConformanceReport(report = buildConformanceReport()) {
   const lines = [
-    '# Conformance Eyelang report',
+    '# Conformance Seam report',
     '',
     'This report summarizes the file-based conformance corpus under `test/conformance/`.',
     '',

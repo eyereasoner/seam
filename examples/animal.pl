@@ -1,6 +1,6 @@
 % Animal classification, adapted from Eyelet's input/animal.pl.
 %
-% The Eyelet source uses Unicode predicate names; this eyelang version keeps the
+% The Eyelet source uses Unicode predicate names; this seam version keeps the
 % same tiny inheritance idea with plain vocabulary names.
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.

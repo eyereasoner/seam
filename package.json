@@ -1,12 +1,12 @@
 {
-  "name": "eyelang",
-  "version": "2.0.0",
+  "name": "seam",
+  "version": "1.7.17",
   "description": "A small Prolog-like logic programming language for facts, rules, goals, answers, and proofs.",
   "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
   "bin": {
-    "eyelang": "./bin/eyelang.js"
+    "seam": "./bin/seam.js"
   },
   "keywords": [
     "logic",
@@ -19,9 +19,9 @@
   "author": "Jos De Roo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eyereasoner/eyelang.git"
+    "url": "git+https://github.com/eyereasoner/seam.git"
   },
-  "homepage": "https://github.com/eyereasoner/eyelang#readme",
+  "homepage": "https://github.com/eyereasoner/seam#readme",
   "files": [
     "LICENSE.md",
     "README.md",
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "test": "node test/run-all.mjs",
-    "test:eyelang": "node test/run-all.mjs",
+    "test:seam": "node test/run-all.mjs",
     "test:conformance": "node test/run-conformance.mjs",
     "test:examples": "node test/run-examples.mjs",
     "test:regression": "node test/run-regression.mjs",

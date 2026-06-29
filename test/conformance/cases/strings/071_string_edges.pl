@@ -7,4 +7,4 @@ answer(join_numbers, X) :- join([1, 2, 3], "-", X).
 answer(substring_empty, X) :- substring("abcdef", 2, 0, X).
 answer(replace_empty_search, X) :- replace("abc", "", "x", X).
 answer(lower_string, X) :- lowercase("Hello", X).
-answer(upper_string, X) :- uppercase("Eyelang 123", X).
+answer(upper_string, X) :- uppercase("Seam 123", X).

@@ -1,13 +1,13 @@
 % socket-family.pl
 %
-% A small runnable eyelang Socket example.
+% A small runnable seam Socket example.
 %
-% The socket facts below are ordinary eyelang data. They document the
+% The socket facts below are ordinary seam data. They document the
 % semantic opening: this reasoning module expects a provider for parent/2.
 % The plug fact says which provider is connected.
 %
 % Run:
-%   eyelang socket-family.pl
+%   seam socket-family.pl
 
 % Output declarations: materialize/2 selects the relations written to this example's golden output.
 materialize(ancestor, 2).

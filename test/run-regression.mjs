@@ -47,7 +47,7 @@ let tmp = null;
 let tmpCounter = 0;
 
 export function runRegression(reporter = new TestReporter()) {
-  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'eyelang-regression.'));
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'seam-regression.'));
   tmpCounter = 0;
 
   try {
@@ -160,11 +160,11 @@ why(
       },
     },
     {
-      name: 'EYELANG_LOCAL_TIME fixes local_time builtin',
+      name: 'SEAM_LOCAL_TIME fixes local_time builtin',
       run: () => {
         const result = runCli(['-'], {
           input: 'materialize(local_time_answer, 1).\nlocal_time_answer(D) :- local_time(D).\n',
-          env: { EYELANG_LOCAL_TIME: '2024-01-02' },
+          env: { SEAM_LOCAL_TIME: '2024-01-02' },
         });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'local_time_answer("2024-01-02").\n', 'stdout');
@@ -176,13 +176,13 @@ why(
       run: () => {
         const result = runCli([]);
         assertEqual(result.status, 0, 'exit status');
-        assertIncludes(result.stdout, 'Usage:\n  eyelang [options] [file-or-url.pl|- ...]', 'stdout');
+        assertIncludes(result.stdout, 'Usage:\n  seam [options] [file-or-url.pl|- ...]', 'stdout');
         assertIncludes(result.stdout, '-p, --proof', 'stdout');
         assertIncludes(result.stdout, '-s, --stats', 'stdout');
         assertIncludes(result.stdout, '-v, --version', 'stdout');
         assertIncludes(result.stdout, '-w, --warnings', 'stdout');
         assertIncludes(result.stdout, '-v, --version         Show the package version and exit.\n  -w, --warnings        Print non-fatal portability warnings to stderr.', 'stdout');
-        assertIncludes(result.stdout, 'Read an Eyelang program', 'stdout');
+        assertIncludes(result.stdout, 'Read a Seam program', 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
@@ -191,7 +191,7 @@ why(
       run: () => {
         const result = runCli(['--version']);
         assertEqual(result.status, 0, 'exit status');
-        assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
+        assertEqual(result.stdout, `seam ${pkg.version}\n`, 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
@@ -200,20 +200,20 @@ why(
       run: () => {
         const result = runCli(['-v']);
         assertEqual(result.status, 0, 'exit status');
-        assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
+        assertEqual(result.stdout, `seam ${pkg.version}\n`, 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
     {
       name: 'npm exec can run package CLI bin from checkout',
       run: () => {
-        const result = spawnSync('npm', ['exec', '--', 'eyelang', '--version'], {
+        const result = spawnSync('npm', ['exec', '--', 'seam', '--version'], {
           cwd: packageRoot,
           encoding: 'utf8',
           env: { ...process.env, npm_config_update_notifier: 'false' },
         });
         assertEqual(result.status, 0, 'exit status');
-        assertEqual(result.stdout, `eyelang ${pkg.version}\n`, 'stdout');
+        assertEqual(result.stdout, `seam ${pkg.version}\n`, 'stdout');
         assertEqual(result.stderr, '', 'stderr');
       },
     },
@@ -253,7 +253,7 @@ why(
         const result = runCli(['--stats', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
-        assertIncludes(result.stderr, 'eyelang stats:\n', 'stderr');
+        assertIncludes(result.stderr, 'seam stats:\n', 'stderr');
         assertIncludes(result.stderr, '  solve_goals_calls:', 'stderr');
       },
     },
@@ -263,7 +263,7 @@ why(
         const result = runCli(['-s', '-'], { input: 'p(a, b).\nq(X, Y) :- p(X, Y).\n' });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, 'q(a, b).\n', 'stdout');
-        assertIncludes(result.stderr, 'eyelang stats:\n', 'stderr');
+        assertIncludes(result.stderr, 'seam stats:\n', 'stderr');
         assertIncludes(result.stderr, '  solve_goals_calls:', 'stderr');
       },
     },
@@ -280,7 +280,7 @@ why(
         const result = runCli(['--warnings', '-'], { input });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, '', 'stdout');
-        assertIncludes(result.stderr, 'eyelang warning: unstratified negation\n', 'stderr');
+        assertIncludes(result.stderr, 'seam warning: unstratified negation\n', 'stderr');
         assertIncludes(result.stderr, 'p/1 depends negatively on q/1', 'stderr');
         assertIncludes(result.stderr, 'q/1 depends negatively on p/1', 'stderr');
       },
@@ -298,7 +298,7 @@ why(
         const result = runCli(['-w', '-'], { input });
         assertEqual(result.status, 0, 'exit status');
         assertEqual(result.stdout, '', 'stdout');
-        assertIncludes(result.stderr, 'eyelang warning: unstratified negation\n', 'stderr');
+        assertIncludes(result.stderr, 'seam warning: unstratified negation\n', 'stderr');
       },
     },
     {
@@ -359,7 +359,7 @@ function documentationSyncCases() {
       run: () => assertArrayEqual(findBrokenDocLinks(), [], 'broken documentation links'),
     },
     {
-      name: 'documentation uses eyelang source style',
+      name: 'documentation uses seam source style',
       run: () => assertArrayEqual(documentationSourceStyleIssues(), [], 'documentation source style'),
     },
     {
@@ -392,8 +392,8 @@ function documentationSyncCases() {
     {
       name: 'source-checkout setup docs match package bin',
       run: () => {
-        assertEqual(pkg.bin?.eyelang, './bin/eyelang.js', 'package eyelang bin');
-        const binPath = path.join(packageRoot, pkg.bin.eyelang);
+        assertEqual(pkg.bin?.seam, './bin/seam.js', 'package seam bin');
+        const binPath = path.join(packageRoot, pkg.bin.seam);
         const binText = fs.readFileSync(binPath, 'utf8');
         assertEqual(binText.startsWith('#!/usr/bin/env node\n'), true, 'bin shebang');
         assertArrayEqual(misleadingDependencyInstallDocs(), [], 'misleading dependency install docs');
@@ -949,7 +949,7 @@ function playgroundStaticIssues() {
   const html = fs.readFileSync(playgroundPath, 'utf8');
   const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
   if (!pkg.files?.includes('playground.html')) issues.push('package files must include playground.html');
-  if (!readme.includes('[Playground](https://eyereasoner.github.io/eyelang/playground)')) issues.push('README must link to the GitHub Pages playground URL');
+  if (!readme.includes('[Playground](https://eyereasoner.github.io/seam/playground)')) issues.push('README must link to the GitHub Pages playground URL');
   if (!html.includes('<meta name="viewport" content="width=device-width, initial-scale=1">')) issues.push('missing mobile viewport meta');
   if (!html.includes('main {') || !html.includes('display: block;')) {
     issues.push('playground must use a simple vertical layout');
@@ -1108,7 +1108,7 @@ function documentationSourceStyleIssues() {
   for (const file of docs) {
     const text = fs.readFileSync(file, 'utf8');
     if (text.includes('```prolog')) {
-      issues.push(`${path.relative(packageRoot, file)}: use eyelang code fences instead of prolog fences`);
+      issues.push(`${path.relative(packageRoot, file)}: use seam code fences instead of prolog fences`);
     }
   }
 
@@ -1117,7 +1117,7 @@ function documentationSourceStyleIssues() {
   const staleQuestionVariables = /`[^`]*\?[A-Za-z_][A-Za-z0-9_]*[^`]*`|`[^`]*\?(?=[,.)\] |])[^`]*`/;
   for (const [index, line] of builtins.split('\n').entries()) {
     if (!line.trim().startsWith('|')) continue;
-    if (line.includes('EYELANG_LOCAL_TIME=')) continue;
+    if (line.includes('SEAM_LOCAL_TIME=')) continue;
     if (staleQuestionVariables.test(line)) {
       issues.push(`docs/language-reference.md section 9 line ${index + 1}: stale question-mark variable in built-in description: ${line.trim()}`);
     }

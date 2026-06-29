@@ -2,6 +2,6 @@
 import { main } from '../src/cli.js';
 
 main(process.argv.slice(2)).catch((error) => {
-  console.error(`eyelang: ${error && error.message ? error.message : String(error)}`);
+  console.error(`seam: ${error && error.message ? error.message : String(error)}`);
   process.exit(1);
 });

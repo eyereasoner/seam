@@ -1,2 +1,2 @@
-answer(str_concat, "eyelang").
+answer(str_concat, "seam").
 answer(contains, true).

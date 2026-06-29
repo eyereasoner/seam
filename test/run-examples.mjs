@@ -102,8 +102,8 @@ function runProofExample(name) {
 }
 
 function runProgramExample(programFile, filename, options) {
-  const oldLocalTime = process.env.EYELANG_LOCAL_TIME;
-  process.env.EYELANG_LOCAL_TIME = fixedExampleDate;
+  const oldLocalTime = process.env.SEAM_LOCAL_TIME;
+  process.env.SEAM_LOCAL_TIME = fixedExampleDate;
   try {
     const text = fs.readFileSync(programFile, 'utf8');
     const program = Program.parseSources([{ text, filename }], {
@@ -112,8 +112,8 @@ function runProgramExample(programFile, filename, options) {
     });
     return run(program, options).stdout;
   } finally {
-    if (oldLocalTime == null) delete process.env.EYELANG_LOCAL_TIME;
-    else process.env.EYELANG_LOCAL_TIME = oldLocalTime;
+    if (oldLocalTime == null) delete process.env.SEAM_LOCAL_TIME;
+    else process.env.SEAM_LOCAL_TIME = oldLocalTime;
   }
 }
 

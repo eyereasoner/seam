@@ -1,8 +1,8 @@
-export interface EyelangStats {
+export interface SeamStats {
   [key: string]: number;
 }
 
-export interface EyelangRunOptions {
+export interface SeamRunOptions {
   proof?: boolean;
   why?: boolean;
   explain?: boolean;
@@ -16,29 +16,29 @@ export interface EyelangRunOptions {
   [key: string]: unknown;
 }
 
-export interface EyelangRunResult {
+export interface SeamRunResult {
   stdout: string;
-  stats: EyelangStats;
+  stats: SeamStats;
 }
 
-export interface EyelangSourcePart {
+export interface SeamSourcePart {
   text?: string;
   source?: string;
   filename?: string;
 }
 
-export interface EyelangClause {
-  head: EyelangTerm;
-  body: EyelangTerm[];
+export interface SeamClause {
+  head: SeamTerm;
+  body: SeamTerm[];
   index?: number;
   filename?: string;
   clauseNumber?: number;
 }
 
-export interface EyelangPredicateGroup {
+export interface SeamPredicateGroup {
   name: string;
   arity: number;
-  clauses: EyelangClause[];
+  clauses: SeamClause[];
   argIndexes: unknown[];
   pairIndexes: unknown[];
   tabled: boolean;
@@ -48,49 +48,49 @@ export interface EyelangPredicateGroup {
   negationStratum: number | null;
 }
 
-export type EyelangTerm = Term | { type: string; name: string; args?: EyelangTerm[]; arity?: number };
+export type SeamTerm = Term | { type: string; name: string; args?: SeamTerm[]; arity?: number };
 
 export class Term {
-  constructor(type: string, name?: unknown, args?: EyelangTerm[]);
+  constructor(type: string, name?: unknown, args?: SeamTerm[]);
   type: string;
   name: string;
-  args: EyelangTerm[];
+  args: SeamTerm[];
   get arity(): number;
 }
 
 export class Env {
-  constructor(bindings?: Iterable<readonly [string, EyelangTerm]> | null);
-  bindings: Map<string, EyelangTerm>;
+  constructor(bindings?: Iterable<readonly [string, SeamTerm]> | null);
+  bindings: Map<string, SeamTerm>;
   clone(): Env;
   has(name: string): boolean;
-  get(name: string): EyelangTerm | undefined;
-  bind(name: string, term: EyelangTerm): void;
+  get(name: string): SeamTerm | undefined;
+  bind(name: string, term: SeamTerm): void;
 }
 
 export class Program {
-  constructor(clauses?: EyelangClause[], options?: EyelangRunOptions);
-  clauses: EyelangClause[];
-  groups: Map<string, EyelangPredicateGroup>;
+  constructor(clauses?: SeamClause[], options?: SeamRunOptions);
+  clauses: SeamClause[];
+  groups: Map<string, SeamPredicateGroup>;
   materializedGroups: Set<string>;
   hasMaterialize: boolean;
   negationDependencies: Array<{ from: string; to: string; negative: boolean }>;
   negationStratificationErrors: Array<{ from: string; to: string }>;
   stratifiedNegation: boolean;
-  static parse(source: string, options?: EyelangRunOptions): Program;
-  static parseSources(sources?: Array<string | EyelangSourcePart>, options?: EyelangRunOptions): Program;
-  makeGroup(name: string, arity: number): EyelangPredicateGroup;
-  indexClause(clause: EyelangClause): void;
-  findGroup(name: string, arity: number): EyelangPredicateGroup | null;
-  applyDeclarations(options?: EyelangRunOptions): void;
+  static parse(source: string, options?: SeamRunOptions): Program;
+  static parseSources(sources?: Array<string | SeamSourcePart>, options?: SeamRunOptions): Program;
+  makeGroup(name: string, arity: number): SeamPredicateGroup;
+  indexClause(clause: SeamClause): void;
+  findGroup(name: string, arity: number): SeamPredicateGroup | null;
+  applyDeclarations(options?: SeamRunOptions): void;
   markRecursivePredicates(): void;
   analyzeNegationStratification(): Array<{ from: string; to: string }>;
   assertStratifiedNegation(): true;
   isStratifiedNegation(): boolean;
   hasMaterializeDeclarations(): boolean;
-  groupIsMaterialized(group: EyelangPredicateGroup): boolean;
-  groupHasRule(group: EyelangPredicateGroup): boolean;
+  groupIsMaterialized(group: SeamPredicateGroup): boolean;
+  groupHasRule(group: SeamPredicateGroup): boolean;
   sourceFactLines(predicateKeys?: Set<string> | null): Set<string>;
-  materializationGoals(): EyelangTerm[];
+  materializationGoals(): SeamTerm[];
 }
 
 export interface BuiltinDefinition {
@@ -98,12 +98,12 @@ export interface BuiltinDefinition {
   arity: number;
   handler: BuiltinHandler;
   deterministic: boolean;
-  ready: ((solver: Solver, goal: EyelangTerm, env: Env) => boolean) | null;
+  ready: ((solver: Solver, goal: SeamTerm, env: Env) => boolean) | null;
   fallbackWhenNotReady: boolean;
-  shouldUse: ((solver: Solver, goal: EyelangTerm, env: Env) => boolean) | null;
+  shouldUse: ((solver: Solver, goal: SeamTerm, env: Env) => boolean) | null;
 }
 
-export type BuiltinHandler = (context: { solver: Solver; goal: EyelangTerm; env: Env }) => Iterable<Env>;
+export type BuiltinHandler = (context: { solver: Solver; goal: SeamTerm; env: Env }) => Iterable<Env>;
 
 export class BuiltinRegistry {
   constructor();
@@ -113,7 +113,7 @@ export class BuiltinRegistry {
 }
 
 export class Solver {
-  constructor(program: Program, options?: EyelangRunOptions);
+  constructor(program: Program, options?: SeamRunOptions);
   program: Program;
   registry: BuiltinRegistry;
   maxDepth: number;
@@ -121,10 +121,10 @@ export class Solver {
   solutionsSeen: number;
   active: unknown[];
   memo: Map<string, unknown>;
-  stats: EyelangStats;
+  stats: SeamStats;
   cloneForInnerGoal(solutionLimit?: number): Solver;
-  solve(goals: EyelangTerm | EyelangTerm[], env?: Env, depth?: number): Iterable<Env>;
-  activeVariant(goal: EyelangTerm, env: Env): boolean;
+  solve(goals: SeamTerm | SeamTerm[], env?: Env, depth?: number): Iterable<Env>;
+  activeVariant(goal: SeamTerm, env: Env): boolean;
 }
 
 export const VAR: 'var';
@@ -138,44 +138,44 @@ export function atom(name: string): Term;
 export function stringTerm(value: string): Term;
 export function numberTerm(value: string | number): Term;
 /** Construct a compound term; an empty argument list is canonicalized to atom(name). */
-export function compound(name: string, args?: EyelangTerm[]): Term;
+export function compound(name: string, args?: SeamTerm[]): Term;
 export function emptyList(): Term;
-export function cons(head: EyelangTerm, tail: EyelangTerm): Term;
-export function deref(term: EyelangTerm, env: Env): EyelangTerm;
-export function isScalar(term: EyelangTerm | null | undefined): boolean;
-export function isEmptyList(term: EyelangTerm | null | undefined): boolean;
-export function isCons(term: EyelangTerm | null | undefined): boolean;
-export function isConjunction(term: EyelangTerm | null | undefined): boolean;
-export function unify(left: EyelangTerm, right: EyelangTerm, env: Env): boolean;
-export function cloneTerm(term: EyelangTerm): Term;
-export function freshTerm(term: EyelangTerm, suffix: string | number): Term;
-export function copyResolved(term: EyelangTerm, env: Env): Term;
-export function termIsGround(term: EyelangTerm, env?: Env): boolean;
-export function termToString(term: EyelangTerm, env?: Env, quoteStrings?: boolean): string;
-export function lexicalValue(term: EyelangTerm, env: Env): string | null;
-export function properListItems(list: EyelangTerm, env: Env): EyelangTerm[] | null;
-export function listFromItems(items: EyelangTerm[], start?: number, end?: number, tail?: EyelangTerm): Term;
-export function flattenConjunction(goal: EyelangTerm): EyelangTerm[];
-export function termSignature(term: EyelangTerm | null | undefined): string | null;
-export function variantTerms(left: EyelangTerm, leftEnv: Env, right: EyelangTerm, rightEnv: Env, pairs?: Map<string, string>, reverse?: Map<string, string>): boolean;
-export function compareTerms(left: EyelangTerm, right: EyelangTerm): number;
+export function cons(head: SeamTerm, tail: SeamTerm): Term;
+export function deref(term: SeamTerm, env: Env): SeamTerm;
+export function isScalar(term: SeamTerm | null | undefined): boolean;
+export function isEmptyList(term: SeamTerm | null | undefined): boolean;
+export function isCons(term: SeamTerm | null | undefined): boolean;
+export function isConjunction(term: SeamTerm | null | undefined): boolean;
+export function unify(left: SeamTerm, right: SeamTerm, env: Env): boolean;
+export function cloneTerm(term: SeamTerm): Term;
+export function freshTerm(term: SeamTerm, suffix: string | number): Term;
+export function copyResolved(term: SeamTerm, env: Env): Term;
+export function termIsGround(term: SeamTerm, env?: Env): boolean;
+export function termToString(term: SeamTerm, env?: Env, quoteStrings?: boolean): string;
+export function lexicalValue(term: SeamTerm, env: Env): string | null;
+export function properListItems(list: SeamTerm, env: Env): SeamTerm[] | null;
+export function listFromItems(items: SeamTerm[], start?: number, end?: number, tail?: SeamTerm): Term;
+export function flattenConjunction(goal: SeamTerm): SeamTerm[];
+export function termSignature(term: SeamTerm | null | undefined): string | null;
+export function variantTerms(left: SeamTerm, leftEnv: Env, right: SeamTerm, rightEnv: Env, pairs?: Map<string, string>, reverse?: Map<string, string>): boolean;
+export function compareTerms(left: SeamTerm, right: SeamTerm): number;
 export function isDecimalInteger(text: string | null | undefined): boolean;
 export function compareIntegerText(left: string, right: string): number;
 export function parseFiniteNumber(text: string | null | undefined): number | null;
 export function numberTextFromDouble(value: number): string | null;
 export function compareNumberText(left: string, right: string): number;
 
-export function makeProgram(source: string, options?: EyelangRunOptions): Program;
-export function parseClauses(source: string, options?: EyelangRunOptions): EyelangClause[];
-export function parseProgramText(source: string, options?: EyelangRunOptions): EyelangClause[];
+export function makeProgram(source: string, options?: SeamRunOptions): Program;
+export function parseClauses(source: string, options?: SeamRunOptions): SeamClause[];
+export function parseProgramText(source: string, options?: SeamRunOptions): SeamClause[];
 export function createDefaultRegistry(): BuiltinRegistry;
 export function getDefaultRegistry(): BuiltinRegistry;
-export function run(source: string | Program, options?: EyelangRunOptions): EyelangRunResult;
-export function whyProof(program: Program, goal: EyelangTerm, options?: EyelangRunOptions): { ok: boolean; text: string };
-export function whyNoProof(goal: EyelangTerm): string;
-export function explainProof(program: Program, goal: EyelangTerm, options?: EyelangRunOptions): { ok: boolean; text: string };
+export function run(source: string | Program, options?: SeamRunOptions): SeamRunResult;
+export function whyProof(program: Program, goal: SeamTerm, options?: SeamRunOptions): { ok: boolean; text: string };
+export function whyNoProof(goal: SeamTerm): string;
+export function explainProof(program: Program, goal: SeamTerm, options?: SeamRunOptions): { ok: boolean; text: string };
 
-declare const eyelang: {
+declare const seam: {
   VAR: typeof VAR;
   ATOM: typeof ATOM;
   STRING: typeof STRING;
@@ -227,4 +227,4 @@ declare const eyelang: {
   explainProof: typeof explainProof;
 };
 
-export default eyelang;
+export default seam;
