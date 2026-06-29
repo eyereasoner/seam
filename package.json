@@ -1,6 +1,6 @@
 {
-  "name": "seam",
-  "version": "1.7.18",
+  "name": "seam-lang",
+  "version": "2.0.0",
   "description": "A small Prolog-like logic programming language for facts, rules, goals, answers, and proofs.",
   "type": "module",
   "main": "./index.js",
