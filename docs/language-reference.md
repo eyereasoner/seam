@@ -7,13 +7,16 @@
 - [2. Design goals](#2-design-goals)
 - [3. Lexical structure](#3-lexical-structure)
   - [3.1 Character stream](#31-character-stream)
-  - [3.2 Comments](#32-comments)
-  - [3.3 Punctuation tokens](#33-punctuation-tokens)
-  - [3.4 Variables](#34-variables)
-  - [3.5 Atom constants](#35-atom-constants)
-  - [3.6 Strings](#36-strings)
-  - [3.7 Numbers](#37-numbers)
+  - [3.2 Unicode and UTF-8](#32-unicode-and-utf-8)
+  - [3.3 Comments](#33-comments)
+  - [3.4 Punctuation tokens](#34-punctuation-tokens)
+  - [3.5 Variables](#35-variables)
+  - [3.6 Atom constants](#36-atom-constants)
+  - [3.7 Strings](#37-strings)
+  - [3.8 Numbers](#38-numbers)
 - [4. Surface grammar](#4-surface-grammar)
+  - [4.1 EBNF grammar](#41-ebnf-grammar)
+  - [4.2 Grammar notes](#42-grammar-notes)
 - [5. Terms](#5-terms)
   - [5.1 Variables](#51-variables)
   - [5.2 Atom constants, strings, and numbers](#52-atom-constants-strings-and-numbers)
@@ -100,19 +103,32 @@ Non-goals include complete ISO Prolog compatibility, operator declarations, modu
 ## 3. Lexical structure
 
 ### 3.1 Character stream
-
 Input is Unicode text. Whitespace separates tokens and is otherwise insignificant outside quoted strings and quoted atom constants.
 
-### 3.2 Comments
 
+### 3.2 Unicode and UTF-8
+Seam source files are UTF-8.
+
+Quoted atoms and strings may contain Unicode text:
+
+```seam
+name(alice, 'Élodie').
+city('München').
+message("café").
+```
+
+Unquoted atoms and variables intentionally use ASCII syntax. This keeps programs portable and makes the Prolog-style distinction between atoms and variables clear: lowercase names are atoms, while uppercase and underscore names are variables.
+
+Use quoted atoms for non-ASCII names.
+
+### 3.3 Comments
 A percent sign starts a line comment outside quoted strings and quoted atom constants. The comment extends to the end of the line.
 
 ```seam
 parent(pat, jan).  % this is a comment
 ```
 
-### 3.3 Punctuation tokens
-
+### 3.4 Punctuation tokens
 The punctuation tokens are:
 
 ```text
@@ -121,8 +137,7 @@ The punctuation tokens are:
 
 A colon outside `:-` is not part of the language. Namespace-like names SHOULD be written as explicit atom constants such as `person_type`, `odrl_permission`, or quoted atoms such as `'org.schema'`.
 
-### 3.4 Variables
-
+### 3.5 Variables
 A variable is either the bare anonymous variable `_`, or starts with an uppercase ASCII letter or underscore and then zero or more ASCII letters, digits, or underscores. This is the source-level variable spelling used by ISO Prolog.
 
 Examples:
@@ -136,8 +151,7 @@ _
 
 Each bare `_` anonymous variable occurrence is fresh. A name such as `_thing` is a named variable and is reused within its clause.
 
-### 3.5 Atom constants
-
+### 3.6 Atom constants
 A plain atom constant starts with a lowercase ASCII letter and is followed by zero or more ASCII letters, digits, or underscores. A dot is not part of a plain atom; dotted web spaces such as `'be.ugent'` or `'org.schema'` MUST be quoted if they are meant as one atom constant. Names such as `a-b` MUST also be quoted if they are meant as one atom constant:
 
 ```seam
@@ -176,12 +190,10 @@ A graphic atom constant is one or more graphic characters from this set:
 
 Graphic atoms such as `<=>`, `<`, and `>=` remain graphic atoms. Longer names containing letters or punctuation outside the graphic set should be quoted, for example `'<abc>'`.
 
-### 3.6 Strings
-
+### 3.7 Strings
 A string is enclosed in double quotes. The implementation supports common escapes such as `\n`, `\t`, `\"`, and `\\`.
 
-### 3.7 Numbers
-
+### 3.8 Numbers
 Numbers are scalar terms. Integers, decimal numbers, and scientific notation are accepted:
 
 ```seam
@@ -196,33 +208,103 @@ Integer arithmetic built-ins use arbitrary-precision decimal strings where possi
 
 ## 4. Surface grammar
 
-This grammar is descriptive. Implementations MAY reject programs that exceed implementation limits.
+This section gives the portable source grammar in EBNF. Lexical tokens are defined in section 3. Whitespace and comments may appear between tokens and are otherwise ignored.
+
+### 4.1 EBNF grammar
 
 ```text
-program      ::= clause*
-clause       ::= term "." | term ":-" goal_list "."
-goal_list    ::= term ("," term)*
-term         ::= variable
-              | atom_constant
-              | string
-              | number
-              | atom_constant "(" term ("," term)* ")"
-              | "[" [list_items] "]"
-              | "(" term ("," term)+ ")"
-list_items   ::= term ("," term)* ["|" term]
+program             ::= { clause } ;
+
+clause              ::= head, "."
+                      | head, ":-", goal-list, "." ;
+
+head                ::= term ;
+
+goal-list           ::= term, { ",", term } ;
+
+term                ::= variable
+                      | atom-constant
+                      | string
+                      | number
+                      | compound
+                      | list
+                      | parenthesized-term ;
+
+compound            ::= atom-constant, "(", term, { ",", term }, ")" ;
+
+list                ::= "[", "]"
+                      | "[", list-items, "]" ;
+
+list-items          ::= term, { ",", term }, [ "|", term ] ;
+
+parenthesized-term  ::= "(", term, [ ",", term, { ",", term } ], ")" ;
+
+variable            ::= "_"
+                      | variable-start, { name-continue } ;
+
+atom-constant       ::= plain-atom
+                      | quoted-atom
+                      | graphic-atom ;
+
+plain-atom          ::= lowercase-letter, { name-continue } ;
+
+quoted-atom         ::= "'", { quoted-atom-char }, "'" ;
+
+quoted-atom-char    ::= non-single-quote-char
+                      | "''"
+                      | escape-sequence ;
+
+string              ::= '"', { string-char }, '"' ;
+
+string-char         ::= non-double-quote-char
+                      | '""'
+                      | escape-sequence ;
+
+number              ::= [ "-" ], digits, [ ".", digits ], [ exponent ] ;
+
+exponent            ::= ( "e" | "E" ), [ "+" | "-" ], digits ;
+
+graphic-atom        ::= graphic-char, { graphic-char } ;
+
+variable-start      ::= uppercase-letter | "_" ;
+
+name-continue       ::= uppercase-letter | lowercase-letter | digit | "_" ;
+
+digits              ::= digit, { digit } ;
+
+escape-sequence     ::= "\\", any-char ;
+
+uppercase-letter    ::= "A" | ... | "Z" ;
+lowercase-letter    ::= "a" | ... | "z" ;
+digit               ::= "0" | ... | "9" ;
+
+non-single-quote-char ::= any source character except "'", "\\", or end of input ;
+non-double-quote-char ::= any source character except '"', "\\", or end of input ;
+any-char           ::= any source character except end of input ;
+
+graphic-char        ::= "#" | "$" | "&" | "*" | "+" | "-" | "/" | "<"
+                      | "=" | ">" | "@" | "^" | "~" | "\\" ;
 ```
 
-Here `atom_constant` is a lexical class for symbolic scalar terms, not an atomic formula. Atomic formulas are represented by the grammar alternative `atom_constant "(" ... ")"` when such a compound appears in a clause head, rule body, or selected goal. Compound syntax always has at least one argument.
+### 4.2 Grammar notes
 
-A clause head SHOULD be a compound term. Non-compound heads are parsed but are not useful in the current predicate index.
+The `atom-constant` nonterminal is a lexical class for symbolic scalar terms, not an atomic formula. Atomic formulas are represented by the `compound` alternative when such a term appears as a clause head, rule body, or selected goal. The functor or predicate name is always an atom constant; Seam does not support variables in functor or predicate position.
 
-Arity-zero data is written as an atom constant, not as a zero-arity compound:
+A portable clause head SHOULD be a compound term. Non-compound heads are parsed, but they are not useful in the current predicate index.
+
+Compound syntax always has at least one argument. Arity-zero data is written as an atom constant, not as a zero-arity compound:
 
 ```seam
 value(example, nil).
 ```
 
-The syntax `nil()` is intentionally rejected so seam source and read-back output use one representation for arity-zero data. Host APIs SHOULD follow the same rule: constructing a term with an atom name and an empty argument list is canonicalized to the atom constant itself.
+The syntax `nil()` is intentionally rejected so Seam source and read-back output use one representation for arity-zero data. Host APIs SHOULD follow the same rule: constructing a term with an atom name and an empty argument list is canonicalized to the atom constant itself.
+
+Parentheses around a single term are accepted and denote that same term. Parentheses around two or more comma-separated terms denote a right-associated comma term using the functor `','/2`. When such a comma term appears as a goal, it is evaluated as conjunction.
+
+A quoted atom represents an atom constant. A doubled single quote inside a quoted atom represents one literal single quote. A backslash may introduce an escaped character in quoted atoms and strings. Portable source SHOULD use the common escapes `\\`, `\n`, `\t`, `\'` in quoted atoms, and `\\`, `\n`, `\t`, `\"` in strings.
+
+A percent sign outside a quoted atom or string starts a line comment that extends to the end of the line.
 
 ## 5. Terms
 

@@ -40,8 +40,7 @@ import { hashHex } from '../src/hash.js';
 
 const testRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const packageRoot = path.resolve(testRoot, '..');
-const runtimeRoot = path.join(packageRoot, 'src');
-const bin = path.join(runtimeRoot, 'bin.js');
+const bin = path.join(packageRoot, 'bin', 'seam.js');
 const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 let tmp = null;
 let tmpCounter = 0;

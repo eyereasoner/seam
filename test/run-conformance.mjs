@@ -10,7 +10,7 @@ import { TestReporter, isMainModule } from './test-style.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const packageRoot = path.resolve(root, '..');
-const cliBin = path.join(packageRoot, 'src', 'bin.js');
+const cliBin = path.join(packageRoot, 'bin', 'seam.js');
 const filterArg = process.argv[2] ?? null;
 
 export function runConformance(reporter = new TestReporter(), requestedFilter = null) {
