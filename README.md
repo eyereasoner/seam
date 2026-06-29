@@ -3,11 +3,11 @@
 [![npm version](https://img.shields.io/npm/v/seam-lang.svg)](https://www.npmjs.com/package/seam-lang)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20761726-blue.svg)](https://doi.org/10.5281/zenodo.20761726)
 
-Seam is built to make small reasoning programs easy to write, run, test, and understand: facts and rules go in, goals are asked, and answers and proofs come out.
+Seam is a small reasoning language for turning facts and rules into answers and proofs.
 
-It uses a familiar Prolog-like syntax with ISO Prolog-style variables such as `X`, while staying small and explicit rather than trying to be a full Prolog system.
+Prolog-like syntax. Small core. Inspectable results.
 
-Seam grew out of experiments in the EYE tradition, but is packaged as its own project.
+The name comes from the way reasoning joins things together: facts with rules, goals with answers, and answers with proofs.
 
 ## Install and run
 
