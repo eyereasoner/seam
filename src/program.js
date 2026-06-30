@@ -44,6 +44,7 @@ export class Program {
       mode: null,
       determinism: null,
       recursive: false,
+      scalarFactsOnly: true,
       negationStratum: null,
     };
     if (arity > 2) {
@@ -64,6 +65,9 @@ export class Program {
       group = this.makeGroup(head.name, head.arity);
       this.groups.set(key, group);
     }
+    clause.groundHead = termHasNoVariables(head);
+    clause.scalarHead = head.type === COMPOUND && head.args.every(isScalar);
+    if (clause.body.length !== 0 || !clause.scalarHead) group.scalarFactsOnly = false;
     group.clauses.push(clause);
     for (let i = 0; i < head.arity; i++) indexOne(group.argIndexes[i], head.args[i], clause);
     for (const pair of group.pairIndexes) indexPair(pair, head, clause);
@@ -264,6 +268,12 @@ export class Program {
 }
 
 
+
+
+function termHasNoVariables(term) {
+  if (!term || term.type === 'var') return false;
+  return !term.args?.some((arg) => !termHasNoVariables(arg));
+}
 
 function collectGoalDependencies(goal, negated) {
   if (goal.type !== COMPOUND) return [];

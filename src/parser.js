@@ -335,6 +335,7 @@ function parseClausesFastNoSource(source) {
     cache.set(key, value);
     return value;
   };
+
   const isFastScalarToken = (text) => SIMPLE_VARIABLE.test(text) || SIMPLE_ATOM.test(text) || GRAPHIC_ATOM.test(text) || SIMPLE_NUMBER.test(text);
   const scalarOrVariableFast = (text) => {
     if (!text || !isFastScalarToken(text)) throw new Error('bad simple term');
@@ -350,8 +351,117 @@ function parseClausesFastNoSource(source) {
     if ((first === 45 || isDigitCode(first)) && SIMPLE_NUMBER.test(text)) return cached(numberCache, text, numberTerm);
     return atom(text);
   };
+
+  const trimRange = (text, start, end) => {
+    while (start < end && isWhitespaceCode(text.charCodeAt(start))) start++;
+    while (end > start && isWhitespaceCode(text.charCodeAt(end - 1))) end--;
+    return [start, end];
+  };
+
+  const tokenKindInRange = (text, start, end) => {
+    if (start >= end) return null;
+    const first = text.charCodeAt(start);
+    if (first === 95 || (first >= 65 && first <= 90)) {
+      for (let i = start + 1; i < end; i++) if (!isNameContinueCode(text.charCodeAt(i))) return null;
+      return 'var';
+    }
+    if (first >= 97 && first <= 122) {
+      for (let i = start + 1; i < end; i++) if (!isNameContinueCode(text.charCodeAt(i))) return null;
+      return 'atom';
+    }
+    let allGraphic = true;
+    for (let i = start; i < end; i++) {
+      if (!isGraphicAtomCode(text.charCodeAt(i))) { allGraphic = false; break; }
+    }
+    if (allGraphic) return 'atom';
+    return null;
+  };
+
+  const simpleNumberInRange = (text, start, end) => {
+    let i = start;
+    if (text.charCodeAt(i) === 45) i++;
+    if (i >= end || !isDigitCode(text.charCodeAt(i))) return false;
+    while (i < end && isDigitCode(text.charCodeAt(i))) i++;
+    if (i < end && text.charCodeAt(i) === 46) {
+      i++;
+      if (i >= end || !isDigitCode(text.charCodeAt(i))) return false;
+      while (i < end && isDigitCode(text.charCodeAt(i))) i++;
+    }
+    if (i < end && (text.charCodeAt(i) === 101 || text.charCodeAt(i) === 69)) {
+      i++;
+      if (i < end && (text.charCodeAt(i) === 43 || text.charCodeAt(i) === 45)) i++;
+      if (i >= end || !isDigitCode(text.charCodeAt(i))) return false;
+      while (i < end && isDigitCode(text.charCodeAt(i))) i++;
+    }
+    return i === end;
+  };
+
+  const scalarOrVariableRange = (text, start, end) => {
+    [start, end] = trimRange(text, start, end);
+    const kind = tokenKindInRange(text, start, end);
+    const value = text.slice(start, end);
+    if (kind === 'var') {
+      if (value === '_') return variable(`__anon${anonymous++}`);
+      const existing = variableCache.get(value);
+      if (existing) return existing;
+      const term = variable(value);
+      variableCache.set(value, term);
+      return term;
+    }
+    if (kind === 'atom') return atom(value);
+    if (simpleNumberInRange(text, start, end)) return cached(numberCache, value, numberTerm);
+    return null;
+  };
+
+  const parseBinaryCompoundRange = (text, start = 0, end = text.length) => {
+    [start, end] = trimRange(text, start, end);
+    let i = start;
+    const first = text.charCodeAt(i);
+    if (!(first >= 97 && first <= 122)) return null;
+    i++;
+    while (i < end && isNameContinueCode(text.charCodeAt(i))) i++;
+    const nameEnd = i;
+    while (i < end && isWhitespaceCode(text.charCodeAt(i))) i++;
+    if (text.charCodeAt(i) !== 40) return null;
+    i++;
+    const arg1Start = i;
+    while (i < end && text.charCodeAt(i) !== 44 && text.charCodeAt(i) !== 40 && text.charCodeAt(i) !== 41 && text.charCodeAt(i) !== 91 && text.charCodeAt(i) !== 93 && text.charCodeAt(i) !== 124 && text.charCodeAt(i) !== 34 && text.charCodeAt(i) !== 39) i++;
+    if (i >= end || text.charCodeAt(i) !== 44) return null;
+    const arg1End = i;
+    i++;
+    const arg2Start = i;
+    while (i < end && text.charCodeAt(i) !== 41 && text.charCodeAt(i) !== 40 && text.charCodeAt(i) !== 44 && text.charCodeAt(i) !== 91 && text.charCodeAt(i) !== 93 && text.charCodeAt(i) !== 124 && text.charCodeAt(i) !== 34 && text.charCodeAt(i) !== 39) i++;
+    if (i >= end || text.charCodeAt(i) !== 41) return null;
+    const arg2End = i;
+    i++;
+    while (i < end && isWhitespaceCode(text.charCodeAt(i))) i++;
+    if (i !== end) return null;
+    const left = scalarOrVariableRange(text, arg1Start, arg1End);
+    if (!left) return null;
+    const right = scalarOrVariableRange(text, arg2Start, arg2End);
+    if (!right) return null;
+    return compound(text.slice(start, nameEnd), [left, right]);
+  };
+
+  const parseFastLine = (text) => {
+    if (!text.endsWith('.')) return null;
+    const end = text.length - 1;
+    const rule = text.indexOf(':-');
+    if (rule < 0) {
+      const head = parseBinaryCompoundRange(text, 0, end);
+      return head ? { head, body: [] } : null;
+    }
+    if (text.indexOf(':-', rule + 2) >= 0) return null;
+    const head = parseBinaryCompoundRange(text, 0, rule);
+    if (!head) return null;
+    const bodyGoal = parseBinaryCompoundRange(text, rule + 2, end);
+    return bodyGoal ? { head, body: [bodyGoal] } : null;
+  };
+
   const scalarOrVariable = (text) => scalarOrVariableFast(text.trim());
   const parseBinaryCompound = (text) => {
+    const parsed = parseBinaryCompoundRange(text, 0, text.length);
+    if (parsed) return parsed;
     text = text.trim();
     const open = text.indexOf('(');
     if (open <= 0 || text[text.length - 1] !== ')') return null;
@@ -366,35 +476,11 @@ function parseClausesFastNoSource(source) {
     if (!isFastScalarToken(left) || !isFastScalarToken(right)) return null;
     return compound(name, [scalarOrVariable(left), scalarOrVariable(right)]);
   };
-  const parseFastBinaryMatch = (match) => {
-    if (!isFastScalarToken(match[2]) || !isFastScalarToken(match[3])) return null;
-    return compound(match[1], [scalarOrVariableFast(match[2]), scalarOrVariableFast(match[3])]);
-  };
-  const parseFastBinaryRuleMatch = (match) => {
-    if (!isFastScalarToken(match[2]) || !isFastScalarToken(match[3]) || !isFastScalarToken(match[5]) || !isFastScalarToken(match[6])) return null;
-    return {
-      head: compound(match[1], [scalarOrVariableFast(match[2]), scalarOrVariableFast(match[3])]),
-      body: [compound(match[4], [scalarOrVariableFast(match[5]), scalarOrVariableFast(match[6])])],
-    };
-  };
-  const parseFastLine = (text) => {
-    if (!text.endsWith('.')) return null;
-    const ruleMatch = FAST_BINARY_RULE.exec(text);
-    if (ruleMatch) {
-      const parsed = parseFastBinaryRuleMatch(ruleMatch);
-      if (parsed) return parsed;
-    }
-    const factMatch = FAST_BINARY_FACT.exec(text);
-    if (factMatch) {
-      const head = parseFastBinaryMatch(factMatch);
-      if (head) return { head, body: [] };
-    }
-    return null;
-  };
+
   const parseSimple = (text) => {
-    if (!text.endsWith('.') || text.includes('\n')) return null;
     const fast = parseFastLine(text);
     if (fast) return fast;
+    if (!text.endsWith('.') || text.includes('\n')) return null;
     text = text.slice(0, -1);
     const rule = text.indexOf(':-');
     if (rule < 0) {

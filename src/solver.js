@@ -1,6 +1,6 @@
 // Depth-first seam solver with builtin dispatch, memoization, and guarded recursion handling.
 // Most semantic decisions still flow through unification; optimizations only select candidates earlier.
-import { COMPOUND, Env, copyResolved, flattenConjunction, freshTerm, termIsGround, termToString, unify, variantTerms } from './term.js';
+import { COMPOUND, Env, compound, copyResolved, flattenConjunction, freshTerm, termIsGround, termToString, unify, variantTerms } from './term.js';
 import { createDefaultRegistry } from './builtins/registry.js';
 import { selectClauseCandidates } from './program.js';
 
@@ -156,6 +156,7 @@ export class Solver {
           }
         }
 
+        if (!group.tabled && tryPushScalarFactRunFrames(stack, this, [goal, ...rest], env, depth, active)) break;
         pushUserGoalUncachedFrames(stack, this, group, goal, rest, env, depth, active);
         break;
       }
@@ -230,6 +231,14 @@ export class Solver {
     const candidates = selectClauseCandidates(group, goal, env);
     for (const pass of [candidates.primary, candidates.fallback]) {
       for (const clause of pass) {
+        if (clause.body.length === 0 && clause.scalarHead) {
+          const next = matchScalarFact(goal, clause.head, env);
+          if (!next) continue;
+          this.stats.unify_calls++;
+          yield* this.solve(rest, next, depth + 1);
+          if (this.solutionsSeen >= this.solutionLimit) return;
+          continue;
+        }
         if (headCannotMatch(goal, clause.head, env)) continue;
         const id = nextFreshId();
         const freshHead = freshTerm(clause.head, id);
@@ -285,6 +294,14 @@ function pushUserGoalUncachedFrames(stack, solver, group, goal, rest, env, depth
   const frames = [];
   for (const pass of [candidates.primary, candidates.fallback]) {
     for (const clause of pass) {
+      if (clause.body.length === 0 && clause.scalarHead) {
+        const next = matchScalarFact(goal, clause.head, env);
+        if (next) {
+          solver.stats.unify_calls++;
+          frames.push({ kind: 'goals', goals: rest, env: next, depth: depth + 1, active });
+        }
+        continue;
+      }
       if (headCannotMatch(goal, clause.head, env)) continue;
       const id = nextFreshId();
       const freshHead = freshTerm(clause.head, id);
@@ -309,6 +326,184 @@ function pushUserGoalUncachedFrames(stack, solver, group, goal, rest, env, depth
 }
 
 
+
+const SCALAR_FACT_RUN_FRAME_LIMIT = 100000;
+
+function tryPushScalarFactRunFrames(stack, solver, goals, env, depth, active) {
+  // Consecutive lookups into predicates that are entirely scalar ground facts
+  // are common in data-heavy joins. Execute such a prefix as one iterative join
+  // using local binding arrays, so intermediate fact candidates do not allocate
+  // cloned Env maps.
+  let runLength = 0;
+  const groups = [];
+  while (runLength < goals.length) {
+    const goal = goals[runLength];
+    if (!goal || goal.kind === 'releaseActive' || goal.kind === 'memoStore') break;
+    if (goal.type !== COMPOUND) break;
+    const def = solver.registry.get(goal.name, goal.arity);
+    if (def) break;
+    const group = solver.program.findGroup(goal.name, goal.arity);
+    if (!group || group.tabled || !group.scalarFactsOnly) break;
+    groups.push(group);
+    runLength++;
+  }
+  if (runLength < 2) return false;
+
+  const rest = goals.slice(runLength);
+  const localStack = [{ index: 0, names: [], values: [], depth }];
+  const frames = [];
+
+  while (localStack.length) {
+    const state = localStack.pop();
+    solver.stats.max_depth = Math.max(solver.stats.max_depth, state.depth);
+    if (state.index === runLength) {
+      const next = env.clone();
+      for (let i = 0; i < state.names.length; i++) next.bind(state.names[i], state.values[i]);
+      frames.push({ kind: 'goals', goals: rest, env: next, depth: state.depth, active });
+      if (frames.length > SCALAR_FACT_RUN_FRAME_LIMIT) return false;
+      continue;
+    }
+
+    const goal = goals[state.index];
+    if (activeMightContain(goal, active) && activeVariantIn(goal, envWithLocal(env, state.names, state.values), active)) continue;
+    solver.stats.solve_one_goal_calls++;
+    const candidates = selectScalarFactCandidates(groups[state.index], goal, env, state.names, state.values);
+    const nextStates = [];
+    for (const pass of [candidates.primary, candidates.fallback]) {
+      for (const clause of pass) {
+        const match = matchScalarFactLocal(goal, clause.head, env, state.names, state.values);
+        if (!match) continue;
+        solver.stats.unify_calls++;
+        nextStates.push({ index: state.index + 1, names: match.names, values: match.values, depth: state.depth + 1 });
+      }
+    }
+    for (let i = nextStates.length - 1; i >= 0; i--) localStack.push(nextStates[i]);
+    if (solver.solutionsSeen >= solver.solutionLimit) break;
+  }
+
+  for (let i = frames.length - 1; i >= 0; i--) stack.push(frames[i]);
+  return true;
+}
+
+
+function activeMightContain(goal, active) {
+  if (active.length === 0 || goal.type !== COMPOUND) return false;
+  for (const entry of active) {
+    const activeGoal = entry.goal;
+    if (activeGoal?.type === COMPOUND && activeGoal.name === goal.name && activeGoal.arity === goal.arity) return true;
+  }
+  return false;
+}
+
+function envWithLocal(env, names, values) {
+  if (names.length === 0) return env;
+  return {
+    has(name) { return names.includes(name) || env.has(name); },
+    get(name) {
+      const index = names.indexOf(name);
+      return index >= 0 ? values[index] : env.get(name);
+    },
+  };
+}
+
+function selectScalarFactCandidates(group, goal, env, names, values) {
+  let bestPrimary = group.clauses;
+  let bestFallback = [];
+  let bestLen = group.clauses.length;
+  let indexed = false;
+
+  for (let i = 0; i < goal.arity; i++) {
+    const arg = derefScalarMatch(goal.args[i], env, names, values);
+    if (!isScalarTerm(arg)) continue;
+    const index = group.argIndexes[i];
+    const bucket = index.buckets.get(arg.name) ?? [];
+    const candidateLen = bucket.length + index.fallback.length;
+    if (!indexed || candidateLen < bestLen) {
+      bestPrimary = bucket;
+      bestFallback = index.fallback;
+      bestLen = candidateLen;
+      indexed = true;
+      if (bestLen === 0) break;
+    }
+  }
+
+  for (const pair of group.pairIndexes) {
+    const left = derefScalarMatch(goal.args[pair.left], env, names, values);
+    const right = derefScalarMatch(goal.args[pair.right], env, names, values);
+    if (!isScalarTerm(left) || !isScalarTerm(right)) continue;
+    const bucket = pair.buckets.get(`${left.name}\x1f${right.name}`) ?? [];
+    const candidateLen = bucket.length + pair.fallback.length;
+    if (!indexed || candidateLen < bestLen) {
+      bestPrimary = bucket;
+      bestFallback = pair.fallback;
+      bestLen = candidateLen;
+      indexed = true;
+      if (bestLen === 0) break;
+    }
+  }
+
+  return { primary: bestPrimary, fallback: bestFallback };
+}
+
+function matchScalarFactLocal(goal, head, env, names, values) {
+  if (goal.type !== COMPOUND || head.type !== COMPOUND) return null;
+  if (goal.name !== head.name || goal.arity !== head.arity) return null;
+
+  let nextNames = names;
+  let nextValues = values;
+  for (let i = 0; i < goal.arity; i++) {
+    const factArg = head.args[i];
+    const arg = derefScalarMatch(goal.args[i], env, nextNames, nextValues);
+    if (arg.type === 'var') {
+      if (nextNames === names) {
+        nextNames = names.slice();
+        nextValues = values.slice();
+      }
+      nextNames.push(arg.name);
+      nextValues.push(factArg);
+      continue;
+    }
+    if (!isScalarTerm(arg) || arg.name !== factArg.name) return null;
+  }
+  return { names: nextNames, values: nextValues };
+}
+
+function matchScalarFact(goal, head, env) {
+  // A scalar ground fact has no variables to freshen and no compound structure
+  // to traverse. Match the goal arguments directly and clone only after the
+  // candidate has succeeded.
+  if (goal.type !== COMPOUND || head.type !== COMPOUND) return null;
+  if (goal.name !== head.name || goal.arity !== head.arity) return null;
+
+  const names = [];
+  const values = [];
+  for (let i = 0; i < goal.arity; i++) {
+    const factArg = head.args[i];
+    let arg = derefScalarMatch(goal.args[i], env, names, values);
+    if (arg.type === 'var') {
+      names.push(arg.name);
+      values.push(factArg);
+      continue;
+    }
+    if (!isScalarTerm(arg) || arg.name !== factArg.name) return null;
+  }
+
+  const next = env.clone();
+  for (let i = 0; i < names.length; i++) next.bind(names[i], values[i]);
+  return next;
+}
+
+function derefScalarMatch(term, env, names, values) {
+  let current = term;
+  for (let guard = 0; current?.type === 'var' && guard < 128; guard++) {
+    const localIndex = names.indexOf(current.name);
+    if (localIndex >= 0) current = values[localIndex];
+    else if (env.has(current.name)) current = env.get(current.name);
+    else break;
+  }
+  return current;
+}
+
 function tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, active) {
   // Compress deterministic ground single-goal chains such as deep taxonomy
   // proofs: a(ind, n100000) -> a(ind, n99999) -> ... -> a(ind, n0).
@@ -331,7 +526,7 @@ function tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, 
     // finite taxonomy chains with the recursive maxDepth guard.
     if (solver.solutionsSeen >= solver.solutionLimit) return true;
     solver.stats.max_depth = Math.max(solver.stats.max_depth, currentDepth);
-    const key = `${currentGoal.name}/${currentGoal.arity}:${termToString(currentGoal, currentEnv, true)}`;
+    const key = groundChainKey(currentGoal);
     if (seen.has(key)) return true;
     if (activeVariantIn(currentGoal, currentEnv, active)) return true;
     if (solver.groundChainSuccess.has(key)) {
@@ -346,28 +541,22 @@ function tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, 
     for (const pass of [candidates.primary, candidates.fallback]) {
       for (const clause of pass) {
         if (headCannotMatch(currentGoal, clause.head, currentEnv)) continue;
-        const id = nextFreshId();
-        const freshHead = freshTerm(clause.head, id);
-        const freshBody = clause.body.map((term) => freshTerm(term, id));
-        const next = new Env();
-        solver.stats.unify_calls++;
-        if (!unify(currentGoal, freshHead, next)) continue;
-        matches.push({ body: freshBody, env: next });
+        const match = matchGroundClause(currentGoal, clause);
+        if (match === undefined) return false;
+        if (match === null) continue;
+        matches.push(match);
         if (matches.length > 1) return false;
       }
     }
 
     if (matches.length !== 1) return false;
     const match = matches[0];
-    if (match.body.length === 0) {
+    if (match.done) {
       rememberGroundChainSuccess(solver, seen);
       stack.push({ kind: 'goals', goals: rest, env: baseEnv, depth: depth + 1, active });
       return true;
     }
-    if (match.body.length !== 1) return false;
-    const nextGoal = match.body[0];
-    if (nextGoal.type !== COMPOUND || !termIsGround(nextGoal, match.env)) return false;
-    const resolvedNextGoal = copyResolved(nextGoal, match.env);
+    const resolvedNextGoal = match.nextGoal;
     const nextGroup = solver.program.findGroup(resolvedNextGoal.name, resolvedNextGoal.arity);
     if (!nextGroup) return false;
 
@@ -377,6 +566,72 @@ function tryPushGroundChainFrames(stack, solver, group, goal, rest, env, depth, 
   }
 }
 
+
+
+
+function matchGroundClause(goal, clause) {
+  if (clause.head.type !== COMPOUND || goal.type !== COMPOUND) return undefined;
+  if (clause.head.name !== goal.name || clause.head.arity !== goal.arity) return null;
+
+  const names = [];
+  const values = [];
+  for (let i = 0; i < goal.arity; i++) {
+    const headArg = clause.head.args[i];
+    const goalArg = goal.args[i];
+    if (headArg.type === 'var') {
+      let index = names.indexOf(headArg.name);
+      if (index < 0) {
+        names.push(headArg.name);
+        values.push(goalArg);
+      } else if (!sameGroundTerm(values[index], goalArg)) {
+        return null;
+      }
+    } else if (isScalarTerm(headArg)) {
+      if (!sameGroundTerm(headArg, goalArg)) return null;
+    } else {
+      return undefined;
+    }
+  }
+
+  if (clause.body.length === 0) return { done: true };
+  if (clause.body.length !== 1) return undefined;
+  const bodyGoal = clause.body[0];
+  if (bodyGoal.type !== COMPOUND) return undefined;
+  const args = [];
+  for (const arg of bodyGoal.args) {
+    if (arg.type === 'var') {
+      const index = names.indexOf(arg.name);
+      if (index < 0) return undefined;
+      args.push(values[index]);
+    } else if (isScalarTerm(arg)) {
+      args.push(arg);
+    } else {
+      return undefined;
+    }
+  }
+  return { nextGoal: compound(bodyGoal.name, args) };
+}
+
+function isScalarTerm(term) {
+  return term && (term.type === 'atom' || term.type === 'string' || term.type === 'number');
+}
+
+function sameGroundTerm(left, right) {
+  if (left?.type !== right?.type || left?.name !== right?.name) return false;
+  const arity = left.args?.length ?? 0;
+  if (arity !== (right.args?.length ?? 0)) return false;
+  for (let i = 0; i < arity; i++) if (!sameGroundTerm(left.args[i], right.args[i])) return false;
+  return true;
+}
+
+function groundChainKey(term) {
+  if (term?.type === COMPOUND) {
+    let out = `${term.name}/${term.arity}`;
+    for (let i = 0; i < term.arity; i++) out += `${groundChainKey(term.args[i])}`;
+    return out;
+  }
+  return `${term?.type ?? ''}:${term?.name ?? ''}`;
+}
 
 function rememberGroundChainSuccess(solver, seen) {
   for (const key of seen) solver.groundChainSuccess.add(key);
